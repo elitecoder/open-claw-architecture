@@ -1,0 +1,2486 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-7-memory-system/">
+      
+      
+        <link rel="next" href="../layer-9-voice-tts/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 8: Context Engine - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-8-context-engine-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 8: Context Engine
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-the-context-engine-the-simple-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is the Context Engine? (The Simple Version)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-contextengine-interface-the-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The ContextEngine Interface — The Contract
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The ContextEngine Interface — The Contract">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-lifecycle-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Lifecycle Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-info-property" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Info Property
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-the-registry-how-engines-are-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: The Registry — How Engines Are Found
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: The Registry — How Engines Are Found">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-symbolfor-trick" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Symbol.for Trick
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registration-and-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registration and Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initialization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-the-legacy-engine-backward-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: The Legacy Engine — Backward Compatibility
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-the-compaction-system-summarizing-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: The Compaction System — Summarizing History
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: The Compaction System — Summarizing History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Estimation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-chunking-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Chunking Algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-summarization-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Summarization Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safeguard-mode-quality-audited-compaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Safeguard Mode — Quality-Audited Compaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-context-pruning-the-lighter-touch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Context Pruning — The Lighter Touch
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Context Pruning — The Lighter Touch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-triggers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Triggers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-stage-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two-Stage Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool Filtering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Defaults
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-the-3-tier-overflow-recovery-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: The 3-Tier Overflow Recovery System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: The 3-Tier Overflow Recovery System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#max-attempts-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Max Attempts: 3
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-1-retry-after-in-attempt-compaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 1: Retry After In-Attempt Compaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-2-explicit-overflow-compaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 2: Explicit Overflow Compaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-3-tool-result-truncation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 3: Tool Result Truncation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-token-budgeting-and-context-window-guards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Token Budgeting and Context Window Guards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Token Budgeting and Context Window Guards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context-window-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Window Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-tool-result-budgeting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-Tool-Result Budgeting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-how-it-all-fits-together-the-agent-run-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: How It All Fits Together — The Agent Run Loop
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 8: How It All Fits Together — The Agent Run Loop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#subagent-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subagent Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-ownscompaction-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The ownsCompaction Guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-9-plugin-sdk-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 9: Plugin SDK Integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-10-test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 10: Test Coverage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git-history-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git History Evolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Git History Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-foundation-compaction-slash-commands-early-jan-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Foundation — Compaction &amp; Slash Commands (Early Jan 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-context-pruning-a-lighter-approach-jan-7-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Context Pruning — A Lighter Approach (Jan 7, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-safeguard-mode-overflow-recovery-jan-1024-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Safeguard Mode &amp; Overflow Recovery (Jan 10–24, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-hardening-security-feb-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Hardening &amp; Security (Feb 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-the-contextengine-abstraction-mar-6-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: The ContextEngine Abstraction (Mar 6, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-rapid-stabilization-mar-613-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Rapid Stabilization (Mar 6–13, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-evolution-story-in-four-sentences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Evolution Story in Four Sentences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-the-context-engine-the-simple-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is the Context Engine? (The Simple Version)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-contextengine-interface-the-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The ContextEngine Interface — The Contract
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The ContextEngine Interface — The Contract">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-lifecycle-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Lifecycle Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-info-property" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Info Property
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-the-registry-how-engines-are-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: The Registry — How Engines Are Found
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: The Registry — How Engines Are Found">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-symbolfor-trick" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Symbol.for Trick
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registration-and-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registration and Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initialization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-the-legacy-engine-backward-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: The Legacy Engine — Backward Compatibility
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-the-compaction-system-summarizing-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: The Compaction System — Summarizing History
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: The Compaction System — Summarizing History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Estimation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-chunking-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Chunking Algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-summarization-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Summarization Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safeguard-mode-quality-audited-compaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Safeguard Mode — Quality-Audited Compaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-context-pruning-the-lighter-touch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Context Pruning — The Lighter Touch
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Context Pruning — The Lighter Touch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-triggers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Triggers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-stage-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two-Stage Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool Filtering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Defaults
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-the-3-tier-overflow-recovery-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: The 3-Tier Overflow Recovery System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: The 3-Tier Overflow Recovery System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#max-attempts-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Max Attempts: 3
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-1-retry-after-in-attempt-compaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 1: Retry After In-Attempt Compaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-2-explicit-overflow-compaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 2: Explicit Overflow Compaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-3-tool-result-truncation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 3: Tool Result Truncation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-token-budgeting-and-context-window-guards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Token Budgeting and Context Window Guards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Token Budgeting and Context Window Guards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context-window-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Window Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-tool-result-budgeting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-Tool-Result Budgeting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-how-it-all-fits-together-the-agent-run-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: How It All Fits Together — The Agent Run Loop
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 8: How It All Fits Together — The Agent Run Loop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#subagent-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subagent Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-ownscompaction-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The ownsCompaction Guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-9-plugin-sdk-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 9: Plugin SDK Integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-10-test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 10: Test Coverage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git-history-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git History Evolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Git History Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-foundation-compaction-slash-commands-early-jan-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Foundation — Compaction &amp; Slash Commands (Early Jan 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-context-pruning-a-lighter-approach-jan-7-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Context Pruning — A Lighter Approach (Jan 7, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-safeguard-mode-overflow-recovery-jan-1024-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Safeguard Mode &amp; Overflow Recovery (Jan 10–24, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-hardening-security-feb-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Hardening &amp; Security (Feb 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-the-contextengine-abstraction-mar-6-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: The ContextEngine Abstraction (Mar 6, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-rapid-stabilization-mar-613-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Rapid Stabilization (Mar 6–13, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-evolution-story-in-four-sentences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Evolution Story in Four Sentences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-8-context-engine-deep-dive">Layer 8: Context Engine — Deep Dive<a class="headerlink" href="#layer-8-context-engine-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-the-context-engine-the-simple-version">What Is the Context Engine? (The Simple Version)<a class="headerlink" href="#what-is-the-context-engine-the-simple-version" title="Permanent link">&para;</a></h2>
+<p>Imagine you're having a really long conversation with a friend — like, you've been texting all day for weeks. Your phone has unlimited storage, so every text is saved. But here's the problem: your friend has a <strong>limited memory</strong>. They can only "remember" the last few pages of the conversation at any given time.</p>
+<p>That's exactly what happens with AI models. OpenClaw stores <strong>every message</strong> you've ever sent, but the AI model can only look at a certain number of words at once (its "context window" — usually 128K or 200K tokens). The <strong>Context Engine</strong> is the system that decides:</p>
+<ol>
+<li><strong>Which messages</strong> the AI gets to see right now</li>
+<li><strong>When to summarize</strong> old messages to make room for new ones</li>
+<li><strong>How to recover</strong> when there are just too many messages to fit</li>
+<li><strong>How to manage</strong> conversations that spawn sub-conversations</li>
+</ol>
+<p>Think of it like a librarian managing a small reading desk. The library has thousands of books (all your messages), but the desk only fits 20 books at a time. The librarian decides which 20 books to put on the desk, and when the desk gets full, they write a summary of the old books on a sticky note and replace them with the note.</p>
+<hr />
+<h2 id="part-1-the-contextengine-interface-the-contract">Part 1: The ContextEngine Interface — The Contract<a class="headerlink" href="#part-1-the-contextengine-interface-the-contract" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/context-engine/types.ts</code> (177 lines)</p>
+<p>The Context Engine starts with a <strong>contract</strong> — a TypeScript interface that says "any context engine must be able to do these things." This is like a job description: "To be a librarian, you must be able to shelve books, find books, and write summaries."</p>
+<h3 id="the-lifecycle-methods">The Lifecycle Methods<a class="headerlink" href="#the-lifecycle-methods" title="Permanent link">&para;</a></h3>
+<p>Every context engine follows this lifecycle during a conversation turn:</p>
+<div class="language-text highlight"><pre><span></span><code>bootstrap → ingest → assemble → [AI runs] → afterTurn → compact → dispose
+</code></pre></div>
+<p>Here's what each one does:</p>
+<h4 id="1-bootstrapsessionid-sessionkey-sessionfile">1. <code>bootstrap(sessionId, sessionKey?, sessionFile)</code><a class="headerlink" href="#1-bootstrapsessionid-sessionkey-sessionfile" title="Permanent link">&para;</a></h4>
+<p><strong>When:</strong> At the start of a session
+<strong>What:</strong> Initialize the engine's internal state. Like a librarian opening the library in the morning — check what books are already on shelves, set up the card catalog.
+<strong>Returns:</strong> <code>BootstrapResult</code> with:
+- <code>bootstrapped: boolean</code> — did it actually initialize?
+- <code>importedMessages?: number</code> — did it import old history?
+- <code>reason?: string</code> — why it skipped, if it did</p>
+<h4 id="2-ingestsessionid-message-isheartbeat-and-ingestbatchmessages">2. <code>ingest(sessionId, message, isHeartbeat?)</code> and <code>ingestBatch(messages)</code><a class="headerlink" href="#2-ingestsessionid-message-isheartbeat-and-ingestbatchmessages" title="Permanent link">&para;</a></h4>
+<p><strong>When:</strong> After each message is created
+<strong>What:</strong> Feed new messages into the engine so it can track them. Like handing a new book to the librarian so they know it exists.
+<strong>Returns:</strong> <code>IngestResult</code> with <code>ingested: boolean</code> — the engine might reject duplicates</p>
+<h4 id="3-assemblesessionid-messages-tokenbudget">3. <code>assemble(sessionId, messages, tokenBudget?)</code><a class="headerlink" href="#3-assemblesessionid-messages-tokenbudget" title="Permanent link">&para;</a></h4>
+<p><strong>When:</strong> Right before sending messages to the AI model
+<strong>What:</strong> This is the big one. Given ALL messages and a token budget, pick and arrange the messages the AI should see. The librarian picks which 20 books go on the reading desk.
+<strong>Returns:</strong> <code>AssembleResult</code> with:
+- <code>messages: AgentMessage[]</code> — the ordered messages to send to the AI
+- <code>estimatedTokens: number</code> — how many tokens this uses
+- <code>systemPromptAddition?: string</code> — extra instructions to prepend to the system prompt (e.g., "Here's a summary of what happened earlier...")</p>
+<h4 id="4-compactsessionid-sessionfile-tokenbudget-force">4. <code>compact(sessionId, sessionFile, tokenBudget?, force?)</code><a class="headerlink" href="#4-compactsessionid-sessionfile-tokenbudget-force" title="Permanent link">&para;</a></h4>
+<p><strong>When:</strong> After a turn, or when overflow is detected
+<strong>What:</strong> Summarize old messages to free up space. The librarian writes summary sticky notes and removes old books from the desk.
+<strong>Returns:</strong> <code>CompactResult</code> with:
+- <code>ok: boolean</code> — did it succeed?
+- <code>compacted: boolean</code> — did it actually change anything?
+- <code>reason?: string</code> — status message
+- <code>result?</code> — details including <code>summary</code>, <code>tokensBefore</code>, <code>tokensAfter</code>, <code>firstKeptEntryId</code></p>
+<p>The compact method has extra parameters for fine control:
+- <code>currentTokenCount</code> — the caller's observed token count (not just an estimate)
+- <code>compactionTarget</code> — <code>"budget"</code> (compact to fit) or <code>"threshold"</code> (compact to a trigger level)
+- <code>customInstructions</code> — user-provided hints like "preserve the task list"
+- <code>runtimeContext</code> — a bag of runtime state (session key, model, provider, workspace dir, skills, etc.)</p>
+<h4 id="5-afterturnsessionid-messages-prepromptmessagecount-tokenbudget">5. <code>afterTurn(sessionId, messages, prePromptMessageCount, tokenBudget?)</code><a class="headerlink" href="#5-afterturnsessionid-messages-prepromptmessagecount-tokenbudget" title="Permanent link">&para;</a></h4>
+<p><strong>When:</strong> After an AI run attempt completes
+<strong>What:</strong> Post-turn housekeeping. If <code>afterTurn</code> exists, it gets called. If not, the system falls back to calling <code>ingestBatch</code> with the new messages. This is where proactive compaction can happen.</p>
+<h4 id="6-preparesubagentspawnparentkey-childkey-ttlms-and-onsubagentendedchildkey-reason">6. <code>prepareSubagentSpawn(parentKey, childKey, ttlMs?)</code> and <code>onSubagentEnded(childKey, reason)</code><a class="headerlink" href="#6-preparesubagentspawnparentkey-childkey-ttlms-and-onsubagentendedchildkey-reason" title="Permanent link">&para;</a></h4>
+<p><strong>When:</strong> When the AI spawns a "sub-agent" (a helper AI doing a sub-task)
+<strong>What:</strong> Set up isolated context for the child agent, and clean up when it's done.
+<strong>Returns:</strong> <code>SubagentSpawnPreparation</code> with a <code>rollback()</code> function in case the spawn fails
+<strong>End reasons:</strong> <code>"deleted" | "completed" | "swept" | "released"</code></p>
+<h4 id="7-dispose">7. <code>dispose()</code><a class="headerlink" href="#7-dispose" title="Permanent link">&para;</a></h4>
+<p><strong>When:</strong> Shutting down
+<strong>What:</strong> Clean up resources. Close the library.</p>
+<h3 id="the-info-property">The Info Property<a class="headerlink" href="#the-info-property" title="Permanent link">&para;</a></h3>
+<p>Every engine also has an <code>info</code> property of type <code>ContextEngineInfo</code>:
+<div class="language-typescript highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">          </span><span class="c1">// &quot;legacy&quot;, &quot;my-custom-engine&quot;, etc.</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">        </span><span class="c1">// &quot;Legacy Context Engine&quot;</span>
+<span class="w">  </span><span class="nx">version?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">    </span><span class="c1">// &quot;1.0.0&quot;</span>
+<span class="w">  </span><span class="nx">ownsCompaction?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">  </span><span class="c1">// CRITICAL: if true, disables built-in auto-compaction</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>The <code>ownsCompaction</code> flag is crucial — when a plugin says "I own compaction," the built-in Pi auto-compaction system is disabled entirely, trusting the plugin to handle everything.</p>
+<hr />
+<h2 id="part-2-the-registry-how-engines-are-found">Part 2: The Registry — How Engines Are Found<a class="headerlink" href="#part-2-the-registry-how-engines-are-found" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/context-engine/registry.ts</code> (86 lines)</p>
+<p>The registry is how OpenClaw knows which context engines exist and which one to use.</p>
+<h3 id="the-symbolfor-trick">The Symbol.for Trick<a class="headerlink" href="#the-symbolfor-trick" title="Permanent link">&para;</a></h3>
+<p>The registry uses a clever technique to survive JavaScript bundling:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">REGISTRY_KEY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Symbol</span><span class="p">.</span><span class="k">for</span><span class="p">(</span><span class="s2">&quot;openclaw.contextEngineRegistryState&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><code>Symbol.for()</code> creates a <strong>globally unique key</strong> that's the same across all JavaScript modules, even if the code is duplicated by the bundler into multiple chunks. Without this, if two different parts of the code both imported the registry, they'd each get their own separate map and wouldn't see each other's engines.</p>
+<p>The state itself is stored on <code>globalThis</code> (the process-global object):</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">getContextEngineRegistryState</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">ContextEngineRegistryState</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nb">globalThis</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">)[</span><span class="nx">REGISTRY_KEY</span><span class="p">];</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">engines</span><span class="o">:</span><span class="w"> </span><span class="kt">new</span><span class="w"> </span><span class="nb">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">ContextEngineFactory</span><span class="o">&gt;</span><span class="p">()</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="p">(</span><span class="nb">globalThis</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">)[</span><span class="nx">REGISTRY_KEY</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">state</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">state</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="registration-and-resolution">Registration and Resolution<a class="headerlink" href="#registration-and-resolution" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// A factory is a function that creates an engine</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">ContextEngineFactory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ContextEngine</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ContextEngine</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// Register: &quot;here&#39;s how to create engine X&quot;</span>
+<span class="nx">registerContextEngine</span><span class="p">(</span><span class="s2">&quot;legacy&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">LegacyContextEngine</span><span class="p">());</span>
+
+<span class="c1">// Resolve: &quot;give me the engine the user configured&quot;</span>
+<span class="nx">resolveContextEngine</span><span class="p">(</span><span class="nx">config</span><span class="o">?</span><span class="p">)</span>
+</code></pre></div>
+<p>Resolution order:
+1. Check <code>config.plugins.slots.contextEngine</code> (user chose a specific engine)
+2. Fall back to the default slot: <code>"legacy"</code>
+3. Look up the factory in the registry
+4. If not found: throw an error listing the engine ID and all available engines</p>
+<h3 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/context-engine/init.ts</code> (23 lines)</p>
+<p><code>ensureContextEnginesInitialized()</code> is called once at startup. It:
+1. Checks a module-level boolean flag (prevents double-init)
+2. Registers <code>LegacyContextEngine</code> as the safe fallback
+3. Plugins register additional engines during plugin load via <code>api.registerContextEngine()</code></p>
+<hr />
+<h2 id="part-3-the-legacy-engine-backward-compatibility">Part 3: The Legacy Engine — Backward Compatibility<a class="headerlink" href="#part-3-the-legacy-engine-backward-compatibility" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/context-engine/legacy.ts</code> (129 lines)</p>
+<p>The <code>LegacyContextEngine</code> is a <strong>pass-through wrapper</strong> around the pre-existing compaction system. It exists so that the old behavior works exactly the same way through the new pluggable interface.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ingest()</code></td>
+<td>Returns <code>{ ingested: false }</code> — no-op, SessionManager handles persistence</td>
+</tr>
+<tr>
+<td><code>assemble()</code></td>
+<td>Returns messages as-is with <code>estimatedTokens: 0</code> — the existing sanitize → validate → limit → repair pipeline in attempt.ts handles assembly</td>
+</tr>
+<tr>
+<td><code>afterTurn()</code></td>
+<td>No-op — legacy flow persists context directly</td>
+</tr>
+<tr>
+<td><code>compact()</code></td>
+<td><strong>Delegates</strong> to <code>compactEmbeddedPiSessionDirect()</code> — the real compaction engine</td>
+</tr>
+<tr>
+<td><code>dispose()</code></td>
+<td>No-op</td>
+</tr>
+</tbody>
+</table>
+<p>The compact method does important bridging work:
+- Lazy-loads the compaction module via dynamic <code>import()</code>
+- Maps the <code>runtimeContext</code> bag into <code>CompactEmbeddedPiSessionParams</code>
+- Handles <code>currentTokenCount</code> from either direct params or runtimeContext
+- Converts the compaction result back into the standard <code>CompactResult</code> shape</p>
+<p>Info: <code>{ id: "legacy", name: "Legacy Context Engine", version: "1.0.0" }</code></p>
+<hr />
+<h2 id="part-4-the-compaction-system-summarizing-history">Part 4: The Compaction System — Summarizing History<a class="headerlink" href="#part-4-the-compaction-system-summarizing-history" title="Permanent link">&para;</a></h2>
+<p>This is where the heavy lifting happens. When the context window fills up, the compaction system summarizes old messages to make room.</p>
+<h3 id="token-estimation">Token Estimation<a class="headerlink" href="#token-estimation" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/compaction.ts</code> (465 lines)</p>
+<p>OpenClaw uses a simple heuristic: <strong>4 characters ≈ 1 token</strong>. But tool results are weighted at <strong>2 characters per token</strong> (2x density) because they tend to be dense, structured content.</p>
+<div class="language-text highlight"><pre><span></span><code>Regular text:    &quot;Hello world&quot; (11 chars) ≈ 3 tokens
+Tool result:     &quot;{&quot;key&quot;:&quot;value&quot;}&quot; (15 chars) ≈ 8 tokens (2x weight)
+Image:           ~8,000 chars estimate per image
+</code></pre></div>
+<p>There's a 20% safety margin (<code>SAFETY_MARGIN = 1.2</code>) on all estimates to account for tokenizer differences across providers.</p>
+<h3 id="the-chunking-algorithm">The Chunking Algorithm<a class="headerlink" href="#the-chunking-algorithm" title="Permanent link">&para;</a></h3>
+<p>Before summarizing, messages are split into chunks. Think of it like breaking a book into chapters before writing chapter summaries.</p>
+<p><strong>Adaptive Chunk Ratio:</strong>
+- Base chunk: 40% of context window (<code>BASE_CHUNK_RATIO = 0.4</code>)
+- Minimum: 15% (<code>MIN_CHUNK_RATIO = 0.15</code>)
+- If messages are large on average (&gt;10% of context each), the chunk ratio shrinks
+- This prevents situations where one giant tool output dominates a chunk</p>
+<p><strong>Two chunking strategies:</strong>
+1. <code>splitMessagesByTokenShare(messages, parts)</code> — divide into N equal-token chunks
+2. <code>chunkMessagesByMaxTokens(messages, maxTokens)</code> — each chunk stays under a limit</p>
+<h3 id="the-summarization-pipeline">The Summarization Pipeline<a class="headerlink" href="#the-summarization-pipeline" title="Permanent link">&para;</a></h3>
+<p><strong><code>summarizeChunks()</code></strong> — the core recursive summarizer:
+1. Strip <code>details</code> fields from tool results (security boundary — prevents leaking internal metadata)
+2. Chunk messages by max tokens
+3. For each chunk, call the AI to generate a summary
+4. Thread the previous summary into the next chunk as context (so the AI knows what came before)
+5. Return the final summary</p>
+<p><strong><code>summarizeWithFallback()</code></strong> — two-tier fallback:
+1. Try full summarization
+2. If it fails: identify messages that are &gt;50% of context (oversized), exclude them, note "[Large assistant (~45K tokens) omitted from summary]"
+3. Summarize only the smaller messages
+4. Ultimate fallback: "Context contained X messages with tool outputs and conversation"</p>
+<p><strong><code>summarizeInStages()</code></strong> — for very large contexts:
+1. Split into N parts by token share
+2. Summarize each part independently (can be parallelized)
+3. Merge all partial summaries into one cohesive summary with instructions to preserve: active tasks, batch progress, user requests, decisions, TODOs, commitments</p>
+<h3 id="safeguard-mode-quality-audited-compaction">Safeguard Mode — Quality-Audited Compaction<a class="headerlink" href="#safeguard-mode-quality-audited-compaction" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/pi-extensions/compaction-safeguard.ts</code> (1,012 lines)</p>
+<p>Safeguard mode is the enhanced compaction that ensures summaries don't lose critical information.</p>
+<p><strong>Recent Turn Preservation:</strong>
+The last 3 user messages (and their assistant responses + tool results) are preserved verbatim — never summarized. This ensures recent context is always available in full fidelity.</p>
+<p><strong>Required Summary Sections:</strong>
+Every summary MUST include:
+<div class="language-text highlight"><pre><span></span><code>## Decisions
+## Open TODOs
+## Constraints/Rules
+## Pending user asks
+## Exact identifiers
+</code></pre></div></p>
+<p><strong>Quality Auditing (<code>auditSummaryQuality()</code>):</strong>
+After generating a summary, the system checks:
+1. Are all required sections present?
+2. Are critical identifiers preserved? (hex IDs, URLs, file paths, port numbers, large numbers — up to 12 extracted)
+3. Is the latest user request reflected?</p>
+<p>If the audit fails, the summary is <strong>regenerated</strong> with feedback about what was missing. Up to 2 attempts (1 retry).</p>
+<p><strong>Identifier Extraction Patterns:</strong>
+- Hex IDs: <code>[A-Fa-f0-9]{8,}</code> (normalized to uppercase)
+- URLs: <code>https?://\S+</code>
+- Unix paths: <code>/[\w.-]{2,}(?:/[\w.-]+)+</code>
+- Windows paths: <code>[A-Za-z]:\\[\w\\.-]+</code>
+- Host:port: <code>[A-Za-z0-9._-]+\.[A-Za-z0-9._/-]+:\d{1,5}</code>
+- Large numbers: <code>\b\d{6,}\b</code></p>
+<p><strong>Workspace Critical Rules:</strong>
+After summarization, the system reads <code>AGENTS.md</code> from the workspace root, extracts "Session Startup" and "Red Lines" sections (up to 2,000 chars), and appends them in <code>&lt;workspace-critical-rules&gt;</code> tags. This ensures workspace rules survive compaction.</p>
+<p><strong>Tool Failure Collection:</strong>
+The top 8 tool failures (error messages truncated to 240 chars) are extracted and included in the summary, so the AI remembers what went wrong.</p>
+<p><strong>File Operations Tracking:</strong>
+Read-only files and modified files are listed in <code>&lt;read-files&gt;</code> and <code>&lt;modified-files&gt;</code> XML blocks, preserving the working context.</p>
+<hr />
+<h2 id="part-5-context-pruning-the-lighter-touch">Part 5: Context Pruning — The Lighter Touch<a class="headerlink" href="#part-5-context-pruning-the-lighter-touch" title="Permanent link">&para;</a></h2>
+<p><strong>Directory:</strong> <code>src/agents/pi-extensions/context-pruning/</code> (6 files)</p>
+<p>While compaction is aggressive (summarize everything), context pruning is a lighter operation that just trims bloated tool results.</p>
+<h3 id="how-it-triggers">How It Triggers<a class="headerlink" href="#how-it-triggers" title="Permanent link">&para;</a></h3>
+<p>Mode: <code>cache-ttl</code> (default) or <code>off</code></p>
+<p>When the TTL expires (default: 5 minutes since last cache touch), pruning runs. This means: if the AI hasn't been actively using the context, old tool results get trimmed.</p>
+<h3 id="two-stage-pipeline">Two-Stage Pipeline<a class="headerlink" href="#two-stage-pipeline" title="Permanent link">&para;</a></h3>
+<p><strong>Stage 1: Soft Trim</strong> — starts when tool content &gt; 30% of context
+- Preserves the last 3 assistant messages (never pruned)
+- For each eligible tool result over 4KB:
+  - Keep the first 1.5KB (head)
+  - Keep the last 1.5KB (tail)
+  - Join with <code>...</code> ellipsis
+  - Add a note with original character count</p>
+<p><strong>Stage 2: Hard Clear</strong> — activates when tool content &gt; 50% of context
+- Replaces entire tool results with <code>[Old tool result content cleared]</code>
+- Stops once below the 50% threshold
+- Requires at least 50KB of prunable content (prevents clearing tiny results)</p>
+<h3 id="tool-filtering">Tool Filtering<a class="headerlink" href="#tool-filtering" title="Permanent link">&para;</a></h3>
+<p>Not all tools are prunable. The system uses glob-based allow/deny lists:
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">allow</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">],</span><span class="w">           </span><span class="c1">// Default: all tools eligible</span>
+<span class="w">  </span><span class="nx">deny</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read_file&quot;</span><span class="p">]</span><span class="w">     </span><span class="c1">// Example: never prune file reads</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>Images in tool results are replaced with <code>[image removed during context pruning]</code>.</p>
+<h3 id="configuration-defaults">Configuration Defaults<a class="headerlink" href="#configuration-defaults" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">mode</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;cache-ttl&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">ttlMs</span><span class="o">:</span><span class="w"> </span><span class="kt">300_000</span><span class="p">,</span><span class="w">              </span><span class="c1">// 5 minutes</span>
+<span class="w">  </span><span class="nx">keepLastAssistants</span><span class="o">:</span><span class="w"> </span><span class="kt">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">softTrimRatio</span><span class="o">:</span><span class="w"> </span><span class="kt">0.3</span><span class="p">,</span><span class="w">          </span><span class="c1">// 30% of context</span>
+<span class="w">  </span><span class="nx">hardClearRatio</span><span class="o">:</span><span class="w"> </span><span class="kt">0.5</span><span class="p">,</span><span class="w">         </span><span class="c1">// 50% of context</span>
+<span class="w">  </span><span class="nx">minPrunableToolChars</span><span class="o">:</span><span class="w"> </span><span class="kt">50_000</span><span class="w"> </span><span class="c1">// 50KB minimum</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="part-6-the-3-tier-overflow-recovery-system">Part 6: The 3-Tier Overflow Recovery System<a class="headerlink" href="#part-6-the-3-tier-overflow-recovery-system" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/agents/pi-embedded-runner/run.ts</code> (lines 740–1192)</p>
+<p>When the AI model rejects a request because it's too large, OpenClaw has a 3-tier fallback system. Think of it as increasingly desperate measures to fit through a door that's too small.</p>
+<h3 id="max-attempts-3">Max Attempts: 3<a class="headerlink" href="#max-attempts-3" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">MAX_OVERFLOW_COMPACTION_ATTEMPTS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="tier-1-retry-after-in-attempt-compaction">Tier 1: Retry After In-Attempt Compaction<a class="headerlink" href="#tier-1-retry-after-in-attempt-compaction" title="Permanent link">&para;</a></h3>
+<p>If the SDK already ran auto-compaction during the attempt but overflow still happened:
+- Log "context overflow persisted after in-attempt compaction"
+- Increment counter
+- Retry the prompt without additional compaction (sometimes the retry alone fixes it)</p>
+<h3 id="tier-2-explicit-overflow-compaction">Tier 2: Explicit Overflow Compaction<a class="headerlink" href="#tier-2-explicit-overflow-compaction" title="Permanent link">&para;</a></h3>
+<p>If no compaction happened yet:
+- Call <code>contextEngine.compact()</code> with:
+  - <code>trigger: "overflow"</code> — tells the engine this is an emergency
+  - <code>force: true</code> — compact even if below the normal trigger threshold
+  - <code>compactionTarget: "budget"</code> — compact as aggressively as needed to fit
+  - <code>currentTokenCount</code> — the observed overflow size (if extractable from the error)
+- If successful, retry the prompt</p>
+<h3 id="tier-3-tool-result-truncation">Tier 3: Tool Result Truncation<a class="headerlink" href="#tier-3-tool-result-truncation" title="Permanent link">&para;</a></h3>
+<p>The nuclear option. If compaction failed or wasn't enough:
+- Scan messages for tool results that are disproportionately large
+- Truncate them in-place using smart head+tail strategy:
+  - 70% head (beginning of the result)
+  - 30% tail (end — often contains errors/conclusions)
+  - Middle replaced with <code>[... middle content omitted ...]</code>
+- Hard cap: 400K characters per tool result
+- Minimum preserved: 2K characters</p>
+<p><strong>If all 3 attempts fail:</strong>
+Return error: "Context overflow: prompt too large for the model"
+Suggest: <code>/reset</code> or <code>/new</code> or switch to a larger-context model</p>
+<p><strong>Security note:</strong> The compaction counter is NEVER reset (even after successful compaction). This prevents a prompt injection attack where malicious content could trigger unbounded auto-compaction cycles (DoS vector, CWE-400).</p>
+<hr />
+<h2 id="part-7-token-budgeting-and-context-window-guards">Part 7: Token Budgeting and Context Window Guards<a class="headerlink" href="#part-7-token-budgeting-and-context-window-guards" title="Permanent link">&para;</a></h2>
+<h3 id="context-window-resolution">Context Window Resolution<a class="headerlink" href="#context-window-resolution" title="Permanent link">&para;</a></h3>
+<p>The system determines the available context window through a priority hierarchy:
+1. Provider-specific model config (explicit override)
+2. Model metadata <code>contextWindow</code> field
+3. Agent-level <code>contextTokens</code> cap (if lower, takes precedence)
+4. Default: 200,000 tokens</p>
+<p><strong>Safety thresholds:</strong>
+- Hard minimum: 16,000 tokens (block if below — model is too small)
+- Warning threshold: 32,000 tokens (warn the user)</p>
+<h3 id="per-tool-result-budgeting">Per-Tool-Result Budgeting<a class="headerlink" href="#per-tool-result-budgeting" title="Permanent link">&para;</a></h3>
+<p>Before messages even reach the model, individual tool results are budgeted:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">CONTEXT_INPUT_HEADROOM_RATIO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.75</span><span class="w">    </span><span class="c1">// 75% of context for input</span>
+<span class="nx">SINGLE_TOOL_RESULT_CONTEXT_SHARE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="w">  </span><span class="c1">// Any single result max 50%</span>
+</code></pre></div>
+<p>So for a 200K context model:
+- Total context budget: 200K × 4 chars × 0.75 = 600K chars
+- Single result max: 200K × 2 chars × 0.5 = 200K chars</p>
+<p>The <code>transformContext</code> hook enforces these limits by truncating results before they reach the model.</p>
+<hr />
+<h2 id="part-8-how-it-all-fits-together-the-agent-run-loop">Part 8: How It All Fits Together — The Agent Run Loop<a class="headerlink" href="#part-8-how-it-all-fits-together-the-agent-run-loop" title="Permanent link">&para;</a></h2>
+<p>Here's the complete flow during a single conversation turn:</p>
+<div class="language-text highlight"><pre><span></span><code>1. ensureContextEnginesInitialized()
+   └─ Register LegacyContextEngine (+ any plugin engines)
+
+2. resolveContextEngine(config)
+   └─ Check config slot → default &quot;legacy&quot; → look up factory → create engine
+
+3. bootstrap(sessionId, sessionFile)
+   └─ Engine initializes for this session (legacy: no-op)
+
+4. [User sends a message]
+
+5. assemble(sessionId, messages, tokenBudget)
+   └─ Engine picks which messages the AI sees
+   └─ May add systemPromptAddition (e.g., summary of old context)
+   └─ Legacy: returns messages as-is (existing pipeline handles selection)
+
+6. [AI model processes the assembled messages]
+   └─ If overflow → Tier 1/2/3 recovery
+
+7. afterTurn(sessionId, messages, prePromptCount, tokenBudget)
+   └─ Engine does post-turn work (proactive compaction, ingestion)
+   └─ Receives full runtimeContext: model, provider, workspace, skills, etc.
+   └─ If afterTurn not implemented: falls back to ingestBatch/ingest
+
+8. [If context is too large]
+   compact(sessionId, sessionFile, tokenBudget)
+   └─ Legacy delegates to compactEmbeddedPiSessionDirect()
+   └─ Safeguard mode: quality-audited summarization
+   └─ Context pruning: TTL-based tool result trimming
+
+9. dispose()
+   └─ Clean up when done
+</code></pre></div>
+<h3 id="subagent-isolation">Subagent Isolation<a class="headerlink" href="#subagent-isolation" title="Permanent link">&para;</a></h3>
+<p>When the AI spawns a sub-agent (e.g., a coding helper):</p>
+<div class="language-text highlight"><pre><span></span><code>1. prepareSubagentSpawn(parentKey, childKey, ttlMs?)
+   └─ Set up isolated context for the child
+   └─ Returns rollback() in case spawn fails
+
+2. [Child agent runs with its own context]
+
+3. onSubagentEnded(childKey, reason)
+   └─ Clean up child context
+   └─ Reasons: &quot;completed&quot;, &quot;deleted&quot;, &quot;swept&quot;, &quot;released&quot;
+</code></pre></div>
+<h3 id="the-ownscompaction-guard">The ownsCompaction Guard<a class="headerlink" href="#the-ownscompaction-guard" title="Permanent link">&para;</a></h3>
+<p>When a custom context engine sets <code>ownsCompaction: true</code>:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// In pi-settings.ts</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">contextEngineInfo</span><span class="o">?</span><span class="p">.</span><span class="nx">ownsCompaction</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">settingsManager</span><span class="p">.</span><span class="nx">setCompactionEnabled</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This disables Pi's built-in auto-compaction entirely, trusting the plugin to handle all context lifecycle decisions.</p>
+<hr />
+<h2 id="part-9-plugin-sdk-integration">Part 9: Plugin SDK Integration<a class="headerlink" href="#part-9-plugin-sdk-integration" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/plugin-sdk/index.ts</code> (lines 803–816)</p>
+<p>External plugins can create their own context engines. The SDK exports:</p>
+<p><strong>Types:</strong>
+- <code>ContextEngine</code>, <code>ContextEngineInfo</code>, <code>AssembleResult</code>, <code>CompactResult</code>
+- <code>IngestResult</code>, <code>IngestBatchResult</code>, <code>BootstrapResult</code>
+- <code>SubagentSpawnPreparation</code>, <code>SubagentEndReason</code></p>
+<p><strong>Functions:</strong>
+- <code>registerContextEngine(id, factory)</code> — register a custom engine
+- <code>ContextEngineFactory</code> type — async factory function</p>
+<p><strong>Configuration:</strong>
+<div class="language-json5 highlight"><pre><span></span><code><span class="c1">// config.json5</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nv">&quot;plugins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nv">&quot;slots&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">&quot;contextEngine&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-custom-engine&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>A plugin just needs to:
+1. Import <code>registerContextEngine</code> from the SDK
+2. Implement the <code>ContextEngine</code> interface
+3. Register with a unique ID
+4. User sets the slot in config</p>
+<hr />
+<h2 id="part-10-test-coverage">Part 10: Test Coverage<a class="headerlink" href="#part-10-test-coverage" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/context-engine/context-engine.test.ts</code></p>
+<p>The test suite validates:</p>
+<ol>
+<li><strong>Engine Contract</strong> — registration, resolution, all return types have correct shapes</li>
+<li><strong>Registry</strong> — register, retrieve, list, overwrite existing registrations</li>
+<li><strong>Default Selection</strong> — no config → "legacy"; custom slot → custom engine; invalid → helpful error</li>
+<li><strong>LegacyContextEngine Parity</strong> — ingest returns false, assemble passes through, dispose works</li>
+<li><strong>Initialization Guard</strong> — <code>ensureContextEnginesInitialized()</code> is idempotent</li>
+<li><strong>Bundle Chunk Isolation</strong> — the most interesting tests:</li>
+<li>Symbol.for key is stable across independently loaded modules</li>
+<li>Engine registered in chunk A is visible to chunk B</li>
+<li>Plugin SDK exports share the same global registry</li>
+<li>Concurrent registrations from multiple chunks don't lose entries</li>
+</ol>
+<hr />
+<h2 id="git-history-evolution">Git History Evolution<a class="headerlink" href="#git-history-evolution" title="Permanent link">&para;</a></h2>
+<h3 id="phase-1-foundation-compaction-slash-commands-early-jan-2026">Phase 1: Foundation — Compaction &amp; Slash Commands (Early Jan 2026)<a class="headerlink" href="#phase-1-foundation-compaction-slash-commands-early-jan-2026" title="Permanent link">&para;</a></h3>
+<p>The story begins on <strong>January 6, 2026</strong>, when <strong>Peter Steinberger</strong> added the <code>/compact</code> slash command (<code>b56338171</code>). This was the first user-facing compaction feature — before this, there was no way to manually manage context. He also added compaction counting to sessions (<code>b30bae89e</code>), so the system could track how many times a session had been compacted.</p>
+<p>At this point, compaction was a simple slash command with basic summarization. No context engine abstraction, no pruning, no safeguards.</p>
+<h3 id="phase-2-context-pruning-a-lighter-approach-jan-7-2026">Phase 2: Context Pruning — A Lighter Approach (Jan 7, 2026)<a class="headerlink" href="#phase-2-context-pruning-a-lighter-approach-jan-7-2026" title="Permanent link">&para;</a></h3>
+<p>Just one day later, <strong>Max Sumrall</strong> created the entire context pruning subsystem in a single commit (<code>eeaa6ea46</code> — 779 lines). This was a fundamentally different approach: instead of summarizing everything, just trim the bloated tool results. He followed up immediately with test coverage (<code>f9118bd21</code> — 410-line test suite) and a fix to protect bootstrap messages from pruning (<code>5ddf9b2c6</code>).</p>
+<p>The next day, Peter Steinberger <strong>enabled it by default</strong> (<code>2c7d64232</code>), showing confidence in the approach. The reasoning: most context bloat comes from tool results (file reads, command output), not from conversation. Pruning these first avoids unnecessary summarization.</p>
+<h3 id="phase-3-safeguard-mode-overflow-recovery-jan-1024-2026">Phase 3: Safeguard Mode &amp; Overflow Recovery (Jan 10–24, 2026)<a class="headerlink" href="#phase-3-safeguard-mode-overflow-recovery-jan-1024-2026" title="Permanent link">&para;</a></h3>
+<p>On January 10, a contributor named <strong>Shadow</strong> created safeguard compaction (<code>a96d29997</code>), which generates LLM-summarized histories instead of simple truncation. This was a quality leap — summaries preserved important decisions, TODOs, and context.</p>
+<p>The next two weeks saw rapid evolution:
+- <strong>Jan 12:</strong> Peter Steinberger added <strong>pre-compaction memory flush</strong> (<code>7dbb21be8</code>) — saving memory state before compaction to prevent data loss
+- <strong>Jan 21:</strong> <strong>Cache-TTL pruning mode</strong> (<code>9f59ff325</code>) — a new trigger for pruning based on idle time
+- <strong>Jan 22–23:</strong> <strong>Dave Lauer</strong> added <strong>adaptive chunk sizing</strong> (<code>d03c404cb</code>) with <code>computeAdaptiveChunkRatio()</code> and <code>summarizeWithFallback()</code> — making compaction robust against oversized tool outputs
+- <strong>Jan 24:</strong> <strong>Rodrigo Uroz</strong> built <strong>auto-compaction on overflow</strong> (<code>9ceac415c</code>) — detecting "context window exceeded" errors and automatically compacting</p>
+<h3 id="phase-4-hardening-security-feb-2026">Phase 4: Hardening &amp; Security (Feb 2026)<a class="headerlink" href="#phase-4-hardening-security-feb-2026" title="Permanent link">&para;</a></h3>
+<p>February was the "battle-hardening" month, with dozens of contributors fixing edge cases:</p>
+<ul>
+<li><strong>Feb 5:</strong> <strong>Christian Klotz</strong> fixed orphaned <code>tool_result</code> references (<code>f32eeae3b</code>) — dangling tool IDs caused API rejections</li>
+<li><strong>Feb 7:</strong> <strong>Tyler Yust</strong> built the <strong>3-tier overflow recovery</strong> system (<code>0deb8b0da</code>) — tool result truncation as the last resort when compaction isn't enough</li>
+<li><strong>Feb 8:</strong> <strong>Tak Hoffman</strong> fixed <strong>post-compaction amnesia</strong> (<code>0cf93b8fa</code>) — compaction summaries were invisible to providers due to corrupted <code>parentId</code> chains</li>
+<li><strong>Feb 13:</strong> <strong>Vladimir Peshekhonov</strong> stabilized overflow retry accounting (<code>957b88308</code>)</li>
+<li><strong>Feb 14:</strong> <strong>Michael Verrilli</strong> fixed <strong>deadlocks</strong> during compaction timeouts (<code>e6f67d5f3</code>)</li>
+<li><strong>Feb 14:</strong> <strong>Tarun Sukhani</strong> added <strong>task continuity</strong> across compaction (<code>a170e2549</code> — 2,267 lines) — <code>TASKS.md</code> ledger that survives summarization</li>
+<li><strong>Feb 15:</strong> <strong>Bin Deng</strong> added a <strong>300-second safety timeout</strong> on <code>session.compact()</code> (<code>c0cd3c3c0</code>)</li>
+<li><strong>Feb 18:</strong> <strong>Aether AI Agent</strong> (an AI contributor!) fixed a <strong>security vulnerability</strong> (<code>084f62102</code>) — prompt injection could trigger unbounded auto-compaction cycles (CWE-400 DoS). The fix: never reset the compaction counter.</li>
+<li><strong>Feb 23:</strong> <strong>DukeDeSouth</strong> changed the fallback behavior to <strong>cancel compaction instead of truncating</strong> when summarization fails (<code>ea47ab29b</code>) — preventing irreversible data loss</li>
+</ul>
+<h3 id="phase-5-the-contextengine-abstraction-mar-6-2026">Phase 5: The ContextEngine Abstraction (Mar 6, 2026)<a class="headerlink" href="#phase-5-the-contextengine-abstraction-mar-6-2026" title="Permanent link">&para;</a></h3>
+<p>On <strong>March 6, 2026</strong>, <strong>Josh Lehman</strong> created the pluggable <code>ContextEngine</code> interface (<code>fee91fefc</code> — the founding commit of <code>src/context-engine/</code>). This was the architectural turning point: transforming the previously monolithic compaction code into an extensible plugin-driven system.</p>
+<p>The abstraction included:
+- <code>ContextEngine</code> interface with 10 lifecycle methods
+- <code>ContextEngineFactory</code> for lazy/async initialization
+- Module-level singleton registry
+- <code>LegacyContextEngine</code> wrapper for backward compatibility
+- Full agent run lifecycle integration</p>
+<h3 id="phase-6-rapid-stabilization-mar-613-2026">Phase 6: Rapid Stabilization (Mar 6–13, 2026)<a class="headerlink" href="#phase-6-rapid-stabilization-mar-613-2026" title="Permanent link">&para;</a></h3>
+<p>The week after creation saw intensive stabilization:</p>
+<ul>
+<li><strong>Mar 6:</strong> Vincent Koc quick-fixed the legacy module (<code>063b9aabe</code>)</li>
+<li><strong>Mar 8:</strong> Josh Lehman fixed the <strong>Symbol.for registry</strong> (<code>4bfa800cc</code>) — ensuring cross-chunk visibility in bundled builds</li>
+<li><strong>Mar 9:</strong> Daniel Reis added <strong>bundle chunk isolation tests</strong> (<code>fbf5d5636</code>)</li>
+<li><strong>Mar 12:</strong> rabsef-bicrym <strong>carried observed overflow tokens</strong> into compaction (<code>ff47876e6</code>) — so the engine knows exactly how oversized the context was</li>
+<li><strong>Mar 12:</strong> Josh Lehman plumbed <code>sessionKey</code> into all methods (<code>50cc375c1</code>) — completing the API surface</li>
+<li><strong>Mar 12:</strong> David Rudduck added guards for engines with <code>ownsCompaction</code> (<code>f01c41b27</code>)</li>
+<li><strong>Mar 13:</strong> Multiple contributors polished compaction summaries: persona/language continuity (<code>72b6a11a8</code>), status reactions during compaction (<code>61d219cb3</code>), post-compaction sanity checks (<code>771066d12</code>), and double-compaction prevention (<code>9cd54ea88</code>)</li>
+</ul>
+<h3 id="the-evolution-story-in-four-sentences">The Evolution Story in Four Sentences<a class="headerlink" href="#the-evolution-story-in-four-sentences" title="Permanent link">&para;</a></h3>
+<p>The system started in early January 2026 with Peter Steinberger adding a simple <code>/compact</code> command. Within the first week, Max Sumrall built context pruning (a lighter alternative) and Shadow created safeguard summarization (a richer one). Over February, the community hardened it extensively — fixing deadlocks, overflow recovery, orphaned tool results, amnesia, task continuity, and a security DoS vector. In early March, Josh Lehman created the pluggable <code>ContextEngine</code> abstraction, transforming the monolithic compaction code into an extensible plugin-driven architecture.</p>
+<hr />
+<h2 id="architecture-diagram">Architecture Diagram<a class="headerlink" href="#architecture-diagram" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────┐
+│                        Agent Runner                              │
+│                                                                  │
+│  1. ensureContextEnginesInitialized()                           │
+│  2. resolveContextEngine(config) ──→ ContextEngine              │
+│  3. bootstrap()                                                  │
+│  4. assemble(messages, tokenBudget) ──→ AI gets these messages  │
+│  5. [AI runs] ──→ overflow? ──→ 3-Tier Recovery                 │
+│  6. afterTurn(messages)                                          │
+│  7. compact() if needed                                          │
+│                                                                  │
+├──────────────────┬──────────────────────────────────────────────┤
+│                  │                                               │
+│  ┌───────────────▼──────────────┐  ┌──────────────────────────┐ │
+│  │    Context Engine Registry    │  │   Plugin Slot Config     │ │
+│  │                               │  │                          │ │
+│  │  Symbol.for() global state    │  │  contextEngine: &quot;legacy&quot; │ │
+│  │  Map&lt;id, ContextEngineFactory&gt;│  │  (or &quot;my-plugin&quot;)        │ │
+│  └───────────┬───────────────────┘  └──────────┬───────────────┘ │
+│              │                                  │                │
+│              ▼                                  │                │
+│  ┌──────────────────────────────────────────────▼──────────────┐ │
+│  │              ContextEngine Interface                         │ │
+│  │                                                              │ │
+│  │  bootstrap ─→ ingest ─→ assemble ─→ afterTurn ─→ compact   │ │
+│  │  prepareSubagentSpawn / onSubagentEnded / dispose           │ │
+│  └────────┬─────────────────────────────────┬──────────────────┘ │
+│           │                                 │                    │
+│  ┌────────▼──────────┐           ┌──────────▼────────────────┐  │
+│  │ LegacyContextEngine│           │ Custom Plugin Engine      │  │
+│  │                    │           │ (implements ContextEngine) │  │
+│  │ ingest: no-op      │           │                           │  │
+│  │ assemble: pass-thru│           │ Full control over:        │  │
+│  │ compact: delegates │           │ - message selection       │  │
+│  │                    │           │ - summarization           │  │
+│  └────────┬───────────┘           │ - token budgeting         │  │
+│           │                       │ - subagent isolation      │  │
+│           ▼                       └───────────────────────────┘  │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │              Built-in Compaction System                      │ │
+│  │                                                              │ │
+│  │  ┌──────────────────┐  ┌───────────────────────────────┐   │ │
+│  │  │ Context Pruning   │  │ Safeguard Compaction           │   │ │
+│  │  │                   │  │                                │   │ │
+│  │  │ cache-ttl trigger │  │ Quality-audited summaries      │   │ │
+│  │  │ soft trim (30%)   │  │ Required sections              │   │ │
+│  │  │ hard clear (50%)  │  │ Identifier preservation        │   │ │
+│  │  │ tool results only │  │ Workspace rules injection      │   │ │
+│  │  └──────────────────┘  │ Recent turn preservation        │   │ │
+│  │                         │ Tool failure collection         │   │ │
+│  │                         └───────────────────────────────┘   │ │
+│  │                                                              │ │
+│  │  ┌──────────────────────────────────────────────────────┐   │ │
+│  │  │           3-Tier Overflow Recovery                     │   │ │
+│  │  │                                                        │   │ │
+│  │  │  Tier 1: Retry after in-attempt compaction             │   │ │
+│  │  │  Tier 2: Force explicit overflow compaction            │   │ │
+│  │  │  Tier 3: Truncate oversized tool results               │   │ │
+│  │  │                                                        │   │ │
+│  │  │  Max 3 attempts │ Counter never resets (anti-DoS)      │   │ │
+│  │  └──────────────────────────────────────────────────────┘   │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="key-files-reference">Key Files Reference<a class="headerlink" href="#key-files-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/context-engine/types.ts</code></td>
+<td>177</td>
+<td>ContextEngine interface, all result types</td>
+</tr>
+<tr>
+<td><code>src/context-engine/registry.ts</code></td>
+<td>86</td>
+<td>Symbol.for global registry, resolution</td>
+</tr>
+<tr>
+<td><code>src/context-engine/legacy.ts</code></td>
+<td>129</td>
+<td>LegacyContextEngine pass-through</td>
+</tr>
+<tr>
+<td><code>src/context-engine/init.ts</code></td>
+<td>23</td>
+<td>Initialization guard</td>
+</tr>
+<tr>
+<td><code>src/context-engine/index.ts</code></td>
+<td>20</td>
+<td>Public exports</td>
+</tr>
+<tr>
+<td><code>src/context-engine/context-engine.test.ts</code></td>
+<td>~510</td>
+<td>Full test suite</td>
+</tr>
+<tr>
+<td><code>src/agents/compaction.ts</code></td>
+<td>465</td>
+<td>Core chunking &amp; summarization algorithms</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-embedded-runner/compact.ts</code></td>
+<td>1,165</td>
+<td>Compaction orchestration layer</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-extensions/compaction-safeguard.ts</code></td>
+<td>1,012</td>
+<td>Quality-audited safeguard mode</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-extensions/context-pruning/pruner.ts</code></td>
+<td>361</td>
+<td>Soft/hard trim logic</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-extensions/context-pruning/settings.ts</code></td>
+<td>124</td>
+<td>Pruning configuration &amp; defaults</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-extensions/context-pruning/extension.ts</code></td>
+<td>42</td>
+<td>Pruning extension entry point</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-embedded-runner/run.ts</code></td>
+<td>~1,800</td>
+<td>3-tier overflow recovery (lines 740–1192)</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-embedded-runner/tool-result-truncation.ts</code></td>
+<td>~200</td>
+<td>Head+tail smart truncation</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-embedded-runner/tool-result-context-guard.ts</code></td>
+<td>224</td>
+<td>Per-message token budget guard</td>
+</tr>
+<tr>
+<td><code>src/agents/context-window-guard.ts</code></td>
+<td>75</td>
+<td>Context window resolution &amp; thresholds</td>
+</tr>
+<tr>
+<td><code>src/plugin-sdk/index.ts</code></td>
+<td>816+</td>
+<td>SDK exports for custom engines</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

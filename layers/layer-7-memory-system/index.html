@@ -1,0 +1,3110 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-6-skills/">
+      
+      
+        <link rel="next" href="../layer-8-context-engine/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 7: Memory System - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-7-memory-system-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 7: Memory System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 7?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-embeddings-converting-text-to-searchable-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Embeddings (Converting Text to Searchable Numbers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Embeddings (Converting Text to Searchable Numbers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-core-idea" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Core Idea
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-embedding-provider-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Embedding Provider System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-provider-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Provider Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-selection-and-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-Selection and Fallback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimodal-embeddings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multimodal Embeddings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-embedding-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Embedding Cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-embedding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Embedding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-storage-where-memory-lives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Storage (Where Memory Lives)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Storage (Where Memory Lives)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-sqlite-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The SQLite Database
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-database-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Database Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-file-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory File Organization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-indexing-sync-filing-away-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Indexing &amp; Sync (Filing Away Information)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Indexing &amp; Sync (Filing Away Information)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chunking-breaking-text-into-pieces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chunking — Breaking Text Into Pieces
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-sync-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Sync Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-transcript-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session Transcript Indexing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-watching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Watching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readonly-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Readonly Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-search-retrieval-finding-relevant-memories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Search &amp; Retrieval (Finding Relevant Memories)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Search &amp; Retrieval (Finding Relevant Memories)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-search-entry-point" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Search Entry Point
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#three-search-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three Search Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vector-search-cosine-similarity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vector Search (Cosine Similarity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keyword-search-bm25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keyword Search (BM25)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hybrid-merging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hybrid Merging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-result-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Result Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-ranking-algorithms-deciding-whats-best" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Ranking Algorithms (Deciding What's Best)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Ranking Algorithms (Deciding What&#39;s Best)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#query-expansion-making-search-smarter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Expansion — Making Search Smarter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maximal-marginal-relevance-mmr-diversity-ranking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maximal Marginal Relevance (MMR) — Diversity Ranking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-decay-recency-boosting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporal Decay — Recency Boosting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-full-search-pipeline-putting-it-all-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Full Search Pipeline (Putting It All Together)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-memory-extensions-plugin-based-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Memory Extensions (Plugin-Based Backends)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Memory Extensions (Plugin-Based Backends)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-core-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        memory-core Extension
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-lancedb-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        memory-lancedb Extension
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-qmd-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The QMD Backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-configuration-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Configuration &amp; CLI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Configuration &amp; CLI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-7-evolved-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 7 Evolved (Git History)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 7 Evolved (Git History)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-genesis-week-january-12-18-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Genesis Week — January 12-18, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-qmd-backend-january-27-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The QMD Backend — January 27, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-quality-revolution-january-26-to-february-19-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Quality Revolution — January 26 to February 19, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voyage-ai-february-7-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voyage AI — February 7, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-great-decomposition-february-13-17-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Great Decomposition — February 13-17, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-expansion-goes-multilingual-february-16-22-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Expansion Goes Multilingual — February 16-22, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#more-embedding-providers-february-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        More Embedding Providers — February-March 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimodal-memory-march-11-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multimodal Memory — March 11, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-compaction-memory-sync-march-12-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Compaction Memory Sync — March 12, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 7?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-embeddings-converting-text-to-searchable-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Embeddings (Converting Text to Searchable Numbers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Embeddings (Converting Text to Searchable Numbers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-core-idea" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Core Idea
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-embedding-provider-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Embedding Provider System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-provider-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Provider Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-selection-and-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-Selection and Fallback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimodal-embeddings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multimodal Embeddings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-embedding-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Embedding Cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-embedding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Embedding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-storage-where-memory-lives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Storage (Where Memory Lives)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Storage (Where Memory Lives)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-sqlite-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The SQLite Database
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-database-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Database Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-file-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory File Organization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-indexing-sync-filing-away-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Indexing &amp; Sync (Filing Away Information)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Indexing &amp; Sync (Filing Away Information)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chunking-breaking-text-into-pieces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chunking — Breaking Text Into Pieces
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-sync-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Sync Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-transcript-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session Transcript Indexing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-watching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Watching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readonly-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Readonly Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-search-retrieval-finding-relevant-memories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Search &amp; Retrieval (Finding Relevant Memories)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Search &amp; Retrieval (Finding Relevant Memories)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-search-entry-point" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Search Entry Point
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#three-search-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three Search Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vector-search-cosine-similarity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vector Search (Cosine Similarity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keyword-search-bm25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keyword Search (BM25)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hybrid-merging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hybrid Merging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-result-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Result Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-ranking-algorithms-deciding-whats-best" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Ranking Algorithms (Deciding What's Best)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Ranking Algorithms (Deciding What&#39;s Best)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#query-expansion-making-search-smarter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Expansion — Making Search Smarter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maximal-marginal-relevance-mmr-diversity-ranking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maximal Marginal Relevance (MMR) — Diversity Ranking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-decay-recency-boosting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporal Decay — Recency Boosting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-full-search-pipeline-putting-it-all-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Full Search Pipeline (Putting It All Together)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-memory-extensions-plugin-based-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Memory Extensions (Plugin-Based Backends)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Memory Extensions (Plugin-Based Backends)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-core-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        memory-core Extension
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-lancedb-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        memory-lancedb Extension
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-qmd-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The QMD Backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-configuration-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Configuration &amp; CLI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Configuration &amp; CLI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-7-evolved-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 7 Evolved (Git History)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 7 Evolved (Git History)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-genesis-week-january-12-18-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Genesis Week — January 12-18, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-qmd-backend-january-27-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The QMD Backend — January 27, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-quality-revolution-january-26-to-february-19-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Quality Revolution — January 26 to February 19, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voyage-ai-february-7-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voyage AI — February 7, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-great-decomposition-february-13-17-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Great Decomposition — February 13-17, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-expansion-goes-multilingual-february-16-22-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Expansion Goes Multilingual — February 16-22, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#more-embedding-providers-february-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        More Embedding Providers — February-March 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimodal-memory-march-11-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multimodal Memory — March 11, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-compaction-memory-sync-march-12-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Compaction Memory Sync — March 12, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-7-memory-system-deep-dive">Layer 7: Memory System — Deep Dive<a class="headerlink" href="#layer-7-memory-system-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-layer-7">What Is Layer 7?<a class="headerlink" href="#what-is-layer-7" title="Permanent link">&para;</a></h2>
+<p>Every time you have a conversation with the robot, it forgets everything when the conversation ends. It's like talking to someone with amnesia — brilliant, helpful, but no memory of yesterday.</p>
+<p>Layer 7 fixes that. It gives the robot a <strong>long-term memory</strong> — a journal it can write in and search through later. When you tell it "I prefer dark mode" or "our deployment server is at 10.0.0.5," it can write that down. Next week, when you ask "what's our server IP?", it searches its journal and finds the answer.</p>
+<p>This is called <strong>RAG</strong> (Retrieval-Augmented Generation) — a fancy way of saying "search your notes before answering."</p>
+<p>Think of it like a student with a really good filing system. They can't remember everything they've ever learned, but they keep organized notes and know how to search them quickly.</p>
+<p>Layer 7 has <strong>seven major parts</strong>:</p>
+<ol>
+<li><strong>Embeddings</strong> — Converting text into searchable numbers</li>
+<li><strong>Storage</strong> — Where the memory lives (SQLite + vector tables)</li>
+<li><strong>Indexing &amp; Sync</strong> — How new information gets filed away</li>
+<li><strong>Search &amp; Retrieval</strong> — Finding relevant memories</li>
+<li><strong>Ranking Algorithms</strong> — Deciding which results are best (hybrid search, MMR, temporal decay)</li>
+<li><strong>Memory Extensions</strong> — Plugin-based memory backends (LanceDB)</li>
+<li><strong>Configuration &amp; CLI</strong> — Managing the memory system</li>
+</ol>
+<hr />
+<h2 id="part-1-embeddings-converting-text-to-searchable-numbers">Part 1: Embeddings (Converting Text to Searchable Numbers)<a class="headerlink" href="#part-1-embeddings-converting-text-to-searchable-numbers" title="Permanent link">&para;</a></h2>
+<h3 id="the-core-idea">The Core Idea<a class="headerlink" href="#the-core-idea" title="Permanent link">&para;</a></h3>
+<p>Computers can't search by meaning — they can only compare numbers. So to search "things related to deployment," we need to convert text into numbers that capture its meaning. These numbers are called <strong>embeddings</strong> — a list of numbers (a "vector") that represents what a piece of text is about.</p>
+<p>Texts about similar topics produce similar vectors. "Our deployment server is at 10.0.0.5" and "How do I deploy to production?" would have vectors pointing in roughly the same direction, even though they share few words.</p>
+<h3 id="the-embedding-provider-system">The Embedding Provider System<a class="headerlink" href="#the-embedding-provider-system" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/memory/embeddings.ts</code></strong></p>
+<p>OpenClaw supports <strong>6 embedding providers</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>File</th>
+<th>Default Model</th>
+<th>Dimensions</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OpenAI</strong></td>
+<td><code>embeddings-openai.ts</code></td>
+<td>text-embedding-3-small</td>
+<td>1,536</td>
+<td>Most popular, cloud-based</td>
+</tr>
+<tr>
+<td><strong>Google Gemini</strong></td>
+<td><code>embeddings-gemini.ts</code></td>
+<td>gemini-embedding-001</td>
+<td>768</td>
+<td>Multimodal support (images!)</td>
+</tr>
+<tr>
+<td><strong>Voyage AI</strong></td>
+<td><code>embeddings-voyage.ts</code></td>
+<td>voyage-large-2</td>
+<td>1,024</td>
+<td>Specialized for retrieval</td>
+</tr>
+<tr>
+<td><strong>Mistral</strong></td>
+<td><code>embeddings-mistral.ts</code></td>
+<td>mistral-embed</td>
+<td>1,024</td>
+<td>European provider</td>
+</tr>
+<tr>
+<td><strong>Ollama</strong></td>
+<td><code>embeddings-ollama.ts</code></td>
+<td>nomic-embed-text</td>
+<td>varies</td>
+<td>Fully local, runs on your machine</td>
+</tr>
+<tr>
+<td><strong>Local</strong></td>
+<td>(node-llama-cpp)</td>
+<td>embeddinggemma-300m</td>
+<td>300</td>
+<td>Built-in, no network needed</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Dimensions</strong> is the size of the vector. More dimensions = more nuanced understanding, but more storage and slower search. 1,536 dimensions (OpenAI) means each text chunk is represented by 1,536 numbers.</p>
+<h3 id="the-provider-interface">The Provider Interface<a class="headerlink" href="#the-provider-interface" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">EmbeddingProvider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                                     </span><span class="c1">// &quot;openai&quot;, &quot;gemini&quot;, etc.</span>
+<span class="w">  </span><span class="nx">model</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                                  </span><span class="c1">// &quot;text-embedding-3-small&quot;</span>
+<span class="w">  </span><span class="nx">maxInputTokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">                        </span><span class="c1">// Max text length (8192 for OpenAI)</span>
+<span class="w">  </span><span class="nx">embedQuery</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">number</span><span class="p">[]</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Embed a single search query</span>
+<span class="w">  </span><span class="nx">embedBatch</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">texts</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[])</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">number</span><span class="p">[][]</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Embed many texts at once</span>
+<span class="w">  </span><span class="nx">embedBatchInputs</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">inputs</span><span class="o">:</span><span class="w"> </span><span class="kt">EmbeddingInput</span><span class="p">[])</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">number</span><span class="p">[][]</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Multimodal</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="auto-selection-and-fallback">Auto-Selection and Fallback<a class="headerlink" href="#auto-selection-and-fallback" title="Permanent link">&para;</a></h3>
+<p>When the provider is set to <code>"auto"</code>, the system tries providers in order:</p>
+<div class="language-text highlight"><pre><span></span><code>1. Local model (if model file exists on disk)
+       │ (not available)
+2. OpenAI (if OPENAI_API_KEY set)
+       │ (not available)
+3. Gemini (if GEMINI_API_KEY set)
+       │ (not available)
+4. Voyage AI (if VOYAGE_API_KEY set)
+       │ (not available)
+5. Mistral (if MISTRAL_API_KEY set)
+       │ (not available)
+6. FTS-only mode (no embeddings, just keyword search)
+</code></pre></div>
+<p>If the primary provider fails at runtime, a <strong>fallback provider</strong> kicks in automatically. If the fallback also fails with auth errors, the system degrades gracefully to FTS-only mode (keyword search without vectors).</p>
+<h3 id="multimodal-embeddings">Multimodal Embeddings<a class="headerlink" href="#multimodal-embeddings" title="Permanent link">&para;</a></h3>
+<p>Gemini's newer models can embed <strong>images and audio</strong>, not just text:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">EmbeddingInput</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">parts</span><span class="o">?:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">;</span><span class="w"> </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;inline-data&quot;</span><span class="p">;</span><span class="w"> </span><span class="nx">mimeType</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// base64</span>
+<span class="w">  </span><span class="p">];</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>This means the memory system can index screenshots, diagrams, and audio files — and find them by searching with text queries like "that architecture diagram we discussed."</p>
+<h3 id="the-embedding-cache">The Embedding Cache<a class="headerlink" href="#the-embedding-cache" title="Permanent link">&para;</a></h3>
+<p>Computing embeddings costs money (API calls) and time. So OpenClaw caches them:</p>
+<div class="language-sql highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">embedding_cache</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">provider</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">model</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">provider_key</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- Hash of provider config (invalidates on changes)</span>
+<span class="w">  </span><span class="n">hash</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">          </span><span class="c1">-- Hash of input text</span>
+<span class="w">  </span><span class="n">embedding</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">     </span><span class="c1">-- JSON array of floats</span>
+<span class="w">  </span><span class="n">dims</span><span class="w"> </span><span class="nb">INTEGER</span><span class="p">,</span>
+<span class="w">  </span><span class="n">updated_at</span><span class="w"> </span><span class="nb">INTEGER</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">provider</span><span class="p">,</span><span class="w"> </span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">provider_key</span><span class="p">,</span><span class="w"> </span><span class="n">hash</span><span class="p">)</span>
+<span class="p">);</span>
+</code></pre></div>
+<p>If you re-index a file that hasn't changed, the embeddings are loaded from cache instead of recomputed. The cache uses LRU (Least Recently Used) eviction — when it's full, the oldest entries are removed.</p>
+<p>The <code>provider_key</code> is clever: it's a hash of the provider configuration. If you switch from OpenAI to Gemini, the old cache entries aren't used (because Gemini's vectors mean different things than OpenAI's).</p>
+<h3 id="batch-embedding">Batch Embedding<a class="headerlink" href="#batch-embedding" title="Permanent link">&para;</a></h3>
+<p>For large indexing jobs, making one API call per text chunk would be painfully slow. Batch embedding processes hundreds of chunks in a single API call:</p>
+<p><strong>Supported batch APIs:</strong>
+- <strong>OpenAI Batches</strong> (<code>batch-openai.ts</code>): Up to 50,000 requests per batch, 24h completion window
+- <strong>Gemini Batches</strong> (<code>batch-gemini.ts</code>): Immediate response via <code>batchEmbedContents</code>
+- <strong>Voyage Batches</strong> (<code>batch-voyage.ts</code>): Similar to OpenAI flow</p>
+<p><strong>Failure handling:</strong> If batch embedding fails twice in a row, it's auto-disabled and the system falls back to one-at-a-time embedding. A success resets the failure counter.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">BATCH_FAILURE_LIMIT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// Auto-disable after 2 consecutive failures</span>
+</code></pre></div>
+<hr />
+<h2 id="part-2-storage-where-memory-lives">Part 2: Storage (Where Memory Lives)<a class="headerlink" href="#part-2-storage-where-memory-lives" title="Permanent link">&para;</a></h2>
+<h3 id="the-sqlite-database">The SQLite Database<a class="headerlink" href="#the-sqlite-database" title="Permanent link">&para;</a></h3>
+<p>All memory data lives in a SQLite database at <code>~/.openclaw/memory/{agentId}.sqlite</code>. SQLite was chosen because it's a single file, requires no server, and handles concurrent reads well.</p>
+<h3 id="the-database-schema">The Database Schema<a class="headerlink" href="#the-database-schema" title="Permanent link">&para;</a></h3>
+<div class="language-sql highlight"><pre><span></span><code><span class="c1">-- Metadata table (key-value store)</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">meta</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="k">key</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">  </span><span class="n">value</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
+<span class="p">);</span>
+
+<span class="c1">-- Tracked files (what&#39;s been indexed)</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">files</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">path</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">  </span><span class="k">source</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;memory&#39;</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &quot;memory&quot; or &quot;sessions&quot;</span>
+<span class="w">  </span><span class="n">hash</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">          </span><span class="c1">-- Content hash for change detection</span>
+<span class="w">  </span><span class="n">mtime</span><span class="w"> </span><span class="nb">INTEGER</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">     </span><span class="c1">-- Last modification time</span>
+<span class="w">  </span><span class="k">size</span><span class="w"> </span><span class="nb">INTEGER</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
+<span class="p">);</span>
+
+<span class="c1">-- Text chunks (the actual indexed content)</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">chunks</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">  </span><span class="n">path</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="k">source</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;memory&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">start_line</span><span class="w"> </span><span class="nb">INTEGER</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">end_line</span><span class="w"> </span><span class="nb">INTEGER</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">hash</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">model</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">         </span><span class="c1">-- Which embedding model was used</span>
+<span class="w">  </span><span class="nb">text</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">          </span><span class="c1">-- The actual text</span>
+<span class="w">  </span><span class="n">embedding</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">     </span><span class="c1">-- JSON array of floats</span>
+<span class="w">  </span><span class="n">updated_at</span><span class="w"> </span><span class="nb">INTEGER</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
+<span class="p">);</span>
+
+<span class="c1">-- Full-text search index (BM25 keyword search)</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="n">VIRTUAL</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">chunks_fts</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="n">fts5</span><span class="p">(</span>
+<span class="w">  </span><span class="nb">text</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="n">UNINDEXED</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="n">UNINDEXED</span><span class="p">,</span><span class="w"> </span><span class="k">source</span><span class="w"> </span><span class="n">UNINDEXED</span><span class="p">,</span>
+<span class="w">  </span><span class="n">model</span><span class="w"> </span><span class="n">UNINDEXED</span><span class="p">,</span><span class="w"> </span><span class="n">start_line</span><span class="w"> </span><span class="n">UNINDEXED</span><span class="p">,</span><span class="w"> </span><span class="n">end_line</span><span class="w"> </span><span class="n">UNINDEXED</span>
+<span class="p">);</span>
+
+<span class="c1">-- Vector search index (cosine similarity)</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="n">VIRTUAL</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">chunks_vec</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="n">vec0</span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">  </span><span class="n">embedding</span><span class="w"> </span><span class="nb">FLOAT</span><span class="p">[</span><span class="err">{</span><span class="n">dims</span><span class="err">}</span><span class="p">]</span><span class="w">    </span><span class="c1">-- dims varies by provider (1536 for OpenAI)</span>
+<span class="p">);</span>
+</code></pre></div>
+<p>There are <strong>four key tables</strong>:
+1. <strong><code>files</code></strong> — Tracks which files have been indexed and their content hashes (for change detection)
+2. <strong><code>chunks</code></strong> — The actual text chunks with their embeddings
+3. <strong><code>chunks_fts</code></strong> — A FTS5 virtual table for fast keyword search (BM25 algorithm)
+4. <strong><code>chunks_vec</code></strong> — A sqlite-vec virtual table for fast vector similarity search</p>
+<h3 id="memory-file-organization">Memory File Organization<a class="headerlink" href="#memory-file-organization" title="Permanent link">&para;</a></h3>
+<p>The robot reads from files in your workspace:</p>
+<div class="language-text highlight"><pre><span></span><code>your-project/
+├── MEMORY.md                    -- Primary memory file (evergreen, no decay)
+└── memory/
+    ├── 2026-03-10.md           -- Dated entry (temporal decay applies)
+    ├── 2026-03-11.md           -- More recent = higher score
+    ├── architecture/
+    │   └── decisions.md        -- Topical subdirectory
+    └── images/
+        └── diagram.png         -- Multimodal (Gemini only)
+</code></pre></div>
+<p><strong>Two types of memory files:</strong>
+- <strong>Evergreen</strong> (<code>MEMORY.md</code>, non-dated files): Never decay in relevance. Good for permanent facts.
+- <strong>Dated</strong> (<code>memory/YYYY-MM-DD.md</code>): Decay over time. Good for daily notes and session summaries.</p>
+<hr />
+<h2 id="part-3-indexing-sync-filing-away-information">Part 3: Indexing &amp; Sync (Filing Away Information)<a class="headerlink" href="#part-3-indexing-sync-filing-away-information" title="Permanent link">&para;</a></h2>
+<h3 id="chunking-breaking-text-into-pieces">Chunking — Breaking Text Into Pieces<a class="headerlink" href="#chunking-breaking-text-into-pieces" title="Permanent link">&para;</a></h3>
+<p>Before text can be embedded, it needs to be split into chunks (each embedding provider has a maximum input size).</p>
+<p><strong>File: <code>src/memory/internal.ts</code></strong></p>
+<div class="language-text highlight"><pre><span></span><code>Algorithm:
+1. Split content into lines
+2. Accumulate lines until reaching the token threshold (default: 400 tokens)
+3. When a chunk is full, save it (with start/end line numbers)
+4. Carry forward some overlap (default: 80 tokens) for continuity
+5. Continue until all lines are processed
+</code></pre></div>
+<p><strong>Why overlap?</strong> Without overlap, if a sentence spans two chunks, neither chunk would have the full sentence. Overlap ensures that information at chunk boundaries is captured in both adjacent chunks.</p>
+<p><strong>Default settings:</strong>
+- Chunk size: 400 tokens (~300 words)
+- Overlap: 80 tokens (~60 words)</p>
+<h3 id="the-sync-pipeline">The Sync Pipeline<a class="headerlink" href="#the-sync-pipeline" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/memory/manager-sync-ops.ts</code> (1,391 lines)</strong></p>
+<p>Sync is the process of detecting changes and re-indexing affected files.</p>
+<div class="language-text highlight"><pre><span></span><code>Trigger (one of):
+  ├── File watcher detects a change
+  ├── Session transcript updated
+  ├── Periodic interval (default: 5 minutes)
+  ├── Manual &quot;openclaw memory index&quot;
+  └── Search requested (auto-sync before searching)
+         │
+Step 1: Scan all memory directories
+         │
+Step 2: For each file:
+  ├── Compute content hash
+  ├── Compare with stored hash in `files` table
+  │     │
+  │     Same hash → Skip (no changes)
+  │     Different → Re-index this file
+  │     New file → Index for first time
+  │     Missing → Remove from index
+         │
+Step 3: For files that need indexing:
+  ├── Split into chunks
+  ├── Check embedding cache for each chunk
+  ├── Embed uncached chunks (batch if possible)
+  ├── Store chunks + embeddings in database
+  └── Update FTS and vector tables
+         │
+Step 4: Mark sync as clean
+</code></pre></div>
+<h3 id="session-transcript-indexing">Session Transcript Indexing<a class="headerlink" href="#session-transcript-indexing" title="Permanent link">&para;</a></h3>
+<p>OpenClaw can also index <strong>past conversations</strong> so the robot can remember what you talked about:</p>
+<p><strong>File: <code>src/memory/session-files.ts</code></strong></p>
+<p>Session files are JSONL (one JSON object per line):
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;message&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Deploy to staging&quot;</span><span class="p">}}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;message&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Done! Deployed v2.3&quot;</span><span class="p">}}</span>
+</code></pre></div></p>
+<p>The indexer:
+1. Reads each line
+2. Extracts user/assistant messages
+3. Formats as "User: ..." and "Assistant: ..."
+4. Hashes the content for change detection
+5. Creates a line map (maps chunk lines → JSONL source lines for citations)
+6. Chunks and embeds like any other memory file</p>
+<p>Session indexing is <strong>optional</strong> (configured via <code>sources: ["memory", "sessions"]</code>).</p>
+<h3 id="file-watching">File Watching<a class="headerlink" href="#file-watching" title="Permanent link">&para;</a></h3>
+<p><strong>Uses chokidar</strong> to watch the <code>memory/</code> directory for changes:
+- Ignores <code>.git</code>, <code>node_modules</code>, <code>.venv</code>, <code>__pycache__</code>
+- Debounces rapid changes (1.5 seconds) — if you save a file 5 times in 2 seconds, it only re-indexes once
+- Marks the index as "dirty" and triggers a sync</p>
+<h3 id="readonly-recovery">Readonly Recovery<a class="headerlink" href="#readonly-recovery" title="Permanent link">&para;</a></h3>
+<p>SQLite databases can become readonly (disk full, permissions, NFS issues). The system detects this and auto-recovers:</p>
+<div class="language-text highlight"><pre><span></span><code>1. Detect &quot;readonly&quot; in error message
+2. Close current database connection
+3. Reopen database
+4. Retry the failed operation
+5. Track attempts/successes/failures for status reporting
+</code></pre></div>
+<hr />
+<h2 id="part-4-search-retrieval-finding-relevant-memories">Part 4: Search &amp; Retrieval (Finding Relevant Memories)<a class="headerlink" href="#part-4-search-retrieval-finding-relevant-memories" title="Permanent link">&para;</a></h2>
+<h3 id="the-search-entry-point">The Search Entry Point<a class="headerlink" href="#the-search-entry-point" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/memory/manager.ts</code></strong></p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="nx">search</span><span class="p">(</span><span class="nx">query</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">maxResults?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">   </span><span class="c1">// Default: 6</span>
+<span class="w">  </span><span class="nx">minScore?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">     </span><span class="c1">// Default: 0.35</span>
+<span class="w">  </span><span class="nx">sessionKey?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">   </span><span class="c1">// For session-scoped search</span>
+<span class="p">})</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">MemorySearchResult</span><span class="p">[]</span><span class="o">&gt;</span>
+</code></pre></div>
+<h3 id="three-search-modes">Three Search Modes<a class="headerlink" href="#three-search-modes" title="Permanent link">&para;</a></h3>
+<p>The system operates in one of three modes depending on what's available:</p>
+<h4 id="mode-1-hybrid-search-best-quality">Mode 1: Hybrid Search (Best Quality)<a class="headerlink" href="#mode-1-hybrid-search-best-quality" title="Permanent link">&para;</a></h4>
+<p>When both vector and FTS are available, the system runs <strong>both</strong> searches and merges results:</p>
+<div class="language-text highlight"><pre><span></span><code>Query: &quot;deployment server configuration&quot;
+         │
+    ┌────┴────┐
+    │         │
+    ▼         ▼
+Vector     Keyword
+Search     Search (BM25)
+    │         │
+    │    ┌────┘
+    ▼    ▼
+  Merge Results
+  (weighted combination)
+    │
+    ▼
+  Apply Temporal Decay (optional)
+    │
+    ▼
+  Apply MMR Re-ranking (optional)
+    │
+    ▼
+  Filter by minScore
+    │
+    ▼
+  Return top maxResults
+</code></pre></div>
+<h4 id="mode-2-vector-only-search">Mode 2: Vector-Only Search<a class="headerlink" href="#mode-2-vector-only-search" title="Permanent link">&para;</a></h4>
+<p>When FTS isn't available:
+1. Embed the query
+2. Search the vector table for nearest neighbors
+3. Filter by minScore, return top results</p>
+<h4 id="mode-3-fts-only-search-fallback">Mode 3: FTS-Only Search (Fallback)<a class="headerlink" href="#mode-3-fts-only-search-fallback" title="Permanent link">&para;</a></h4>
+<p>When no embedding provider is available (no API key, local model missing):
+1. Extract keywords from query (remove stop words)
+2. Search each keyword separately via BM25
+3. Merge and deduplicate results</p>
+<h3 id="vector-search-cosine-similarity">Vector Search (Cosine Similarity)<a class="headerlink" href="#vector-search-cosine-similarity" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/memory/manager-search.ts</code></strong></p>
+<div class="language-sql highlight"><pre><span></span><code><span class="c1">-- If sqlite-vec extension is loaded:</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">start_line</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">end_line</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="nb">text</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="k">source</span><span class="p">,</span>
+<span class="w">       </span><span class="n">vec_distance_cosine</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">embedding</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">dist</span>
+<span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">chunks_vec</span><span class="w"> </span><span class="n">v</span>
+<span class="w">  </span><span class="k">JOIN</span><span class="w"> </span><span class="n">chunks</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">id</span>
+<span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="k">source</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(...)</span>
+<span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">dist</span><span class="w"> </span><span class="k">ASC</span>
+<span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="o">?</span>
+</code></pre></div>
+<p>The score is: <code>score = 1 - distance</code>. A distance of 0 means identical (score = 1.0). A distance of 1 means completely different (score = 0.0).</p>
+<p><strong>Fallback (no sqlite-vec):</strong> Load all embeddings into memory and compute cosine similarity manually:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">cosineSimilarity</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dot</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="o">||</span><span class="nx">a</span><span class="o">||</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="o">||</span><span class="nx">b</span><span class="o">||</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="keyword-search-bm25">Keyword Search (BM25)<a class="headerlink" href="#keyword-search-bm25" title="Permanent link">&para;</a></h3>
+<div class="language-sql highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="k">source</span><span class="p">,</span><span class="w"> </span><span class="n">start_line</span><span class="p">,</span><span class="w"> </span><span class="n">end_line</span><span class="p">,</span><span class="w"> </span><span class="nb">text</span><span class="p">,</span>
+<span class="w">       </span><span class="n">bm25</span><span class="p">(</span><span class="n">chunks_fts</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rank</span>
+<span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">chunks_fts</span>
+<span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">chunks_fts</span><span class="w"> </span><span class="k">MATCH</span><span class="w"> </span><span class="o">?</span>
+<span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="k">ASC</span>
+<span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="o">?</span>
+</code></pre></div>
+<p>BM25 is a classic information retrieval algorithm that scores documents by:
+- How often the search terms appear in the chunk (term frequency)
+- How rare those terms are across all chunks (inverse document frequency)
+- How long the chunk is (shorter chunks with the terms score higher)</p>
+<h3 id="hybrid-merging">Hybrid Merging<a class="headerlink" href="#hybrid-merging" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/memory/hybrid.ts</code></strong></p>
+<p>When both vector and keyword results come back:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">combinedScore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">vectorWeight</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">vectorScore</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">textWeight</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">keywordScore</span>
+<span class="c1">// Default: 0.7 * vector + 0.3 * keyword</span>
+</code></pre></div>
+<p>Vector search is weighted higher (0.7) because it understands <strong>meaning</strong>, not just word matching. But keyword search (0.3) helps catch exact matches that vector search might miss.</p>
+<h3 id="search-result-structure">Search Result Structure<a class="headerlink" href="#search-result-structure" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">MemorySearchResult</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">        </span><span class="c1">// &quot;memory/2026-03-10.md&quot;</span>
+<span class="w">  </span><span class="nx">startLine</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">   </span><span class="c1">// Line 15</span>
+<span class="w">  </span><span class="nx">endLine</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">     </span><span class="c1">// Line 28</span>
+<span class="w">  </span><span class="nx">score</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">       </span><span class="c1">// 0.82</span>
+<span class="w">  </span><span class="nx">snippet</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">     </span><span class="c1">// Truncated to 700 chars</span>
+<span class="w">  </span><span class="nx">source</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;memory&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;sessions&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">citation?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">   </span><span class="c1">// Optional source attribution</span>
+<span class="p">};</span>
+</code></pre></div>
+<hr />
+<h2 id="part-5-ranking-algorithms-deciding-whats-best">Part 5: Ranking Algorithms (Deciding What's Best)<a class="headerlink" href="#part-5-ranking-algorithms-deciding-whats-best" title="Permanent link">&para;</a></h2>
+<h3 id="query-expansion-making-search-smarter">Query Expansion — Making Search Smarter<a class="headerlink" href="#query-expansion-making-search-smarter" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/memory/query-expansion.ts</code> (810 lines)</strong></p>
+<p>Before searching, the query is cleaned up and expanded:</p>
+<div class="language-text highlight"><pre><span></span><code>Input: &quot;that thing we discussed about the API&quot;
+         │
+Step 1: Tokenize
+  → [&quot;that&quot;, &quot;thing&quot;, &quot;we&quot;, &quot;discussed&quot;, &quot;about&quot;, &quot;the&quot;, &quot;API&quot;]
+         │
+Step 2: Remove stop words (language-aware!)
+  → [&quot;discussed&quot;, &quot;API&quot;]
+         │
+Step 3: Filter invalid keywords
+  (&lt; 3 chars, numbers only, punctuation only)
+  → [&quot;discussed&quot;, &quot;API&quot;]
+         │
+Step 4: Deduplicate
+  → [&quot;discussed&quot;, &quot;API&quot;]
+</code></pre></div>
+<p><strong>Multilingual stop words</strong> — The system detects the language and applies appropriate filtering:
+- <strong>English</strong>: "the", "is", "that", "we", "about", "thing" etc.
+- <strong>Chinese</strong>: Character n-grams (unigrams + bigrams for phrase matching)
+- <strong>Japanese</strong>: Mix of kanji, hiragana, katakana handling
+- <strong>Korean</strong>: Strip trailing particles (정렬 → 정)
+- <strong>Arabic, Spanish, Portuguese</strong>: Language-specific stop words</p>
+<h3 id="maximal-marginal-relevance-mmr-diversity-ranking">Maximal Marginal Relevance (MMR) — Diversity Ranking<a class="headerlink" href="#maximal-marginal-relevance-mmr-diversity-ranking" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/memory/mmr.ts</code> (198 lines)</strong></p>
+<p><strong>Problem:</strong> Without MMR, if you search "deployment configuration," you might get 6 results that all say roughly the same thing (because they're all similar to the query AND to each other).</p>
+<p><strong>Solution:</strong> MMR balances <strong>relevance</strong> (how well does this match the query?) with <strong>diversity</strong> (how different is this from results we've already picked?).</p>
+<div class="language-text highlight"><pre><span></span><code>Algorithm:
+1. Start with the highest-scoring result
+2. For each remaining slot:
+   a. For each candidate:
+      - Compute: MMR = λ × relevance - (1-λ) × max_similarity_to_already_selected
+   b. Pick the candidate with the highest MMR score
+3. Repeat until we have enough results
+
+Where:
+  λ = 0.7 (default) — higher = more relevant, lower = more diverse
+  similarity = Jaccard similarity on tokenized text
+</code></pre></div>
+<p><strong>Jaccard similarity</strong> measures overlap between two sets of tokens:
+<div class="language-text highlight"><pre><span></span><code>Jaccard(A, B) = |words in both A and B| / |words in A or B|
+</code></pre></div></p>
+<p><strong>Example:</strong>
+- Result 1: "Deploy to server 10.0.0.5 using SSH" (score: 0.9)
+- Result 2: "Deploy to server 10.0.0.5 via SSH key" (score: 0.88) — very similar to #1!
+- Result 3: "Server configuration uses nginx proxy" (score: 0.75) — different info</p>
+<p>Without MMR: Returns #1, #2, #3 (two near-duplicates)
+With MMR: Returns #1, #3, then maybe #2 (diverse first, then fill)</p>
+<h3 id="temporal-decay-recency-boosting">Temporal Decay — Recency Boosting<a class="headerlink" href="#temporal-decay-recency-boosting" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/memory/temporal-decay.ts</code> (166 lines)</strong></p>
+<p><strong>Problem:</strong> A memory from 6 months ago about "server configuration" shouldn't rank as highly as one from yesterday — the newer one is more likely to be current.</p>
+<p><strong>Solution:</strong> Exponential decay based on age:</p>
+<div class="language-text highlight"><pre><span></span><code>Decay Multiplier = e^(-λ × ageInDays)
+
+Where λ = ln(2) / halfLifeDays
+Default halfLifeDays = 30
+</code></pre></div>
+<p><strong>What this means in practice:</strong>
+- Today's memory: multiplier = 1.0 (full score)
+- 30-day-old memory: multiplier ≈ 0.5 (half score)
+- 60-day-old memory: multiplier ≈ 0.25 (quarter score)
+- 90-day-old memory: multiplier ≈ 0.125 (eighth of score)</p>
+<p><strong>How timestamps are determined:</strong>
+1. Dated files (<code>memory/2026-03-10.md</code>): date extracted from filename
+2. Evergreen files (<code>MEMORY.md</code>, undated): <strong>no decay applied</strong> — they're permanently relevant
+3. Other files: file modification time (mtime)</p>
+<h3 id="the-full-search-pipeline-putting-it-all-together">The Full Search Pipeline (Putting It All Together)<a class="headerlink" href="#the-full-search-pipeline-putting-it-all-together" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>User asks: &quot;What&#39;s our deployment process?&quot;
+         │
+1. Normalize &amp; clean query
+         │
+2. Extract keywords: [&quot;deployment&quot;, &quot;process&quot;]
+         │
+3. PARALLEL:
+   ├─→ Embed query → [1536 floats via OpenAI]
+   │   └─→ Vector search: top 200 candidates (cosine similarity)
+   │
+   └─→ FTS query: &quot;\&quot;deployment\&quot; AND \&quot;process\&quot;&quot;
+       └─→ Keyword search: top 200 candidates (BM25)
+         │
+4. Hybrid merge: score = 0.7 × vector + 0.3 × keyword
+         │
+5. Temporal decay: multiply by age-based factor
+   - memory/2026-03-12.md (1 day old) → × 0.98
+   - memory/2026-02-10.md (31 days) → × 0.49
+   - MEMORY.md (evergreen) → × 1.0
+         │
+6. MMR re-ranking: maximize relevance + diversity
+         │
+7. Filter: score ≥ 0.35
+         │
+8. Return top 6 results
+         │
+9. Inject into AI context as &lt;memory_search_results&gt;
+</code></pre></div>
+<hr />
+<h2 id="part-6-memory-extensions-plugin-based-backends">Part 6: Memory Extensions (Plugin-Based Backends)<a class="headerlink" href="#part-6-memory-extensions-plugin-based-backends" title="Permanent link">&para;</a></h2>
+<h3 id="memory-core-extension">memory-core Extension<a class="headerlink" href="#memory-core-extension" title="Permanent link">&para;</a></h3>
+<p><strong>Location: <code>extensions/memory-core/</code></strong></p>
+<p>This is the <strong>default memory plugin</strong>. It's a thin wrapper that provides:
+- <code>memory_search</code> tool — Semantic search for memory files
+- <code>memory_get</code> tool — Read a specific snippet from a memory file
+- CLI command: <code>openclaw memory</code> (status, index, search)</p>
+<p>It delegates all real work to the core <code>MemoryIndexManager</code> via the plugin runtime API.</p>
+<h3 id="memory-lancedb-extension">memory-lancedb Extension<a class="headerlink" href="#memory-lancedb-extension" title="Permanent link">&para;</a></h3>
+<p><strong>Location: <code>extensions/memory-lancedb/</code></strong></p>
+<p>This is an <strong>alternative memory plugin</strong> using LanceDB (a vector database) instead of SQLite-vec. It adds features the core memory doesn't have:</p>
+<p><strong>Auto-Recall:</strong> Before the AI starts thinking, this plugin automatically searches memory for relevant context and injects it:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// Hook: before_agent_start</span>
+<span class="mf">1.</span><span class="w"> </span><span class="nx">Extract</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">user</span><span class="err">&#39;</span><span class="nx">s</span><span class="w"> </span><span class="nx">latest</span><span class="w"> </span><span class="nx">message</span>
+<span class="mf">2.</span><span class="w"> </span><span class="nx">Embed</span><span class="w"> </span><span class="nx">it</span>
+<span class="mf">3.</span><span class="w"> </span><span class="nx">Search</span><span class="w"> </span><span class="nx">LanceDB</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">top</span><span class="w"> </span><span class="mf">3</span><span class="w"> </span><span class="nx">matching</span><span class="w"> </span><span class="nx">memories</span>
+<span class="mf">4.</span><span class="w"> </span><span class="nx">Inject</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">relevant</span><span class="o">-</span><span class="nx">memories</span><span class="o">&gt;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">context</span>
+</code></pre></div>
+<p><strong>Auto-Capture:</strong> After the AI finishes, this plugin analyzes the conversation and saves important information:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// Hook: agent_end</span>
+<span class="mf">1.</span><span class="w"> </span><span class="nx">Scan</span><span class="w"> </span><span class="nx">all</span><span class="w"> </span><span class="nx">messages</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s2">&quot;trigger patterns&quot;</span>
+<span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="s2">&quot;remember&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;prefer&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;important&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;always&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;never&quot;</span>
+<span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nx">Phone</span><span class="w"> </span><span class="nx">numbers</span><span class="p">,</span><span class="w"> </span><span class="nx">emails</span>
+<span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="s2">&quot;my X is&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;is my&quot;</span>
+<span class="mf">2.</span><span class="w"> </span><span class="nx">Filter</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="nx">noise</span><span class="w"> </span><span class="p">(</span><span class="nx">emoji</span><span class="o">-</span><span class="nx">heavy</span><span class="p">,</span><span class="w"> </span><span class="nx">system</span><span class="o">-</span><span class="nx">generated</span><span class="p">,</span><span class="w"> </span><span class="nx">too</span><span class="w"> </span><span class="kr">short</span><span class="p">)</span>
+<span class="mf">3.</span><span class="w"> </span><span class="nx">Check</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">duplicates</span><span class="w"> </span><span class="p">(</span><span class="mf">0.95</span><span class="w"> </span><span class="nx">similarity</span><span class="w"> </span><span class="nx">threshold</span><span class="p">)</span>
+<span class="mf">4.</span><span class="w"> </span><span class="nx">Store</span><span class="w"> </span><span class="nx">top</span><span class="w"> </span><span class="mf">3</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">memories</span><span class="w"> </span><span class="kd">with</span><span class="w"> </span><span class="nx">categories</span>
+</code></pre></div>
+<p><strong>Memory Categories:</strong>
+- <code>preference</code> — "I prefer dark mode"
+- <code>fact</code> — "The server runs Ubuntu 22.04"
+- <code>decision</code> — "We decided to use PostgreSQL"
+- <code>entity</code> — "John's phone is 555-0123"
+- <code>other</code> — Everything else</p>
+<p><strong>Memory Entry Schema:</strong>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">MemoryEntry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">          </span><span class="c1">// UUID</span>
+<span class="w">  </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">        </span><span class="c1">// The memory content</span>
+<span class="w">  </span><span class="nx">vector</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">[];</span><span class="w">    </span><span class="c1">// Embedding vector</span>
+<span class="w">  </span><span class="nx">importance</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">  </span><span class="c1">// 0 to 1</span>
+<span class="w">  </span><span class="nx">category</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">    </span><span class="c1">// &quot;preference&quot;, &quot;fact&quot;, etc.</span>
+<span class="w">  </span><span class="nx">createdAt</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">   </span><span class="c1">// Timestamp</span>
+<span class="p">};</span>
+</code></pre></div></p>
+<p><strong>Tools Provided:</strong>
+- <code>memory_recall</code> — Search long-term memories
+- <code>memory_store</code> — Save information to memory
+- <code>memory_forget</code> — Delete memories (GDPR-compliant!)</p>
+<p><strong>Prompt Injection Protection:</strong> The plugin escapes special characters and wraps injected memories in <code>&lt;relevant-memories&gt;</code> tags with warnings to prevent memory content from being treated as instructions.</p>
+<h3 id="the-qmd-backend">The QMD Backend<a class="headerlink" href="#the-qmd-backend" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/memory/qmd-manager.ts</code> (2,069 lines — the largest source file!)</strong></p>
+<p>QMD (Query Markdown) is an <strong>alternative backend</strong> that uses an external CLI tool (<code>qmd</code>) instead of the built-in SQLite system.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">MemoryBackend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;builtin&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;qmd&quot;</span><span class="p">;</span>
+</code></pre></div>
+<p><strong>QMD Features:</strong>
+- External process for search (spawns <code>qmd</code> CLI per query)
+- Combines BM25 keyword search + vector search
+- MCP runtime integration
+- Multiple collections (memory, sessions, custom)
+- Default search timeout: 4 seconds
+- Update interval: 5 minutes</p>
+<p><strong>When to use QMD:</strong> It's designed for users who want a local-first search sidecar that runs independently of the OpenClaw process. The built-in backend is fine for most users.</p>
+<h3 id="backend-selection">Backend Selection<a class="headerlink" href="#backend-selection" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/memory/search-manager.ts</code> (254 lines)</strong></p>
+<p>The <code>FallbackMemoryManager</code> wraps the primary backend with automatic fallback:</p>
+<div class="language-text highlight"><pre><span></span><code>1. Try QMD backend (if configured)
+       │ (fails?)
+2. Fall back to builtin SQLite backend
+       │ (also fails?)
+3. Return null (no memory available)
+</code></pre></div>
+<hr />
+<h2 id="part-7-configuration-cli">Part 7: Configuration &amp; CLI<a class="headerlink" href="#part-7-configuration-cli" title="Permanent link">&para;</a></h2>
+<h3 id="memory-configuration">Memory Configuration<a class="headerlink" href="#memory-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/memory-search.ts</code> (407 lines)</strong></p>
+<p>The full resolved configuration:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ResolvedMemorySearchConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">enabled</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// What to index</span>
+<span class="w">  </span><span class="nx">sources</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;sessions&quot;</span><span class="p">)[];</span>
+<span class="w">  </span><span class="nx">extraPaths</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">              </span><span class="c1">// Additional directories to index</span>
+
+<span class="w">  </span><span class="c1">// Embedding provider</span>
+<span class="w">  </span><span class="nx">provider</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;openai&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;gemini&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;voyage&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;mistral&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;ollama&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;local&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;auto&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">model</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">fallback</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;openai&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;gemini&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;local&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;voyage&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;mistral&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;ollama&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Storage</span>
+<span class="w">  </span><span class="nx">store</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">driver</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;sqlite&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                    </span><span class="c1">// ~/.openclaw/memory/{agentId}.sqlite</span>
+<span class="w">    </span><span class="nx">vector</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">enabled</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">extensionPath?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">        </span><span class="c1">// Path to sqlite-vec binary</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Chunking</span>
+<span class="w">  </span><span class="nx">chunking</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="kt">400</span><span class="p">;</span><span class="w">                     </span><span class="c1">// Chunk size</span>
+<span class="w">    </span><span class="nx">overlap</span><span class="o">:</span><span class="w"> </span><span class="kt">80</span><span class="p">;</span><span class="w">                     </span><span class="c1">// Overlap between chunks</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Search</span>
+<span class="w">  </span><span class="nx">query</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">maxResults</span><span class="o">:</span><span class="w"> </span><span class="kt">6</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">minScore</span><span class="o">:</span><span class="w"> </span><span class="kt">0.35</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">hybrid</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">enabled</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">vectorWeight</span><span class="o">:</span><span class="w"> </span><span class="kt">0.7</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">textWeight</span><span class="o">:</span><span class="w"> </span><span class="kt">0.3</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">candidateMultiplier</span><span class="o">:</span><span class="w"> </span><span class="kt">4</span><span class="p">;</span><span class="w">        </span><span class="c1">// Search 4× more candidates than needed</span>
+<span class="w">      </span><span class="nx">mmr</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">enabled</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"> </span><span class="nx">lambda</span><span class="o">:</span><span class="w"> </span><span class="kt">0.7</span><span class="w"> </span><span class="p">};</span>
+<span class="w">      </span><span class="nx">temporalDecay</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">enabled</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"> </span><span class="nx">halfLifeDays</span><span class="o">:</span><span class="w"> </span><span class="kt">30</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Sync</span>
+<span class="w">  </span><span class="nx">sync</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">onSessionStart</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">onSearch</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">               </span><span class="c1">// Auto-sync before searching</span>
+<span class="w">    </span><span class="nx">watch</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">                  </span><span class="c1">// Watch filesystem for changes</span>
+<span class="w">    </span><span class="nx">watchDebounceMs</span><span class="o">:</span><span class="w"> </span><span class="kt">1500</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">intervalMinutes</span><span class="o">:</span><span class="w"> </span><span class="kt">0</span><span class="p">;</span><span class="w">              </span><span class="c1">// Periodic sync interval</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Batch</span>
+<span class="w">  </span><span class="nx">batch</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">enabled</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">wait</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">concurrency</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">pollIntervalMs</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">timeoutMs</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Embedding cache</span>
+<span class="w">  </span><span class="nx">cache</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">enabled</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">maxEntries?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Multimodal</span>
+<span class="w">  </span><span class="nx">multimodal</span><span class="o">:</span><span class="w"> </span><span class="kt">MemoryMultimodalSettings</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="example-config">Example Config<a class="headerlink" href="#example-config" title="Permanent link">&para;</a></h3>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">agents</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">    </span><span class="nv">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;main&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nv">memorySearch</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">enabled</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nv">provider</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;openai&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nv">sources</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;memory&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;sessions&quot;</span><span class="p">],</span>
+<span class="w">      </span><span class="nv">extraPaths</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;~/notes&quot;</span><span class="p">],</span>
+<span class="w">      </span><span class="nv">query</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nv">maxResults</span><span class="p">:</span><span class="w"> </span><span class="mf">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nv">minScore</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span>
+<span class="w">        </span><span class="nv">hybrid</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nv">mmr</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">enabled</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w"> </span><span class="nv">lambda</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nv">temporalDecay</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">enabled</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w"> </span><span class="nv">halfLifeDays</span><span class="p">:</span><span class="w"> </span><span class="mf">14</span><span class="w"> </span><span class="p">},</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">  </span><span class="p">}],</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="cli-commands">CLI Commands<a class="headerlink" href="#cli-commands" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/cli/memory-cli.ts</code> (818 lines)</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span class="c1"># Check memory status for all agents</span>
+openclaw<span class="w"> </span>memory<span class="w"> </span>status
+openclaw<span class="w"> </span>memory<span class="w"> </span>status<span class="w"> </span>--deep<span class="w">      </span><span class="c1"># Probe embedding provider availability</span>
+openclaw<span class="w"> </span>memory<span class="w"> </span>status<span class="w"> </span>--json<span class="w">      </span><span class="c1"># Machine-readable output</span>
+
+<span class="c1"># Force re-index</span>
+openclaw<span class="w"> </span>memory<span class="w"> </span>index
+openclaw<span class="w"> </span>memory<span class="w"> </span>index<span class="w"> </span>--force<span class="w">      </span><span class="c1"># Full reindex (not incremental)</span>
+
+<span class="c1"># Search memory</span>
+openclaw<span class="w"> </span>memory<span class="w"> </span>search<span class="w"> </span><span class="s2">&quot;deployment process&quot;</span>
+openclaw<span class="w"> </span>memory<span class="w"> </span>search<span class="w"> </span>--max-results<span class="w"> </span><span class="m">20</span><span class="w"> </span>--min-score<span class="w"> </span><span class="m">0</span>.2<span class="w"> </span>--json
+</code></pre></div>
+<p>The status command shows:
+- Provider + model in use
+- Files indexed / total files
+- Chunks indexed
+- Sources active (memory/sessions)
+- Store path
+- Vector extension status (loaded/missing)
+- FTS status
+- Cache status (entries count)
+- Batch processing status
+- Fallback reason (if degraded)</p>
+<h3 id="gateway-methods">Gateway Methods<a class="headerlink" href="#gateway-methods" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>doctor.memory.status    — Get memory health report
+skills.status           — Includes memory tool availability
+</code></pre></div>
+<hr />
+<h2 id="how-layer-7-evolved-git-history">How Layer 7 Evolved (Git History)<a class="headerlink" href="#how-layer-7-evolved-git-history" title="Permanent link">&para;</a></h2>
+<h3 id="the-genesis-week-january-12-18-2026">The Genesis Week — January 12-18, 2026<a class="headerlink" href="#the-genesis-week-january-12-18-2026" title="Permanent link">&para;</a></h3>
+<p>The memory system was built in a <strong>single intense week</strong> by Peter Steinberger.</p>
+<p><strong>January 12 — <code>bf11a42c3</code></strong> — <code>feat: add memory vector search</code></p>
+<p>The foundational commit. Created the entire memory system from scratch:
+- <code>src/memory/manager.ts</code> — the core MemoryIndexManager
+- OpenAI embedding support
+- Memory CLI commands
+- Memory search tool for agents
+- Configuration system
+- 1,300+ lines of new code</p>
+<p><strong>January 15 — <code>cb78fa46a</code></strong> — Made <code>node-llama-cpp</code> optional. The local embedding model was too heavy as a required dependency. Now it's a fallback.</p>
+<p><strong>January 17</strong> — Three major features in one day:
+- <code>5a08471dc</code> — <strong>sqlite-vec acceleration</strong> — Vector search went from loading all embeddings into memory to using a proper vector index. Massive speed improvement for large memory stores.
+- <code>a31a79396</code> — <strong>OpenAI batch indexing</strong> — Batch embedding via the OpenAI Batch API (+327 lines in manager.ts)
+- Multiple fixes: split embedding batches, parallelize indexing, session memory source</p>
+<p><strong>January 18</strong> — The system expanded dramatically:
+- <code>be7191879</code> — <strong>Gemini embeddings + auto provider selection</strong> — Second embedding provider. Created <code>embeddings-gemini.ts</code> and <code>embeddings-openai.ts</code> (previously everything was in <code>embeddings.ts</code>). The auto-selection logic was born.
+- <code>946477413</code> — <strong>Gemini batch embedding</strong> — Gemini batch support
+- Memory extensions created: <code>memory-core</code> and <code>memory-lancedb</code> plugins</p>
+<h3 id="the-qmd-backend-january-27-2026">The QMD Backend — January 27, 2026<a class="headerlink" href="#the-qmd-backend-january-27-2026" title="Permanent link">&para;</a></h3>
+<p><strong><code>5d3af3bc6</code></strong> — <code>feat(memory): Implement new (opt-in) QMD memory backend</code></p>
+<p>Author: Vignesh Natarajan. A major milestone introducing QMD as an alternative to the built-in memory:
+- Created <code>qmd-manager.ts</code> (612 lines initially, now 2,069)
+- Created <code>backend-config.ts</code> (245 lines)
+- Expanded <code>search-manager.ts</code>
+- Extracted <code>types.ts</code></p>
+<p>This was the first time the memory system had <strong>two backends</strong>. The architecture was refactored to support a common <code>MemorySearchManager</code> interface with pluggable implementations.</p>
+<h3 id="search-quality-revolution-january-26-to-february-19-2026">Search Quality Revolution — January 26 to February 19, 2026<a class="headerlink" href="#search-quality-revolution-january-26-to-february-19-2026" title="Permanent link">&para;</a></h3>
+<p>A community contributor, <strong>Rodrigo Uroz</strong>, transformed search quality:</p>
+<p><strong>January 26 — <code>fa9420069</code></strong> — <strong>MMR re-ranking</strong> — Created <code>mmr.ts</code> (198 lines) with Jaccard similarity and the MMR algorithm. This was the first step beyond "just sort by score."</p>
+<p><strong>February 10 — <code>6b3e0710f</code></strong> — <strong>Temporal decay</strong> — Created <code>temporal-decay.ts</code> (166 lines). Exponential decay with configurable half-life. 1,372 insertions across 13 files — a significant integration effort.</p>
+<p><strong>February 19 — <code>a87b5fb00</code></strong> — Schema and config additions for MMR + temporal decay.</p>
+<h3 id="voyage-ai-february-7-2026">Voyage AI — February 7, 2026<a class="headerlink" href="#voyage-ai-february-7-2026" title="Permanent link">&para;</a></h3>
+<p><strong><code>6965a2cc9</code></strong> — <code>feat(memory): native Voyage AI support</code></p>
+<p>Author: Jake (mcinteerj). Third embedding provider. Created:
+- <code>embeddings-voyage.ts</code> (86 lines)
+- <code>batch-voyage.ts</code> (363 lines)
+- 879 insertions across 11 files</p>
+<h3 id="the-great-decomposition-february-13-17-2026">The Great Decomposition — February 13-17, 2026<a class="headerlink" href="#the-great-decomposition-february-13-17-2026" title="Permanent link">&para;</a></h3>
+<p>The memory system had grown too large. Two major refactors broke it apart:</p>
+<p><strong>February 13 — <code>4c401d336</code></strong> — <code>refactor(memory): extract manager sync and embedding ops</code></p>
+<p>Split the monolithic <code>manager.ts</code> (which had grown to 1,777+ lines) into:
+- <code>manager-embedding-ops.ts</code> (803 lines) — embedding generation, caching, batch processing
+- <code>manager-sync-ops.ts</code> (998 lines) — file watching, sync pipeline, indexing</p>
+<p>The <code>MemoryIndexManager</code> now extends <code>MemoryManagerEmbeddingOps</code> which extends <code>MemoryManagerSyncOps</code> — a clear inheritance chain separating concerns.</p>
+<p><strong>February 17 — Two refactors:</strong>
+- <code>ddef3cadb</code> — Removed prototype mixing pattern (a code smell)
+- <code>9bfd3ca19</code> — Consolidated batch helpers into shared infrastructure: <code>batch-runner.ts</code>, <code>batch-upload.ts</code>, <code>embeddings-remote-client.ts</code></p>
+<h3 id="query-expansion-goes-multilingual-february-16-22-2026">Query Expansion Goes Multilingual — February 16-22, 2026<a class="headerlink" href="#query-expansion-goes-multilingual-february-16-22-2026" title="Permanent link">&para;</a></h3>
+<p><strong>February 16 — <code>de98782c3</code></strong> — <code>feat: LLM-based query expansion for FTS mode</code></p>
+<p>Author: kangxi. Created <code>query-expansion.ts</code> (357 lines initially) with keyword extraction for FTS-only mode. English and Chinese stop words.</p>
+<p><strong>February 22</strong> — Four language PRs merged on the same day:
+- Korean support (Andrew Jeon)
+- Japanese support (Vincent Koc)
+- Spanish and Portuguese stop words
+- Arabic stop words</p>
+<p>The query expansion system went from English-only to <strong>7 languages</strong> in a single day.</p>
+<h3 id="more-embedding-providers-february-march-2026">More Embedding Providers — February-March 2026<a class="headerlink" href="#more-embedding-providers-february-march-2026" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Provider</th>
+<th>Author</th>
+<th>Commit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Feb 22</td>
+<td><strong>Mistral</strong></td>
+<td>Vincent Koc</td>
+<td><code>d92ba4f8a</code></td>
+</tr>
+<tr>
+<td>Mar 3</td>
+<td><strong>Ollama</strong></td>
+<td>nico-hoff</td>
+<td><code>3eec79bd6</code></td>
+</tr>
+<tr>
+<td>Mar 11</td>
+<td><strong>Gemini v2 preview</strong></td>
+<td>Bill Chirico</td>
+<td><code>60aed9534</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="multimodal-memory-march-11-2026">Multimodal Memory — March 11, 2026<a class="headerlink" href="#multimodal-memory-march-11-2026" title="Permanent link">&para;</a></h3>
+<p><strong><code>d79ca5296</code></strong> — <code>Memory: add multimodal image and audio indexing</code></p>
+<p>Author: Gustavo Madeira Santana. Created <code>multimodal.ts</code> (118 lines) and <code>embedding-inputs.ts</code> (34 lines). Extended Gemini embeddings to handle images and audio files.</p>
+<h3 id="post-compaction-memory-sync-march-12-2026">Post-Compaction Memory Sync — March 12, 2026<a class="headerlink" href="#post-compaction-memory-sync-march-12-2026" title="Permanent link">&para;</a></h3>
+<p><strong><code>143e593ab</code></strong> — <code>Compaction Runner: wire post-compaction memory sync</code></p>
+<p>Author: Rodrigo Uroz. When the context engine (Layer 8) compacts conversation history, the memory system now automatically re-syncs to capture any information that was summarized away.</p>
+<hr />
+<h2 id="architecture-summary">Architecture Summary<a class="headerlink" href="#architecture-summary" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│                     Memory Files                             │
+│  MEMORY.md  memory/*.md  sessions/*.jsonl  extra paths      │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │    File Watcher + Sync     │
+         │                            │
+         │  chokidar watches memory/  │
+         │  Session transcript events │
+         │  Periodic interval (5min)  │
+         │  Debounce: 1.5 seconds     │
+         └─────────────┬─────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │     Chunking Pipeline      │
+         │                            │
+         │  Split text: 400 tokens    │
+         │  Overlap: 80 tokens        │
+         │  Hash for deduplication    │
+         └─────────────┬─────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │   Embedding Generation     │
+         │                            │
+         │  6 providers:              │
+         │  OpenAI, Gemini, Voyage,   │
+         │  Mistral, Ollama, Local    │
+         │                            │
+         │  Auto-selection + fallback │
+         │  Batch API support         │
+         │  Embedding cache (LRU)     │
+         └─────────────┬─────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │      SQLite Storage        │
+         │                            │
+         │  chunks table (text+embed) │
+         │  chunks_fts (BM25 FTS5)    │
+         │  chunks_vec (sqlite-vec)   │
+         │  embedding_cache (LRU)     │
+         └─────────────┬─────────────┘
+                       │
+                  (on search)
+                       │
+         ┌─────────────┴──────────────────────────┐
+         │          Search Pipeline                 │
+         │                                          │
+         │  ┌──────────┐    ┌──────────────┐       │
+         │  │  Vector   │    │   Keyword    │       │
+         │  │  Search   │    │   Search     │       │
+         │  │ (cosine)  │    │   (BM25)     │       │
+         │  └─────┬─────┘    └──────┬───────┘       │
+         │        │                 │                │
+         │        └────────┬────────┘                │
+         │                 │                         │
+         │         Hybrid Merge                      │
+         │     (0.7 vector + 0.3 keyword)            │
+         │                 │                         │
+         │         Temporal Decay                    │
+         │     (exp decay, 30-day half-life)         │
+         │                 │                         │
+         │         MMR Re-ranking                    │
+         │     (λ=0.7 relevance/diversity)           │
+         │                 │                         │
+         │         Filter minScore ≥ 0.35            │
+         │         Return top 6 results              │
+         └─────────────────────────────────────────┘
+
+Alternative Backends:
+  ├── QMD (external CLI, local-first sidecar)
+  └── LanceDB (plugin, auto-recall/capture)
+</code></pre></div>
+<hr />
+<h2 id="key-files-reference">Key Files Reference<a class="headerlink" href="#key-files-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/memory/manager.ts</code></td>
+<td>840</td>
+<td>Core MemoryIndexManager class</td>
+</tr>
+<tr>
+<td><code>src/memory/manager-sync-ops.ts</code></td>
+<td>1,391</td>
+<td>File watching, sync pipeline, indexing</td>
+</tr>
+<tr>
+<td><code>src/memory/manager-embedding-ops.ts</code></td>
+<td>925</td>
+<td>Embedding generation, caching, batch processing</td>
+</tr>
+<tr>
+<td><code>src/memory/qmd-manager.ts</code></td>
+<td>2,069</td>
+<td>QMD alternative backend (largest file!)</td>
+</tr>
+<tr>
+<td><code>src/memory/query-expansion.ts</code></td>
+<td>810</td>
+<td>Multilingual keyword extraction</td>
+</tr>
+<tr>
+<td><code>src/memory/embeddings.ts</code></td>
+<td>~300</td>
+<td>Provider orchestration + auto-selection</td>
+</tr>
+<tr>
+<td><code>src/memory/embeddings-openai.ts</code></td>
+<td>~100</td>
+<td>OpenAI embedding provider</td>
+</tr>
+<tr>
+<td><code>src/memory/embeddings-gemini.ts</code></td>
+<td>~200</td>
+<td>Gemini embedding provider (multimodal)</td>
+</tr>
+<tr>
+<td><code>src/memory/embeddings-voyage.ts</code></td>
+<td>~90</td>
+<td>Voyage AI embedding provider</td>
+</tr>
+<tr>
+<td><code>src/memory/embeddings-mistral.ts</code></td>
+<td>~50</td>
+<td>Mistral embedding provider</td>
+</tr>
+<tr>
+<td><code>src/memory/embeddings-ollama.ts</code></td>
+<td>~140</td>
+<td>Ollama local embedding provider</td>
+</tr>
+<tr>
+<td><code>src/memory/mmr.ts</code></td>
+<td>198</td>
+<td>Maximal Marginal Relevance algorithm</td>
+</tr>
+<tr>
+<td><code>src/memory/temporal-decay.ts</code></td>
+<td>166</td>
+<td>Exponential recency decay</td>
+</tr>
+<tr>
+<td><code>src/memory/hybrid.ts</code></td>
+<td>~160</td>
+<td>Hybrid search merging (vector + keyword)</td>
+</tr>
+<tr>
+<td><code>src/memory/search-manager.ts</code></td>
+<td>254</td>
+<td>Backend abstraction + fallback</td>
+</tr>
+<tr>
+<td><code>src/memory/backend-config.ts</code></td>
+<td>355</td>
+<td>Backend selection (builtin vs QMD)</td>
+</tr>
+<tr>
+<td><code>src/memory/internal.ts</code></td>
+<td>~470</td>
+<td>Chunking, cosine similarity, file scanning</td>
+</tr>
+<tr>
+<td><code>src/memory/session-files.ts</code></td>
+<td>~200</td>
+<td>Session transcript indexing</td>
+</tr>
+<tr>
+<td><code>src/memory/multimodal.ts</code></td>
+<td>118</td>
+<td>Image/audio indexing</td>
+</tr>
+<tr>
+<td><code>src/memory/types.ts</code></td>
+<td>~80</td>
+<td>Core type definitions</td>
+</tr>
+<tr>
+<td><code>src/memory/batch-openai.ts</code></td>
+<td>~200</td>
+<td>OpenAI batch embedding</td>
+</tr>
+<tr>
+<td><code>src/memory/batch-gemini.ts</code></td>
+<td>~200</td>
+<td>Gemini batch embedding</td>
+</tr>
+<tr>
+<td><code>src/memory/batch-voyage.ts</code></td>
+<td>~360</td>
+<td>Voyage batch embedding</td>
+</tr>
+<tr>
+<td><code>src/memory/batch-runner.ts</code></td>
+<td>~150</td>
+<td>Generic batch orchestration</td>
+</tr>
+<tr>
+<td><code>src/agents/memory-search.ts</code></td>
+<td>407</td>
+<td>Agent-level memory config resolution</td>
+</tr>
+<tr>
+<td><code>src/agents/tools/memory-tool.ts</code></td>
+<td>~200</td>
+<td>memory_search and memory_get agent tools</td>
+</tr>
+<tr>
+<td><code>src/cli/memory-cli.ts</code></td>
+<td>818</td>
+<td>CLI commands (status, index, search)</td>
+</tr>
+<tr>
+<td><code>extensions/memory-core/index.ts</code></td>
+<td>~50</td>
+<td>Default memory plugin</td>
+</tr>
+<tr>
+<td><code>extensions/memory-lancedb/index.ts</code></td>
+<td>~500</td>
+<td>LanceDB plugin with auto-recall/capture</td>
+</tr>
+<tr>
+<td><strong>Total: 99 files</strong></td>
+<td><strong>21,343 lines</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

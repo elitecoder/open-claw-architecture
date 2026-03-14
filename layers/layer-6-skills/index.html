@@ -1,0 +1,3027 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-5-ai-providers/">
+      
+      
+        <link rel="next" href="../layer-7-memory-system/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 6: Skills - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-6-skills-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 6: Skills
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 6?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-skill-discovery-finding-the-textbooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Skill Discovery (Finding the Textbooks)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Skill Discovery (Finding the Textbooks)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-does-openclaw-look-for-skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Does OpenClaw Look for Skills?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-discovery-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Discovery Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safety-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Safety Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-frontmatter-metadata-the-skills-id-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Frontmatter &amp; Metadata (The Skill's ID Card)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Frontmatter &amp; Metadata (The Skill&#39;s ID Card)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-in-a-skillmd-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's in a SKILL.md File?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skill-install-specifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Install Specifications
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-eligibility-filtering-can-this-skill-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Eligibility &amp; Filtering (Can This Skill Run?)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Eligibility &amp; Filtering (Can This Skill Run?)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-eligibility-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Eligibility Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-always-escape-hatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The "Always" Escape Hatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remote-eligibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remote Eligibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-prompt-injection-getting-skills-into-the-ais-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Prompt Injection (Getting Skills Into the AI's Brain)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Prompt Injection (Getting Skills Into the AI&#39;s Brain)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-skills-become-part-of-the-ais-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Skills Become Part of the AI's Instructions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-the-ai-uses-skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the AI Uses Skills
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-compaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Compaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skills-excluded-from-the-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills Excluded From the Prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#snapshot-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Snapshot Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-configuration-environment-per-skill-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Configuration &amp; Environment (Per-Skill Settings)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Configuration &amp; Environment (Per-Skill Settings)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skill-config-in-configjson5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Config in config.json5
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variable-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variable Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-primaryenv-shortcut" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The primaryEnv Shortcut
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-the-53-bundled-skills-everything-pre-installed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: The 53 Bundled Skills (Everything Pre-Installed)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: The 53 Bundled Skills (Everything Pre-Installed)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skill-categories-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Categories at a Glance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detailed-skill-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailed Skill Guide
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skills-by-dependency-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills by Dependency Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skill-size-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Size Distribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-skill-security-protecting-against-bad-skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Skill Security (Protecting Against Bad Skills)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Skill Security (Protecting Against Bad Skills)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-security-scanner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Security Scanner
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capability-based-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capability-Based Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zip-slip-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zip Slip Prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-skill-slash-commands-user-invocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: Skill Slash Commands (User Invocation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 8: Skill Slash Commands (User Invocation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-commands-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How /commands Work
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-installation-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Installation System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-6-evolved-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 6 Evolved (Git History)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 6 Evolved (Git History)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-big-bang-december-20-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Big Bang — December 20, 2025
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-holiday-sprint-december-20-31-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Holiday Sprint — December 20-31, 2025
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-january-explosion-january-1-7-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The January Explosion — January 1-7, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-skill-creator-plugin-system-january-11-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Skill-Creator &amp; Plugin System — January 11, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-second-wave-january-18-to-february-19-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Second Wave — January 18 to February 19, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-routing-blocks-february-17-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Routing Blocks — February 17, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-security-hardening-february-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Security Hardening — February-March 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-naming-cascade-january-27-30-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Naming Cascade — January 27-30, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skill-removals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Removals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-agent-discovery-february-12-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Agent Discovery — February 12, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#latest-addition-march-14-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Latest Addition — March 14, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 6?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-skill-discovery-finding-the-textbooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Skill Discovery (Finding the Textbooks)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Skill Discovery (Finding the Textbooks)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-does-openclaw-look-for-skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Does OpenClaw Look for Skills?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-discovery-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Discovery Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safety-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Safety Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-frontmatter-metadata-the-skills-id-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Frontmatter &amp; Metadata (The Skill's ID Card)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Frontmatter &amp; Metadata (The Skill&#39;s ID Card)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-in-a-skillmd-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's in a SKILL.md File?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skill-install-specifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Install Specifications
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-eligibility-filtering-can-this-skill-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Eligibility &amp; Filtering (Can This Skill Run?)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Eligibility &amp; Filtering (Can This Skill Run?)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-eligibility-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Eligibility Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-always-escape-hatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The "Always" Escape Hatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remote-eligibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remote Eligibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-prompt-injection-getting-skills-into-the-ais-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Prompt Injection (Getting Skills Into the AI's Brain)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Prompt Injection (Getting Skills Into the AI&#39;s Brain)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-skills-become-part-of-the-ais-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Skills Become Part of the AI's Instructions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-the-ai-uses-skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the AI Uses Skills
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-compaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Compaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skills-excluded-from-the-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills Excluded From the Prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#snapshot-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Snapshot Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-configuration-environment-per-skill-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Configuration &amp; Environment (Per-Skill Settings)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Configuration &amp; Environment (Per-Skill Settings)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skill-config-in-configjson5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Config in config.json5
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variable-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variable Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-primaryenv-shortcut" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The primaryEnv Shortcut
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-the-53-bundled-skills-everything-pre-installed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: The 53 Bundled Skills (Everything Pre-Installed)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: The 53 Bundled Skills (Everything Pre-Installed)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skill-categories-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Categories at a Glance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detailed-skill-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailed Skill Guide
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skills-by-dependency-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills by Dependency Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skill-size-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Size Distribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-skill-security-protecting-against-bad-skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Skill Security (Protecting Against Bad Skills)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Skill Security (Protecting Against Bad Skills)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-security-scanner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Security Scanner
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capability-based-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capability-Based Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zip-slip-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zip Slip Prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-skill-slash-commands-user-invocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: Skill Slash Commands (User Invocation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 8: Skill Slash Commands (User Invocation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-commands-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How /commands Work
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-installation-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Installation System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-6-evolved-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 6 Evolved (Git History)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 6 Evolved (Git History)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-big-bang-december-20-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Big Bang — December 20, 2025
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-holiday-sprint-december-20-31-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Holiday Sprint — December 20-31, 2025
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-january-explosion-january-1-7-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The January Explosion — January 1-7, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-skill-creator-plugin-system-january-11-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Skill-Creator &amp; Plugin System — January 11, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-second-wave-january-18-to-february-19-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Second Wave — January 18 to February 19, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-routing-blocks-february-17-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Routing Blocks — February 17, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-security-hardening-february-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Security Hardening — February-March 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-naming-cascade-january-27-30-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Naming Cascade — January 27-30, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skill-removals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Removals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-agent-discovery-february-12-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Agent Discovery — February 12, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#latest-addition-march-14-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Latest Addition — March 14, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-6-skills-deep-dive">Layer 6: Skills — Deep Dive<a class="headerlink" href="#layer-6-skills-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-layer-6">What Is Layer 6?<a class="headerlink" href="#what-is-layer-6" title="Permanent link">&para;</a></h2>
+<p>If the AI provider (Layer 5) is the robot's brain, skills are its <strong>textbooks</strong>. They teach the robot how to do specific things — like controlling your lights, checking the weather, managing your GitHub PRs, or sending an iMessage.</p>
+<p>Here's the key insight: <strong>skills are NOT code</strong>. They're documentation files (<code>SKILL.md</code>) written in Markdown. The robot reads them, understands the instructions, and then uses the tools available to it (shell commands, APIs, etc.) to carry them out.</p>
+<p>Think of it like giving a smart person a recipe card. The person (the AI) already knows how to cook (use tools). The recipe card (the skill) just tells them what to make and how to make it. Take away the recipe card, and they can still cook — they just don't know that particular dish.</p>
+<p>This makes skills incredibly easy to create. You don't need to be a programmer. You just write instructions in plain English (with some YAML metadata), and the robot follows them.</p>
+<p>Layer 6 has <strong>six major parts</strong>:</p>
+<ol>
+<li><strong>Skill Discovery</strong> — Finding all available skill files</li>
+<li><strong>Frontmatter &amp; Metadata</strong> — The structured header of each SKILL.md</li>
+<li><strong>Eligibility &amp; Filtering</strong> — Deciding which skills are usable right now</li>
+<li><strong>Prompt Injection</strong> — How skills get into the AI's brain</li>
+<li><strong>Configuration &amp; Environment</strong> — Per-skill settings, API keys, env vars</li>
+<li><strong>The 53 Bundled Skills</strong> — Everything that comes pre-installed</li>
+</ol>
+<hr />
+<h2 id="part-1-skill-discovery-finding-the-textbooks">Part 1: Skill Discovery (Finding the Textbooks)<a class="headerlink" href="#part-1-skill-discovery-finding-the-textbooks" title="Permanent link">&para;</a></h2>
+<h3 id="where-does-openclaw-look-for-skills">Where Does OpenClaw Look for Skills?<a class="headerlink" href="#where-does-openclaw-look-for-skills" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/skills/workspace.ts</code> (~800 lines)</strong></p>
+<p>OpenClaw searches <strong>7 locations</strong> for skill directories, in precedence order (highest wins):</p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Location</th>
+<th>Example Path</th>
+<th>Who Uses It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 (highest)</td>
+<td>Workspace skills</td>
+<td><code>&lt;your-project&gt;/skills/</code></td>
+<td>Per-project skills</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Project agent skills</td>
+<td><code>&lt;your-project&gt;/.agents/skills/</code></td>
+<td>Per-project, shared across agents</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Personal agent skills</td>
+<td><code>~/.agents/skills/</code></td>
+<td>Your personal skills, all projects</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Managed skills</td>
+<td><code>~/.openclaw/skills/</code></td>
+<td>Curated by you, all agents</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Bundled skills</td>
+<td>(shipped with OpenClaw)</td>
+<td>The 53 built-in skills</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Extra directories</td>
+<td><code>skills.load.extraDirs</code> in config</td>
+<td>Explicitly configured paths</td>
+</tr>
+<tr>
+<td>7 (lowest)</td>
+<td>Plugin skills</td>
+<td>From extension manifests</td>
+<td>Plugins that ship skills</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Precedence matters for duplicates.</strong> If you have a <code>github</code> skill in both your workspace (<code>./skills/github/</code>) and the bundled skills, yours wins. This lets you override or customize any built-in skill.</p>
+<h3 id="how-discovery-works">How Discovery Works<a class="headerlink" href="#how-discovery-works" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>1. For each location (in precedence order):
+       │
+2.     List all child directories
+       │
+3.     For each directory:
+       │
+       ├── Does it contain a SKILL.md file?
+       │     │
+       │     Yes → Parse frontmatter, create SkillEntry
+       │     No  → Skip (not a skill)
+       │
+4.     Add to Map&lt;skillName, SkillEntry&gt;
+       │     (later entries DON&#39;T overwrite earlier ones — precedence!)
+       │
+5. Result: Deduplicated list of skills
+</code></pre></div>
+<h3 id="safety-limits">Safety Limits<a class="headerlink" href="#safety-limits" title="Permanent link">&para;</a></h3>
+<p>The discovery system has guardrails to prevent pathological scans:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">DEFAULT_MAX_CANDIDATES_PER_ROOT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">300</span><span class="p">;</span><span class="w">    </span><span class="c1">// Max subdirectories per location</span>
+<span class="nx">DEFAULT_MAX_SKILLS_LOADED_PER_SOURCE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">200</span><span class="p">;</span><span class="w"> </span><span class="c1">// Max skills per source</span>
+<span class="nx">DEFAULT_MAX_SKILL_FILE_BYTES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">256</span><span class="nx">_000</span><span class="p">;</span><span class="w">    </span><span class="c1">// Max SKILL.md file size (256KB)</span>
+</code></pre></div>
+<p>If a directory has more than 300 subdirectories, the scanner stops and logs a warning. This prevents someone from accidentally pointing the skill loader at their home directory.</p>
+<h3 id="path-security">Path Security<a class="headerlink" href="#path-security" title="Permanent link">&para;</a></h3>
+<p>All skill paths are resolved via <code>realpath()</code> to prevent <strong>symlink escape attacks</strong>. If a skill contains a symlink that points outside its root directory, the system catches it and refuses to load that skill. This was added after a security audit in February 2026.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">resolveContainedSkillPath</span><span class="p">(</span><span class="nx">root</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">skillDir</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">resolved</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">fs</span><span class="p">.</span><span class="nx">realpathSync</span><span class="p">(</span><span class="nx">skillDir</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">resolved</span><span class="p">.</span><span class="nx">startsWith</span><span class="p">(</span><span class="nx">root</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Symlink escape detected! This skill is trying to read files</span>
+<span class="w">    </span><span class="c1">// outside its allowed area. Reject it.</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">resolved</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="part-2-frontmatter-metadata-the-skills-id-card">Part 2: Frontmatter &amp; Metadata (The Skill's ID Card)<a class="headerlink" href="#part-2-frontmatter-metadata-the-skills-id-card" title="Permanent link">&para;</a></h2>
+<h3 id="whats-in-a-skillmd-file">What's in a SKILL.md File?<a class="headerlink" href="#whats-in-a-skillmd-file" title="Permanent link">&para;</a></h3>
+<p>Every SKILL.md has two parts: a <strong>YAML frontmatter header</strong> (the structured data) and the <strong>body</strong> (the actual instructions).</p>
+<p><strong>File: <code>src/agents/skills/frontmatter.ts</code> (~200 lines)</strong></p>
+<p><div class="language-markdown highlight"><pre><span></span><code>---
+name: weather
+description: &quot;Get weather forecasts via wttr.in&quot;
+homepage: https://wttr.in
+metadata:
+  {
+    &quot;openclaw&quot;: {
+      &quot;emoji&quot;: &quot;🌤️&quot;,
+      &quot;requires&quot;: { &quot;bins&quot;: [&quot;curl&quot;] },
+      &quot;always&quot;: false,
+      &quot;os&quot;: [&quot;darwin&quot;, &quot;linux&quot;]
+    }
+  }
+user-invocable: true
+<span class="gu">disable-model-invocation: false</span>
+<span class="gu">---</span>
+
+<span class="gh"># Weather Skill</span>
+
+<span class="gu">## Use when</span>
+<span class="k">-</span><span class="w"> </span>User asks about weather, temperature, or forecasts
+<span class="k">-</span><span class="w"> </span>User wants to know if they need an umbrella
+
+<span class="gu">## Don&#39;t use when</span>
+<span class="k">-</span><span class="w"> </span>User asks about climate change (that&#39;s general knowledge)
+
+<span class="gu">## Instructions</span>
+Use curl to query wttr.in:
+```bash
+curl -s &quot;wttr.in/CityName?format=3&quot;
+</code></pre></div>
+...
+<div class="language-text highlight"><pre><span></span><code>### Frontmatter Fields Explained
+
+| Field | Type | What It Does |
+|-------|------|-------------|
+| `name` | string | The skill&#39;s unique name (e.g., &quot;weather&quot;) |
+| `description` | string | One-line summary shown to the AI |
+| `homepage` | string | Link to documentation |
+| `user-invocable` | boolean | Can users trigger this with `/weather`? |
+| `disable-model-invocation` | boolean | Hide from AI? (for user-only skills) |
+| `command-dispatch` | string | How commands are dispatched (&quot;tool&quot; or default) |
+| `command-tool` | string | Which tool to invoke for slash commands |
+
+### OpenClaw Metadata (The Important Part)
+
+The `metadata.openclaw` object is where the real configuration lives:
+
+```typescript
+type OpenClawSkillMetadata = {
+  // Display
+  emoji?: string;           // &quot;🌤️&quot; — shown in the macOS app
+  homepage?: string;        // Link to docs
+
+  // Requirements
+  requires?: {
+    bins?: string[];        // Required CLI tools (ALL must exist)
+    anyBins?: string[];     // At least ONE must exist
+    env?: string[];         // Required environment variables
+    config?: string[];      // Required config keys
+  };
+
+  // Installation
+  install?: SkillInstallSpec[];  // How to install dependencies
+
+  // Behavior
+  always?: boolean;         // Always include, skip eligibility checks
+  primaryEnv?: string;      // Main env var (for API key config)
+  skillKey?: string;        // Custom config key (for hyphens in names)
+  os?: string[];            // Platform restriction: [&quot;darwin&quot;, &quot;linux&quot;, &quot;win32&quot;]
+};
+</code></pre></div></p>
+<h3 id="skill-install-specifications">Skill Install Specifications<a class="headerlink" href="#skill-install-specifications" title="Permanent link">&para;</a></h3>
+<p>Skills can declare how to install their dependencies:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">SkillInstallSpec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">kind</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;brew&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;node&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;go&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;uv&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;download&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">label?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">           </span><span class="c1">// &quot;Install via Homebrew&quot;</span>
+<span class="w">  </span><span class="nx">bins?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">           </span><span class="c1">// Which binaries this installs</span>
+<span class="w">  </span><span class="nx">os?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">             </span><span class="c1">// Platform-specific installer</span>
+<span class="w">  </span><span class="nx">formula?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">          </span><span class="c1">// Brew: formula name</span>
+<span class="w">  </span><span class="nx">package?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">          </span><span class="c1">// npm/uv: package name</span>
+<span class="w">  </span><span class="kr">module</span><span class="nx">?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">           </span><span class="c1">// Go: module path</span>
+<span class="w">  </span><span class="nx">url?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">              </span><span class="c1">// Download: URL</span>
+<span class="w">  </span><span class="nx">archive?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">          </span><span class="c1">// Download: archive type</span>
+<span class="w">  </span><span class="nx">extract?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">         </span><span class="c1">// Download: auto-extract?</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><strong>Example:</strong> The <code>goplaces</code> skill needs the <code>goplaces</code> CLI:
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">install</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">brew</span>
+<span class="w">    </span><span class="nt">formula</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">goplaces</span>
+<span class="w">    </span><span class="nt">bins</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;goplaces&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">os</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;darwin&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">go</span>
+<span class="w">    </span><span class="nt">module</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github.com/user/goplaces@latest</span>
+<span class="w">    </span><span class="nt">bins</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;goplaces&quot;</span><span class="p p-Indicator">]</span>
+</code></pre></div></p>
+<p>This means: on macOS, install via <code>brew install goplaces</code>. On any platform, install via <code>go install github.com/user/goplaces@latest</code>.</p>
+<hr />
+<h2 id="part-3-eligibility-filtering-can-this-skill-run">Part 3: Eligibility &amp; Filtering (Can This Skill Run?)<a class="headerlink" href="#part-3-eligibility-filtering-can-this-skill-run" title="Permanent link">&para;</a></h2>
+<h3 id="the-problem">The Problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h3>
+<p>You might have 53 skills installed, but many won't work on your system. If you're on Linux, macOS-only skills like Apple Notes are useless. If you don't have <code>ffmpeg</code> installed, video skills can't work. If you don't have an OpenAI API key, the Whisper API skill is dead.</p>
+<h3 id="the-eligibility-pipeline">The Eligibility Pipeline<a class="headerlink" href="#the-eligibility-pipeline" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/skills/config.ts</code> (~100 lines)</strong></p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">shouldIncludeSkill</span><span class="p">(</span><span class="nx">params</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">entry</span><span class="o">:</span><span class="w"> </span><span class="kt">SkillEntry</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">config?</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawConfig</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">eligibility?</span><span class="o">:</span><span class="w"> </span><span class="kt">SkillEligibilityContext</span><span class="p">;</span>
+<span class="p">})</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span>
+</code></pre></div>
+<p>The checks run in order:</p>
+<div class="language-text highlight"><pre><span></span><code>1. Config disabled?
+   skills.entries.weather.enabled === false → EXCLUDE
+       │ (not disabled)
+
+2. Bundled allowlist?
+   skills.allowBundled: [&quot;github&quot;, &quot;notion&quot;]
+   Is &quot;weather&quot; in the list? No → EXCLUDE
+       │ (no allowlist, or skill is in list)
+
+3. OS check?
+   metadata.openclaw.os: [&quot;darwin&quot;]
+   Are we on macOS? No → EXCLUDE
+       │ (OS matches, or no OS restriction)
+
+4. Binary check?
+   requires.bins: [&quot;curl&quot;]
+   Is `curl` on PATH? No → EXCLUDE
+       │ (all required binaries found)
+
+5. Any-bins check?
+   requires.anyBins: [&quot;spogo&quot;, &quot;spotify_player&quot;]
+   Is at least ONE on PATH? No → EXCLUDE
+       │ (at least one found)
+
+6. Env check?
+   requires.env: [&quot;OPENAI_API_KEY&quot;]
+   Is it set? (check process.env AND config-provided) No → EXCLUDE
+       │ (env var available)
+
+7. Config check?
+   requires.config: [&quot;browser.enabled&quot;]
+   Is it truthy in config? No → EXCLUDE
+       │ (config satisfied)
+
+8. All checks passed → INCLUDE ✓
+</code></pre></div>
+<h3 id="the-always-escape-hatch">The "Always" Escape Hatch<a class="headerlink" href="#the-always-escape-hatch" title="Permanent link">&para;</a></h3>
+<p>Skills with <code>always: true</code> <strong>skip ALL eligibility checks</strong>. They're always included in the prompt, no matter what. This is used for meta-skills like <code>healthcheck</code> and <code>canvas</code> that should always be available.</p>
+<h3 id="remote-eligibility">Remote Eligibility<a class="headerlink" href="#remote-eligibility" title="Permanent link">&para;</a></h3>
+<p>Here's a clever feature: if your OpenClaw gateway runs on a Linux server but you have a macOS companion app connected, macOS-only skills become eligible! The system considers the capabilities of connected remote nodes, not just the local machine.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">SkillEligibilityContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">remote</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">hasBin</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">bin</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">  </span><span class="c1">// Check if binary exists on remote</span>
+<span class="w">    </span><span class="nx">platforms</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">                </span><span class="c1">// Remote platforms available</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>So if you have <code>memo</code> (Apple Notes CLI) on your Mac but not on your Linux server, the Apple Notes skill is still usable because the gateway can delegate execution to your Mac.</p>
+<hr />
+<h2 id="part-4-prompt-injection-getting-skills-into-the-ais-brain">Part 4: Prompt Injection (Getting Skills Into the AI's Brain)<a class="headerlink" href="#part-4-prompt-injection-getting-skills-into-the-ais-brain" title="Permanent link">&para;</a></h2>
+<h3 id="how-skills-become-part-of-the-ais-instructions">How Skills Become Part of the AI's Instructions<a class="headerlink" href="#how-skills-become-part-of-the-ais-instructions" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/system-prompt.ts</code> (~350 lines)</strong></p>
+<p>When the AI starts processing a message, it receives a system prompt — its core instructions. Skills are injected into a mandatory section:</p>
+<div class="language-text highlight"><pre><span></span><code>## Skills (mandatory)
+
+Before replying: scan &lt;available_skills&gt; &lt;description&gt; entries.
+- If exactly one skill clearly applies: read its SKILL.md at &lt;location&gt;,
+  then follow it.
+- If multiple could apply: choose the most specific one, then read/follow it.
+- If none clearly apply: do not read any SKILL.md.
+
+&lt;available_skills&gt;
+- weather (Get weather forecasts via wttr.in) | ~/skills/weather/SKILL.md
+- github (GitHub operations via gh CLI) | ~/skills/github/SKILL.md
+- spotify-player (Terminal Spotify playback) | ~/skills/spotify-player/SKILL.md
+... (up to 150 skills)
+&lt;/available_skills&gt;
+</code></pre></div>
+<h3 id="how-the-ai-uses-skills">How the AI Uses Skills<a class="headerlink" href="#how-the-ai-uses-skills" title="Permanent link">&para;</a></h3>
+<p>Notice the AI doesn't receive the full SKILL.md content upfront. It only sees the <strong>name and description</strong>. When it decides a skill applies, it <strong>reads the file</strong> using its file-reading tool. This is important because:</p>
+<ol>
+<li><strong>Token efficiency</strong> — 53 full SKILL.md files would be thousands of tokens. Just listing names/descriptions is ~500 tokens.</li>
+<li><strong>On-demand loading</strong> — The AI only loads what it needs.</li>
+<li><strong>Rate limiting</strong> — The AI is instructed to be selective, not read every skill.</li>
+</ol>
+<h3 id="path-compaction">Path Compaction<a class="headerlink" href="#path-compaction" title="Permanent link">&para;</a></h3>
+<p>Skill file paths are compacted to save tokens:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// Before: /Users/alice/.openclaw/skills/weather/SKILL.md</span>
+<span class="c1">// After:  ~/.openclaw/skills/weather/SKILL.md</span>
+</code></pre></div>
+<p>This saves ~5-6 tokens per skill × 53 skills = ~300 tokens. Not huge, but it adds up.</p>
+<h3 id="prompt-limits">Prompt Limits<a class="headerlink" href="#prompt-limits" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/skills/workspace.ts</code> (lines 529-565)</strong></p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">maxSkillsInPrompt</span><span class="o">:</span><span class="w"> </span><span class="kt">150</span><span class="w">        </span><span class="c1">// Maximum number of skills listed</span>
+<span class="nx">maxSkillsPromptChars</span><span class="o">:</span><span class="w"> </span><span class="kt">30_000</span><span class="w">  </span><span class="c1">// Maximum characters for the skills section</span>
+</code></pre></div>
+<p>If you have more than 150 skills, or the skill list exceeds 30,000 characters, the system <strong>truncates</strong> using a binary search algorithm to find the largest prefix that fits. A warning is appended:</p>
+<div class="language-text highlight"><pre><span></span><code>⚠️ Skills truncated: included 150 of 200. Run `openclaw skills check` to audit.
+</code></pre></div>
+<h3 id="skills-excluded-from-the-prompt">Skills Excluded From the Prompt<a class="headerlink" href="#skills-excluded-from-the-prompt" title="Permanent link">&para;</a></h3>
+<p>Two types of skills are never shown to the AI:
+- Skills with <code>disable-model-invocation: true</code> — These are user-only slash commands. The AI can't trigger them.
+- Skills that failed eligibility checks — Missing dependencies mean the skill can't execute, so there's no point showing it to the AI.</p>
+<h3 id="snapshot-caching">Snapshot Caching<a class="headerlink" href="#snapshot-caching" title="Permanent link">&para;</a></h3>
+<p>Skills aren't re-discovered on every message. A <strong>snapshot</strong> is created at session start:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">SkillSnapshot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">prompt</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">              </span><span class="c1">// The formatted skills section</span>
+<span class="w">  </span><span class="nx">skills</span><span class="o">:</span><span class="w"> </span><span class="kt">Array</span><span class="o">&lt;</span><span class="p">{</span>
+<span class="w">    </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">primaryEnv?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">requiredEnv?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span>
+<span class="w">  </span><span class="p">}</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">resolvedSkills?</span><span class="o">:</span><span class="w"> </span><span class="kt">Skill</span><span class="p">[];</span><span class="w">    </span><span class="c1">// Full skill objects</span>
+<span class="w">  </span><span class="nx">version?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">            </span><span class="c1">// For cache invalidation</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>The snapshot is reused across all turns in the same session. It's refreshed if:
+- The skills watcher detects file changes (if <code>skills.load.watch</code> is enabled)
+- A new remote node connects (adding new binary/platform capabilities)</p>
+<hr />
+<h2 id="part-5-configuration-environment-per-skill-settings">Part 5: Configuration &amp; Environment (Per-Skill Settings)<a class="headerlink" href="#part-5-configuration-environment-per-skill-settings" title="Permanent link">&para;</a></h2>
+<h3 id="skill-config-in-configjson5">Skill Config in config.json5<a class="headerlink" href="#skill-config-in-configjson5" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/config/types.skills.ts</code> (~48 lines)</strong></p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">skills</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Global settings</span>
+<span class="w">    </span><span class="nv">allowBundled</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;github&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;weather&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;notion&quot;</span><span class="p">],</span><span class="w">  </span><span class="c1">// Restrict bundled skills</span>
+
+<span class="w">    </span><span class="nv">load</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">extraDirs</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;~/my-custom-skills&quot;</span><span class="p">],</span><span class="w">  </span><span class="c1">// Additional skill directories</span>
+<span class="w">      </span><span class="nv">watch</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w">                         </span><span class="c1">// Watch for file changes</span>
+<span class="w">    </span><span class="p">},</span>
+
+<span class="w">    </span><span class="nv">install</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">preferBrew</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w">           </span><span class="c1">// Prefer Homebrew when multiple options</span>
+<span class="w">      </span><span class="nv">nodeManager</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;npm&quot;</span><span class="p">,</span><span class="w">         </span><span class="c1">// npm, pnpm, yarn, or bun</span>
+<span class="w">    </span><span class="p">},</span>
+
+<span class="w">    </span><span class="nv">limits</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">maxSkillsInPrompt</span><span class="p">:</span><span class="w"> </span><span class="mf">150</span><span class="p">,</span>
+<span class="w">      </span><span class="nv">maxSkillsPromptChars</span><span class="p">:</span><span class="w"> </span><span class="mf">30000</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+
+<span class="w">    </span><span class="c1">// Per-skill configuration</span>
+<span class="w">    </span><span class="nv">entries</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">notion</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nv">enabled</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nv">apiKey</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;env:NOTION_API_KEY&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nv">trello</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nv">enabled</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nv">apiKey</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sk-trello-abc123&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nv">env</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nv">TRELLO_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-token&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nv">&quot;apple-notes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nv">enabled</span><span class="p">:</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w">  </span><span class="c1">// I don&#39;t want this skill</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="environment-variable-injection">Environment Variable Injection<a class="headerlink" href="#environment-variable-injection" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/skills/env-overrides.ts</code> (~300 lines)</strong></p>
+<p>Skills often need API keys or tokens. Instead of requiring you to set global environment variables, OpenClaw can inject them per-skill:</p>
+<div class="language-text highlight"><pre><span></span><code>1. Read skills.entries.&lt;skillKey&gt;.env and apiKey from config
+       │
+2. For each env var:
+       │
+   ├── Is it already set externally? → Skip (don&#39;t override user&#39;s env)
+   │
+   ├── Is it a &quot;dangerous&quot; env var? → Block it!
+   │   (OPENSSL_CONF, LDFLAGS, LD_PRELOAD, etc.)
+   │
+   └── Safe to inject → Set process.env[key] = value
+       │
+3. Track all injected keys
+       │
+4. After the AI run completes:
+       │
+5. Release: restore original env values
+</code></pre></div>
+<p>The <strong>dangerous env var blocklist</strong> prevents skills from injecting variables that could compromise system security (like <code>LD_PRELOAD</code> which could load malicious shared libraries).</p>
+<h3 id="the-primaryenv-shortcut">The primaryEnv Shortcut<a class="headerlink" href="#the-primaryenv-shortcut" title="Permanent link">&para;</a></h3>
+<p>Many skills need just one API key. The <code>primaryEnv</code> metadata field links a skill to its config <code>apiKey</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span class="c1"># In SKILL.md metadata:</span>
+<span class="nt">primaryEnv</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NOTION_API_KEY</span>
+</code></pre></div>
+<div class="language-json5 highlight"><pre><span></span><code><span class="c1">// In config.json5:</span>
+<span class="err">skills</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nv">entries</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nv">notion</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">apiKey</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;env:NOTION_API_KEY&quot;</span><span class="w">  </span><span class="c1">// This gets injected as NOTION_API_KEY</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The <code>apiKey</code> config value is automatically injected as the <code>primaryEnv</code> environment variable. This means you can set API keys in OpenClaw's config without touching your shell profile.</p>
+<hr />
+<h2 id="part-6-the-53-bundled-skills-everything-pre-installed">Part 6: The 53 Bundled Skills (Everything Pre-Installed)<a class="headerlink" href="#part-6-the-53-bundled-skills-everything-pre-installed" title="Permanent link">&para;</a></h2>
+<h3 id="skill-categories-at-a-glance">Skill Categories at a Glance<a class="headerlink" href="#skill-categories-at-a-glance" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+<th>Skills</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Developer Tools</strong></td>
+<td>9</td>
+<td>github, gh-issues, coding-agent, mcporter, tmux, 1password, himalaya, clawhub, node-connect</td>
+</tr>
+<tr>
+<td><strong>Media &amp; Imaging</strong></td>
+<td>8</td>
+<td>camsnap, gifgrep, video-frames, openai-image-gen, nano-banana-pro, nano-pdf, songsee, peekaboo</td>
+</tr>
+<tr>
+<td><strong>Productivity</strong></td>
+<td>7</td>
+<td>apple-notes, bear-notes, notion, obsidian, things-mac, trello, summarize</td>
+</tr>
+<tr>
+<td><strong>Utilities</strong></td>
+<td>6</td>
+<td>weather, goplaces, ordercli, blogwatcher, healthcheck, xurl</td>
+</tr>
+<tr>
+<td><strong>Messaging</strong></td>
+<td>5</td>
+<td>imsg, bluebubbles, discord, slack, wacli</td>
+</tr>
+<tr>
+<td><strong>Music &amp; Audio</strong></td>
+<td>5</td>
+<td>spotify-player, sag, sherpa-onnx-tts, openai-whisper, openai-whisper-api</td>
+</tr>
+<tr>
+<td><strong>Smart Home</strong></td>
+<td>4</td>
+<td>openhue, eightctl, blucli, sonoscli</td>
+</tr>
+<tr>
+<td><strong>Workspace/System</strong></td>
+<td>3</td>
+<td>canvas, skill-creator, model-usage</td>
+</tr>
+<tr>
+<td><strong>Content Generation</strong></td>
+<td>3</td>
+<td>gemini, oracle, gog</td>
+</tr>
+<tr>
+<td><strong>Voice</strong></td>
+<td>1</td>
+<td>voice-call</td>
+</tr>
+<tr>
+<td><strong>Session Management</strong></td>
+<td>2</td>
+<td>session-logs, coding-agent</td>
+</tr>
+</tbody>
+</table>
+<h3 id="detailed-skill-guide">Detailed Skill Guide<a class="headerlink" href="#detailed-skill-guide" title="Permanent link">&para;</a></h3>
+<h4 id="developer-tools">Developer Tools<a class="headerlink" href="#developer-tools" title="Permanent link">&para;</a></h4>
+<p><strong>github</strong> (163 lines) — The workhorse developer skill. Teaches the AI to use the <code>gh</code> CLI for:
+- Creating and reviewing pull requests
+- Managing issues
+- Checking CI/CD run status
+- Querying the GitHub API
+- Code searching</p>
+<p>Explicitly tells the AI when NOT to use it (local git operations, code review of local files).</p>
+<p><strong>gh-issues</strong> (865 lines — the LARGEST skill!) — An ambitious automated GitHub issue fixer. The AI:
+1. Reads a GitHub issue
+2. Spawns a background coding agent to fix it
+3. Creates a PR with the fix
+4. Monitors PR reviews and iterates
+5. All in parallel sub-agents</p>
+<p>This is essentially an autonomous software engineer in a SKILL.md file.</p>
+<p><strong>coding-agent</strong> (295 lines) — Teaches the AI to delegate coding tasks to other AI coding tools (Codex, Claude Code, Pi agents) running as background processes. Includes patterns for parallel task execution.</p>
+<p><strong>tmux</strong> (190 lines) — Remote-controls terminal multiplexer sessions. The AI can send keystrokes to tmux panes, scrape their output, and interact with interactive CLIs that don't have APIs.</p>
+<p><strong>mcporter</strong> — MCP (Model Context Protocol) server management. Lists, calls, and configures MCP tools.</p>
+<p><strong>1password</strong> — 1Password CLI (<code>op</code>) integration for secret management. Critically, it instructs the AI to always use a fresh tmux session for 1Password to avoid credential leakage.</p>
+<p><strong>himalaya</strong> (257 lines) — Full email management via IMAP/SMTP CLI. Supports multiple accounts, MIME composition, attachment handling.</p>
+<p><strong>clawhub</strong> — ClawHub CLI for searching, installing, and publishing skills from the community marketplace.</p>
+<p><strong>node-connect</strong> — Diagnoses connection issues between the OpenClaw gateway and companion apps (iOS, Android, macOS).</p>
+<h4 id="media-imaging">Media &amp; Imaging<a class="headerlink" href="#media-imaging" title="Permanent link">&para;</a></h4>
+<p><strong>openai-image-gen</strong> — Generates images via OpenAI's Images API. Includes batch generation with random prompt sampling and HTML gallery output.</p>
+<p><strong>nano-banana-pro</strong> — Image generation/editing via Google's Gemini 3 Pro Image model using <code>uv</code> (Python package runner).</p>
+<p><strong>camsnap</strong> — Captures frames or clips from RTSP/ONVIF security cameras using <code>ffmpeg</code>.</p>
+<p><strong>gifgrep</strong> — GIF search across Tenor and Giphy with TUI browsing, download, and frame extraction.</p>
+<p><strong>video-frames</strong> — Extracts frames or short clips from video files using <code>ffmpeg</code>.</p>
+<p><strong>peekaboo</strong> (190 lines) — macOS UI automation. Can capture screenshots, target UI elements, and simulate input. Essentially gives the AI "eyes and hands" on your Mac.</p>
+<p><strong>nano-pdf</strong> — Edit PDFs with natural-language instructions.</p>
+<p><strong>songsee</strong> — Generate audio spectrograms and feature visualizations.</p>
+<h4 id="productivity">Productivity<a class="headerlink" href="#productivity" title="Permanent link">&para;</a></h4>
+<p><strong>apple-notes</strong> — Manage Apple Notes via the <code>memo</code> CLI. Create, view, edit, delete, search, move, and export notes. macOS-only.</p>
+<p><strong>apple-reminders</strong> — Manage Apple Reminders via <code>remindctl</code>. List, add, edit, complete, and delete reminders. macOS-only.</p>
+<p><strong>things-mac</strong> — Things 3 todo app integration via the <code>things</code> CLI. macOS-only.</p>
+<p><strong>notion</strong> (174 lines) — Full Notion API integration for pages, databases, and blocks. Requires <code>NOTION_API_KEY</code>.</p>
+<p><strong>obsidian</strong> — Work with Obsidian vaults (which are just Markdown files) via <code>obsidian-cli</code>.</p>
+<p><strong>trello</strong> — Trello REST API for boards, lists, and cards. Requires <code>TRELLO_API_KEY</code> and <code>TRELLO_TOKEN</code>.</p>
+<p><strong>summarize</strong> — Summarize URLs, local files, and YouTube videos (including transcription).</p>
+<h4 id="smart-home">Smart Home<a class="headerlink" href="#smart-home" title="Permanent link">&para;</a></h4>
+<p><strong>openhue</strong> — Control Philips Hue lights and scenes. On/off, brightness, color, color temperature, scenes.</p>
+<p><strong>eightctl</strong> — Control Eight Sleep smart mattress pods. Temperature, alarms, schedules.</p>
+<p><strong>sonoscli</strong> — Control Sonos speakers. Discover, play, volume, grouping, queue management.</p>
+<p><strong>blucli</strong> — BluOS CLI for Bluesound/NAD players. Discovery, playback, grouping.</p>
+<h4 id="music-audio">Music &amp; Audio<a class="headerlink" href="#music-audio" title="Permanent link">&para;</a></h4>
+<p><strong>spotify-player</strong> — Spotify playback and search via <code>spogo</code> (preferred) or <code>spotify_player</code>.</p>
+<p><strong>sag</strong> — ElevenLabs text-to-speech with macOS <code>say</code>-style UX. Requires <code>ELEVENLABS_API_KEY</code>.</p>
+<p><strong>sherpa-onnx-tts</strong> — Local on-device text-to-speech via sherpa-onnx. No cloud needed, works offline.</p>
+<p><strong>openai-whisper</strong> — Local speech-to-text using the Whisper CLI. No API key needed — models download to <code>~/.cache/whisper</code>.</p>
+<p><strong>openai-whisper-api</strong> — Cloud-based speech-to-text via OpenAI's Audio Transcriptions API. Requires <code>OPENAI_API_KEY</code>.</p>
+<h4 id="messaging">Messaging<a class="headerlink" href="#messaging" title="Permanent link">&para;</a></h4>
+<p><strong>discord</strong> (197 lines) — Discord operations via the message tool: reactions, pins, send/edit/delete, threads, search, presence.</p>
+<p><strong>slack</strong> — Slack operations: react, manage pins, send/edit/delete messages, fetch member info.</p>
+<p><strong>imsg</strong> — iMessage/SMS CLI for listing chats, reading history, and sending messages. macOS-only.</p>
+<p><strong>bluebubbles</strong> — iMessage via BlueBubbles REST API. Richer than native iMessage skill (reactions, effects, edit, unsend).</p>
+<p><strong>wacli</strong> — WhatsApp CLI for sending messages and searching/syncing history.</p>
+<h4 id="utilities">Utilities<a class="headerlink" href="#utilities" title="Permanent link">&para;</a></h4>
+<p><strong>weather</strong> — Get weather via <code>wttr.in</code> or Open-Meteo. No API key needed. The simplest possible skill.</p>
+<p><strong>goplaces</strong> — Google Places API for location search, details, reviews. Requires <code>GOOGLE_PLACES_API_KEY</code>.</p>
+<p><strong>xurl</strong> (461 lines) — Full X (Twitter) API access: post, search, engage, DMs, social graph management.</p>
+<p><strong>blogwatcher</strong> — Monitor blogs and RSS/Atom feeds for updates.</p>
+<p><strong>healthcheck</strong> (245 lines) — Security auditing for OpenClaw deployments. Checks host hardening, risk tolerance, configuration.</p>
+<p><strong>ordercli</strong> — Check food delivery orders (Foodora supported, Deliveroo WIP).</p>
+<h4 id="metasystem-skills">Meta/System Skills<a class="headerlink" href="#metasystem-skills" title="Permanent link">&para;</a></h4>
+<p><strong>skill-creator</strong> (372 lines) — The meta-skill. Teaches the AI how to create, edit, improve, and audit other skills. Includes Python scripts for scaffolding and packaging.</p>
+<p><strong>canvas</strong> (198 lines) — Display HTML content on connected OpenClaw nodes (Mac, iOS, Android apps). The bridge between AI output and visual UI.</p>
+<p><strong>model-usage</strong> — Get per-model usage costs from local cost logs.</p>
+<p><strong>session-logs</strong> — Search and analyze conversation session logs using <code>jq</code> and <code>ripgrep</code>.</p>
+<h4 id="content-tools">Content &amp; Tools<a class="headerlink" href="#content-tools" title="Permanent link">&para;</a></h4>
+<p><strong>gemini</strong> — One-shot Q&amp;A via the Gemini CLI.</p>
+<p><strong>oracle</strong> — Best practices for the <code>oracle</code> CLI (prompt bundling, engines, sessions).</p>
+<p><strong>gog</strong> — Google Workspace CLI for Gmail, Calendar, Drive, Contacts, Sheets, and Docs.</p>
+<p><strong>voice-call</strong> — Start voice calls via the OpenClaw voice-call plugin (Twilio, Telnyx, Plivo, or mock).</p>
+<h3 id="skills-by-dependency-type">Skills by Dependency Type<a class="headerlink" href="#skills-by-dependency-type" title="Permanent link">&para;</a></h3>
+<p><strong>No external dependencies (API/gateway-based):</strong>
+- bluebubbles, canvas, coding-agent, gh-issues, healthcheck, node-connect, notion, voice-call</p>
+<p><strong>Needs API keys:</strong>
+- notion (NOTION_API_KEY), trello (TRELLO_API_KEY + TRELLO_TOKEN), sag (ELEVENLABS_API_KEY), openai-image-gen (OPENAI_API_KEY), openai-whisper-api (OPENAI_API_KEY), goplaces (GOOGLE_PLACES_API_KEY), nano-banana-pro (GEMINI_API_KEY), gh-issues (GH_TOKEN)</p>
+<p><strong>macOS-only:</strong>
+- apple-notes, apple-reminders, bear-notes, imsg, things-mac, peekaboo, model-usage</p>
+<h3 id="skill-size-distribution">Skill Size Distribution<a class="headerlink" href="#skill-size-distribution" title="Permanent link">&para;</a></h3>
+<p><strong>Large skills (200+ lines):</strong> gh-issues (865!), xurl (461), skill-creator (372), coding-agent (295), himalaya (257), healthcheck (245)</p>
+<p><strong>Medium skills (100-199 lines):</strong> canvas (198), discord (197), peekaboo (190), notion (174), github (163), tmux (190+)</p>
+<p><strong>Small skills (&lt;100 lines):</strong> weather, camsnap, voice-call, video-frames, nano-pdf, openai-whisper, gemini — each under 50 lines</p>
+<p><strong>Total SKILL.md content across all 53 skills: ~6,900 lines.</strong></p>
+<hr />
+<h2 id="part-7-skill-security-protecting-against-bad-skills">Part 7: Skill Security (Protecting Against Bad Skills)<a class="headerlink" href="#part-7-skill-security-protecting-against-bad-skills" title="Permanent link">&para;</a></h2>
+<h3 id="the-security-scanner">The Security Scanner<a class="headerlink" href="#the-security-scanner" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/security/skill-scanner.ts</code></strong></p>
+<p>When a skill is installed from an external source, the system scans it for dangerous patterns:
+- Hardcoded credentials
+- Suspicious imports
+- Unsafe shell commands
+- Prompt injection patterns in SKILL.md</p>
+<p>Critical findings block installation. Warnings are shown but don't block.</p>
+<h3 id="capability-based-security">Capability-Based Security<a class="headerlink" href="#capability-based-security" title="Permanent link">&para;</a></h3>
+<p>Added in February 2026 (commit <code>2c61fb69c</code>, +1,568 lines), this is a full capability model:</p>
+<p>Skills can declare what capabilities they need:
+- <strong>shell</strong> — Can run shell commands
+- <strong>filesystem</strong> — Can read/write files
+- <strong>network</strong> — Can make network requests
+- <strong>browser</strong> — Can control a browser
+- <strong>sessions</strong> — Can access conversation history</p>
+<p>The system enforces these at runtime: if a skill hasn't declared <code>network</code> capability, the AI's tool calls involving network access are blocked.</p>
+<h3 id="zip-slip-prevention">Zip Slip Prevention<a class="headerlink" href="#zip-slip-prevention" title="Permanent link">&para;</a></h3>
+<p>After a security audit found a CVSS 7.7 vulnerability in the skill-creator's packaging script, protections were added:
+- Archive extraction validates all paths stay within the target directory
+- Symlinks are checked for escape attempts
+- Skill download target paths are restricted</p>
+<hr />
+<h2 id="part-8-skill-slash-commands-user-invocation">Part 8: Skill Slash Commands (User Invocation)<a class="headerlink" href="#part-8-skill-slash-commands-user-invocation" title="Permanent link">&para;</a></h2>
+<h3 id="how-commands-work">How /commands Work<a class="headerlink" href="#how-commands-work" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/auto-reply/skill-commands.ts</code> (~200 lines)</strong></p>
+<p>Skills with <code>user-invocable: true</code> are exposed as slash commands. If the <code>weather</code> skill is user-invocable, typing <code>/weather London</code> triggers it directly.</p>
+<p>Command names are sanitized:
+- Max 32 characters
+- Lowercase
+- Special characters replaced with underscores
+- Collisions handled with numeric suffixes (<code>github_2</code>, <code>github_3</code>)
+- Discord descriptions limited to 100 characters
+- Reserved names (built-in commands) are excluded</p>
+<h3 id="the-installation-system">The Installation System<a class="headerlink" href="#the-installation-system" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/skills-install.ts</code> (~400 lines)</strong></p>
+<p>Skills can be installed through the gateway:</p>
+<div class="language-text highlight"><pre><span></span><code>1. User selects skill + installer option
+       │
+2. Build install command based on kind:
+   ├── brew: brew install &lt;formula&gt;
+   ├── node: npm install -g &lt;package&gt; --ignore-scripts
+   ├── go: go install &lt;module&gt;@latest
+   ├── uv: uv tool install &lt;package&gt;
+   └── download: curl &lt;url&gt; + extract
+       │
+3. Run with timeout
+       │
+4. Security scan the installed files
+       │
+5. Return success/failure
+</code></pre></div>
+<p>The <code>--ignore-scripts</code> flag for npm installs is a security measure — it prevents arbitrary code execution during package installation.</p>
+<h3 id="gateway-methods">Gateway Methods<a class="headerlink" href="#gateway-methods" title="Permanent link">&para;</a></h3>
+<p>The gateway exposes four skill-related RPC methods:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>skills.status</code></td>
+<td>Get health report for all skills</td>
+</tr>
+<tr>
+<td><code>skills.bins</code></td>
+<td>List all required binaries across agents</td>
+</tr>
+<tr>
+<td><code>skills.install</code></td>
+<td>Install a skill's dependencies</td>
+</tr>
+<tr>
+<td><code>skills.update</code></td>
+<td>Update a skill's config (apiKey, env, enabled)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="how-layer-6-evolved-git-history">How Layer 6 Evolved (Git History)<a class="headerlink" href="#how-layer-6-evolved-git-history" title="Permanent link">&para;</a></h2>
+<h3 id="the-big-bang-december-20-2025">The Big Bang — December 20, 2025<a class="headerlink" href="#the-big-bang-december-20-2025" title="Permanent link">&para;</a></h3>
+<p>The entire skill system was created in a single day.</p>
+<p><strong><code>d1850aaad</code></strong> — <code>feat: add managed skills gating</code></p>
+<p>This massive commit (+1,233 lines) introduced everything at once:
+- <code>src/agents/skills.ts</code> (390 lines) — the core skill loader
+- Config integration
+- Agent integration
+- Documentation
+- <strong>~25 initial skills</strong> including: blucli, camsnap, eightctl, gog, imsg, mcporter, nano-banana-pro, nano-pdf, openai-image-gen, openai-whisper, openai-whisper-api, openhue, oracle, peekaboo, sag, sonoscli, spotify-player, video-frames, wacli, and more</p>
+<p>On the same day, <code>c4a67b7d0</code> added the macOS Skills settings UI and standardized metadata across all skills.</p>
+<p>The initial skills were heavily focused on smart home, media, and macOS — reflecting the creator's personal use cases.</p>
+<h3 id="the-holiday-sprint-december-20-31-2025">The Holiday Sprint — December 20-31, 2025<a class="headerlink" href="#the-holiday-sprint-december-20-31-2025" title="Permanent link">&para;</a></h3>
+<p>Skills were added during the holiday season:
+- <strong>Dec 29</strong>: obsidian
+- <strong>Dec 30</strong>: food-order
+- <strong>Dec 31</strong>: gifgrep</p>
+<h3 id="the-january-explosion-january-1-7-2026">The January Explosion — January 1-7, 2026<a class="headerlink" href="#the-january-explosion-january-1-7-2026" title="Permanent link">&para;</a></h3>
+<p><strong>January 2 was the biggest single day</strong> — at least 8 new skills:
+- things-mac, trello, songsee, weather, goplaces, coding-agent, apple-notes, apple-reminders, discord</p>
+<p>By January 7, the skill count had roughly doubled from the original ~25.</p>
+<p>Key additions:
+- <strong>Jan 1</strong>: Config unification (<code>fbcbc60e8</code> — <code>feat: unify skills config</code>)
+- <strong>Jan 1</strong>: OS-specific gating (<code>73d0e2cb8</code> — <code>fix: gate skills by OS</code>)
+- <strong>Jan 3</strong>: bear-notes, tmux, github, blogwatcher, notion, clawhub, slack
+- <strong>Jan 5</strong>: model-usage
+- <strong>Jan 6</strong>: 1password, himalaya
+- <strong>Jan 7</strong>: session-logs</p>
+<h3 id="the-skill-creator-plugin-system-january-11-2026">The Skill-Creator &amp; Plugin System — January 11, 2026<a class="headerlink" href="#the-skill-creator-plugin-system-january-11-2026" title="Permanent link">&para;</a></h3>
+<p>Two landmark additions on the same day:</p>
+<p><strong><code>7006a4aad</code></strong> — <code>feat: add skill-creator bundled skill</code> (+1,163 lines)</p>
+<p>The self-referential meta-skill. It teaches the AI how to create new skills, complete with Python scripts for scaffolding (<code>init_skill.py</code>), packaging (<code>package_skill.py</code>), and validation (<code>quick_validate.py</code>). This is the second-largest skill at 372 lines.</p>
+<p><strong><code>cf0c72a55</code></strong> — <code>feat: add plugin architecture</code> (+2,408 lines)</p>
+<p>The plugin system (Layer 3) was born on the same day, and with it came the ability for plugins to ship their own skills.</p>
+<h3 id="the-second-wave-january-18-to-february-19-2026">The Second Wave — January 18 to February 19, 2026<a class="headerlink" href="#the-second-wave-january-18-to-february-19-2026" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Skill</th>
+<th>Notable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jan 18</td>
+<td>bluebubbles, canvas</td>
+<td>Canvas for visual UI</td>
+</tr>
+<tr>
+<td>Jan 21</td>
+<td>sherpa-onnx-tts</td>
+<td>First local TTS skill</td>
+</tr>
+<tr>
+<td>Jan 26</td>
+<td>bitwarden</td>
+<td>Later removed</td>
+</tr>
+<tr>
+<td>Feb 2</td>
+<td>healthcheck</td>
+<td>Security auditing</td>
+</tr>
+<tr>
+<td>Feb 16</td>
+<td>gh-issues</td>
+<td>The 865-line autonomous issue fixer</td>
+</tr>
+<tr>
+<td>Feb 19</td>
+<td>xurl</td>
+<td>X/Twitter API (461 lines)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-routing-blocks-february-17-2026">The Routing Blocks — February 17, 2026<a class="headerlink" href="#the-routing-blocks-february-17-2026" title="Permanent link">&para;</a></h3>
+<p><strong><code>9cce40d12</code></strong> — <code>feat(skills): Add 'Use when / Don't use when' routing blocks</code></p>
+<p>This was a game-changer for skill quality. Instead of the AI guessing which skill to use, skills now explicitly declare:</p>
+<div class="language-markdown highlight"><pre><span></span><code><span class="gu">## Use when</span>
+<span class="k">-</span><span class="w"> </span>User asks about weather, temperature, or forecasts
+<span class="k">-</span><span class="w"> </span>User wants to know what to wear
+
+<span class="gu">## Don&#39;t use when</span>
+<span class="k">-</span><span class="w"> </span>User asks about climate change (general knowledge)
+<span class="k">-</span><span class="w"> </span>User asks about historical weather data
+</code></pre></div>
+<p>This was inspired by OpenAI's best practices for function calling. It reduced skill mis-selection significantly.</p>
+<h3 id="the-security-hardening-february-march-2026">The Security Hardening — February-March 2026<a class="headerlink" href="#the-security-hardening-february-march-2026" title="Permanent link">&para;</a></h3>
+<p>A sustained security effort:</p>
+<p><strong>Feb 17</strong> — <code>2c61fb69c</code> — <strong>Client-side skill security enforcement</strong> (+1,568 lines)
+- Capability-based security model
+- Static SKILL.md scanner for prompt injection
+- Before-tool-call enforcement gate
+- Trust tier classification (builtin/community/local)</p>
+<p><strong>Feb 19</strong> — <code>c275932aa</code> — <strong>Zip Slip prevention</strong> — Fixed CVSS 7.7 vulnerability in skill packaging</p>
+<p><strong>Feb 27</strong> — <code>abc08a9f7</code> — Parse skill capabilities from frontmatter</p>
+<p><strong>Mar 2</strong> — <code>132794fe7</code> — Audit workspace skill symlink escapes</p>
+<p><strong>Mar 6</strong> — <code>bf623a580</code> — Skill API rate-limit guardrails</p>
+<h3 id="the-naming-cascade-january-27-30-2026">The Naming Cascade — January 27-30, 2026<a class="headerlink" href="#the-naming-cascade-january-27-30-2026" title="Permanent link">&para;</a></h3>
+<p>The project was renamed twice, requiring updates across all 53 skill files:
+- <strong>Jan 27</strong>: clawdbot → moltbot (53 skill files updated)
+- <strong>Jan 30</strong>: moltbot → openclaw (53 skill files updated again)</p>
+<h3 id="skill-removals">Skill Removals<a class="headerlink" href="#skill-removals" title="Permanent link">&para;</a></h3>
+<p>Not every skill survived:
+- <strong>food-order</strong> — Removed Feb 22
+- <strong>bird</strong> — Removed (date unclear)
+- <strong>local-places</strong> — Duplicate of goplaces, removed
+- <strong>QR code skill</strong> — Added and reverted
+- <strong>video-quote-finder</strong> — Added and reverted
+- <strong>bitwarden</strong> — Added Jan 26, later removed</p>
+<h3 id="cross-agent-discovery-february-12-2026">Cross-Agent Discovery — February 12, 2026<a class="headerlink" href="#cross-agent-discovery-february-12-2026" title="Permanent link">&para;</a></h3>
+<p><strong><code>d85150357</code></strong> — <code>feat: support .agents/skills/ directory for cross-agent skill discovery</code></p>
+<p>Added two new skill loading locations:
+- <code>~/.agents/skills/</code> — Personal skills shared across all agents
+- <code>&lt;workspace&gt;/.agents/skills/</code> — Project-level skills shared across agents</p>
+<p>This established the full 7-location precedence hierarchy.</p>
+<h3 id="latest-addition-march-14-2026">Latest Addition — March 14, 2026<a class="headerlink" href="#latest-addition-march-14-2026" title="Permanent link">&para;</a></h3>
+<p><strong>node-connect</strong> — The most recent skill, helping users diagnose connection issues between the gateway and companion apps.</p>
+<hr />
+<h2 id="architecture-summary">Architecture Summary<a class="headerlink" href="#architecture-summary" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code>┌───────────────────────────────────────────────────────┐
+│                     Config                             │
+│  skills.entries.github.enabled: true                   │
+│  skills.entries.notion.apiKey: &quot;env:NOTION_API_KEY&quot;    │
+│  skills.allowBundled: [...] (optional filter)          │
+└──────────────────────┬────────────────────────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │      Skill Discovery       │
+         │                            │
+         │  7 locations, precedence:  │
+         │  workspace &gt; project &gt;     │
+         │  personal &gt; managed &gt;      │
+         │  bundled &gt; extra &gt; plugin  │
+         │                            │
+         │  Dedup by name             │
+         │  (highest precedence wins) │
+         └─────────────┬─────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │    Frontmatter Parsing     │
+         │                            │
+         │  YAML header → metadata    │
+         │  requires: { bins, env }   │
+         │  install: [brew, go, ...]  │
+         │  os: [&quot;darwin&quot;, &quot;linux&quot;]   │
+         └─────────────┬─────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │   Eligibility Filtering    │
+         │                            │
+         │  Config disabled? → skip   │
+         │  Bundled allowlist? → skip │
+         │  OS mismatch? → skip       │
+         │  Missing binary? → skip    │
+         │  Missing env var? → skip   │
+         │  always: true? → include!  │
+         └─────────────┬─────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │    Prompt Injection        │
+         │                            │
+         │  Format eligible skills    │
+         │  Apply limits (150 / 30K)  │
+         │  Compact paths (~ prefix)  │
+         │  Cache as SkillSnapshot    │
+         │                            │
+         │  Inject into system prompt │
+         │  as &lt;available_skills&gt;     │
+         └─────────────┬─────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │       AI Runtime           │
+         │                            │
+         │  AI reads skill names      │
+         │  Matches to user request   │
+         │  Reads SKILL.md on demand  │
+         │  Follows instructions      │
+         │  Uses tools to execute     │
+         └────────────────────────────┘
+
+Env Injection (parallel):
+  Config apiKey/env → sanitize → inject process.env → run → release
+
+Security (parallel):
+  Capability enforcement → tool-call gating → symlink audit → rate limiting
+</code></pre></div>
+<hr />
+<h2 id="key-files-reference">Key Files Reference<a class="headerlink" href="#key-files-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/agents/skills/workspace.ts</code></td>
+<td>~800</td>
+<td>Core discovery, loading, prompt building, limits</td>
+</tr>
+<tr>
+<td><code>src/agents/skills/frontmatter.ts</code></td>
+<td>~200</td>
+<td>SKILL.md YAML parsing</td>
+</tr>
+<tr>
+<td><code>src/agents/skills/config.ts</code></td>
+<td>~100</td>
+<td>Eligibility evaluation pipeline</td>
+</tr>
+<tr>
+<td><code>src/agents/skills/types.ts</code></td>
+<td>~90</td>
+<td>Core type definitions (SkillEntry, SkillSnapshot, etc.)</td>
+</tr>
+<tr>
+<td><code>src/agents/skills/env-overrides.ts</code></td>
+<td>~300</td>
+<td>Environment variable injection &amp; safety</td>
+</tr>
+<tr>
+<td><code>src/agents/skills/plugin-skills.ts</code></td>
+<td>~90</td>
+<td>Plugin-shipped skill discovery</td>
+</tr>
+<tr>
+<td><code>src/agents/skills-status.ts</code></td>
+<td>~250</td>
+<td>Health reporting (status, missing deps)</td>
+</tr>
+<tr>
+<td><code>src/agents/skills-install.ts</code></td>
+<td>~400</td>
+<td>Installation pipeline (brew/node/go/uv/download)</td>
+</tr>
+<tr>
+<td><code>src/agents/system-prompt.ts</code></td>
+<td>~350</td>
+<td>System prompt building with skills section</td>
+</tr>
+<tr>
+<td><code>src/auto-reply/skill-commands.ts</code></td>
+<td>~200</td>
+<td>Slash command registration from skills</td>
+</tr>
+<tr>
+<td><code>src/config/types.skills.ts</code></td>
+<td>~48</td>
+<td>Config schema types</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-methods/skills.ts</code></td>
+<td>~250</td>
+<td>Gateway RPC methods (status/install/update)</td>
+</tr>
+<tr>
+<td><code>src/security/skill-scanner.ts</code></td>
+<td>~200</td>
+<td>Security scanning for installed skills</td>
+</tr>
+<tr>
+<td><code>src/cli/skills-cli.ts</code></td>
+<td>~80</td>
+<td>CLI commands (list, info, check)</td>
+</tr>
+<tr>
+<td><code>skills/</code></td>
+<td>53 dirs</td>
+<td>All bundled SKILL.md files (~6,900 total lines)</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

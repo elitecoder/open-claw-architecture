@@ -1,0 +1,2155 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../layers/layer-1-core-runtime/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Architecture Reference - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#openclaw-complete-architecture-analysis" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What It Is
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-layers-bottom-to-top" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Layers (Bottom to Top)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Layers (Bottom to Top)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layer-1-core-runtime-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 1: Core Runtime (Required)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-2-gateway-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 2: Gateway (Required)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-3-plugin-system-required-framework-individual-plugins-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3: Plugin System (Required framework, individual plugins optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-4-channel-integrations-need-at-least-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 4: Channel Integrations (Need at least 1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-5-ai-providers-need-at-least-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 5: AI Providers (Need at least 1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-6-skills-all-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 6: Skills (All Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-7-memory-system-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 7: Memory System (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-8-context-engine-optional-but-important" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 8: Context Engine (Optional but important)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-9-voice-tts-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 9: Voice / TTS (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-10-canvas-a2ui-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 10: Canvas &amp; A2UI (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-11-companion-apps-all-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 11: Companion Apps (All Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-12-infrastructure-all-optionalswappable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 12: Infrastructure (All Optional/Swappable)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-optional-quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Optional — Quick Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-file-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key File Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layers/layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-it-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What It Is
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-layers-bottom-to-top" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Layers (Bottom to Top)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Layers (Bottom to Top)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layer-1-core-runtime-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 1: Core Runtime (Required)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-2-gateway-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 2: Gateway (Required)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-3-plugin-system-required-framework-individual-plugins-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3: Plugin System (Required framework, individual plugins optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-4-channel-integrations-need-at-least-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 4: Channel Integrations (Need at least 1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-5-ai-providers-need-at-least-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 5: AI Providers (Need at least 1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-6-skills-all-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 6: Skills (All Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-7-memory-system-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 7: Memory System (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-8-context-engine-optional-but-important" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 8: Context Engine (Optional but important)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-9-voice-tts-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 9: Voice / TTS (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-10-canvas-a2ui-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 10: Canvas &amp; A2UI (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-11-companion-apps-all-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 11: Companion Apps (All Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-12-infrastructure-all-optionalswappable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 12: Infrastructure (All Optional/Swappable)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-optional-quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Optional — Quick Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-file-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key File Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="openclaw-complete-architecture-analysis">OpenClaw — Complete Architecture Analysis<a class="headerlink" href="#openclaw-complete-architecture-analysis" title="Permanent link">&para;</a></h1>
+<h2 id="what-it-is">What It Is<a class="headerlink" href="#what-it-is" title="Permanent link">&para;</a></h2>
+<p>OpenClaw is a <strong>self-hosted, local-first personal AI assistant</strong> that connects to messaging platforms (WhatsApp, Telegram, Discord, Slack, Signal, iMessage, etc.) and runs on your own devices. It's a monorepo built with TypeScript (Node.js 22+), Swift (Apple apps), and Kotlin (Android).</p>
+<hr />
+<h2 id="architecture-layers-bottom-to-top">Architecture Layers (Bottom to Top)<a class="headerlink" href="#architecture-layers-bottom-to-top" title="Permanent link">&para;</a></h2>
+<h3 id="layer-1-core-runtime-required">Layer 1: Core Runtime (Required)<a class="headerlink" href="#layer-1-core-runtime-required" title="Permanent link">&para;</a></h3>
+<p><strong>Boot sequence</strong> (<code>src/entry.ts</code> → <code>src/cli/run-main.ts</code> → <code>src/index.ts</code>):</p>
+<ol>
+<li>Set process title, install warning filters, normalize env</li>
+<li>Enable Node compile cache, respawn with correct flags if needed</li>
+<li>Fast-path <code>--version</code> / <code>--help</code></li>
+<li>Load <code>.env</code>, assert Node 22+, build Commander CLI program</li>
+<li>Register all commands, parse args, execute</li>
+</ol>
+<p><strong>Config system</strong> (<code>src/config/io.ts:725-869</code>):</p>
+<ul>
+<li>Reads <code>config.json5</code> from <code>~/.openclaw/</code></li>
+<li>Supports JSON5 with <code>include</code> directives</li>
+<li>Applies cascading defaults: messages → logging → sessions → agents → context pruning → compaction → model → talk normalization</li>
+<li>45-second in-memory cache with hot-reload watching</li>
+</ul>
+<p><strong>Session management</strong> (<code>src/config/sessions/store.ts:195-270</code>):</p>
+<ul>
+<li>Persists to <code>~/.openclaw/agents/{agentId}/sessions/sessions.json</code></li>
+<li>Retry logic on read (Windows: 3x, Unix: 1x)</li>
+<li>Automatic migrations and disk budget enforcement</li>
+</ul>
+<p><strong>Routing</strong> (<code>src/routing/resolve-route.ts:614-804</code>):</p>
+<ul>
+<li>Determines which agent handles a message via a resolution hierarchy:</li>
+<li>Peer binding (direct match)</li>
+<li>Parent peer binding (thread inheritance)</li>
+<li>Guild+roles binding (Discord)</li>
+<li>Guild → Team → Account → Channel binding</li>
+<li>Default agent fallback</li>
+<li>Two-tier LRU cache (2000 bindings + 4000 routes)</li>
+</ul>
+<hr />
+<h3 id="layer-2-gateway-required">Layer 2: Gateway (Required)<a class="headerlink" href="#layer-2-gateway-required" title="Permanent link">&para;</a></h3>
+<p>The <strong>central nervous system</strong> — <code>src/gateway/</code> (247 files, ~4.8MB).</p>
+<p><strong>Entry:</strong> <code>src/gateway/server.impl.ts:267-1070</code> — <code>startGatewayServer()</code></p>
+<p><strong>10-phase startup:</strong></p>
+<ol>
+<li>Load config snapshot + migrate legacy</li>
+<li>Activate secrets runtime</li>
+<li>Bootstrap auth (generate tokens, load TLS)</li>
+<li>Load plugins + channel plugins</li>
+<li>Create HTTP/HTTPS + WebSocket servers</li>
+<li>Start channel manager (all configured channels)</li>
+<li>Start discovery (mDNS, Tailscale, wide-area)</li>
+<li>Start cron, health monitor, heartbeat</li>
+<li>Attach WebSocket handlers + plugin hooks</li>
+<li>Register config watcher for hot-reload</li>
+</ol>
+<p><strong>Protocol</strong> (<code>src/gateway/protocol/</code>): Request/Response/Event frames over WebSocket with AJV-validated schemas.</p>
+<p><strong>Auth</strong> (<code>src/gateway/auth.ts</code>): Token, password, Tailscale identity, device pairing, trusted proxy, bootstrap tokens. Role-based access (operator/node/guest) with per-method scopes.</p>
+<p><strong>Key server methods</strong> (<code>src/gateway/server-methods/</code>, 69 files):</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Methods</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chat</td>
+<td><code>chat.send</code>, <code>chat.abort</code>, <code>chat.history</code></td>
+</tr>
+<tr>
+<td>Config</td>
+<td><code>config.get</code>, <code>config.set</code>, <code>config.patch</code></td>
+</tr>
+<tr>
+<td>Channels</td>
+<td><code>channels.status</code>, <code>channels.logout</code></td>
+</tr>
+<tr>
+<td>Nodes</td>
+<td><code>node.list</code>, <code>node.pair</code>, <code>node.invoke</code></td>
+</tr>
+<tr>
+<td>Cron</td>
+<td><code>cron.list</code>, <code>cron.add</code>, <code>cron.run</code></td>
+</tr>
+<tr>
+<td>Sessions</td>
+<td><code>sessions.list</code>, <code>sessions.patch</code>, <code>sessions.reset</code></td>
+</tr>
+<tr>
+<td>System</td>
+<td><code>health</code>, <code>logs.tail</code>, <code>usage.status</code>, <code>skills.status</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>HTTP endpoints</strong> (<code>src/gateway/server-http.ts</code>):</p>
+<ul>
+<li><code>GET /health</code>, <code>/ready</code>, <code>/healthz</code> — health probes</li>
+<li><code>POST /v1/chat/completions</code> — OpenAI-compatible API</li>
+<li><code>POST /v1/responses</code> — OpenResponses protocol</li>
+<li><code>POST /hooks/*</code> — inbound webhooks from channels</li>
+<li><code>GET /canvas/*</code> — Canvas AI UI</li>
+</ul>
+<p><strong>Runtime state</strong> (<code>src/gateway/server-runtime-state.ts:43-150</code>):</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">canvasHost</span><span class="o">:</span><span class="w"> </span><span class="kt">CanvasHostHandler</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="w">   </span><span class="c1">// Embedded browser canvas</span>
+<span class="w">  </span><span class="nx">httpServer</span><span class="o">:</span><span class="w"> </span><span class="kt">HttpServer</span><span class="w">                 </span><span class="c1">// Main HTTP/HTTPS server</span>
+<span class="w">  </span><span class="nx">wss</span><span class="o">:</span><span class="w"> </span><span class="kt">WebSocketServer</span><span class="w">                   </span><span class="c1">// WebSocket server</span>
+<span class="w">  </span><span class="nx">clients</span><span class="o">:</span><span class="w"> </span><span class="kt">Set</span><span class="o">&lt;</span><span class="nx">GatewayWsClient</span><span class="o">&gt;</span><span class="w">         </span><span class="c1">// Connected clients</span>
+<span class="w">  </span><span class="nx">broadcast</span><span class="o">:</span><span class="w"> </span><span class="kt">GatewayBroadcastFn</span><span class="w">          </span><span class="c1">// Send to all clients</span>
+<span class="w">  </span><span class="nx">agentRunSeq</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">number</span><span class="o">&gt;</span><span class="w">       </span><span class="c1">// Agent run IDs for dedup</span>
+<span class="w">  </span><span class="nx">dedupe</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">DedupeEntry</span><span class="o">&gt;</span><span class="w">       </span><span class="c1">// Request dedup cache</span>
+<span class="w">  </span><span class="nx">chatRunState</span><span class="o">:</span><span class="w"> </span><span class="p">{...}</span><span class="w">                    </span><span class="c1">// Chat session tracking</span>
+<span class="w">  </span><span class="nx">chatAbortControllers</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="w">              </span><span class="c1">// Chat cancellation handles</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Broadcasting</strong> (<code>src/gateway/server-broadcast.ts</code>): Central event system pushing to all connected clients. Event types include <code>agent</code>, <code>chat</code>, <code>presence</code>, <code>health</code>, <code>tick</code>, <code>node.pair.requested</code>, <code>exec.approval.requested</code>.</p>
+<p><strong>Channel Manager</strong> (<code>src/gateway/server-channels.ts:111-300</code>): Lifecycle management for all messaging channels with exponential backoff restarts (5s → 5m max).</p>
+<hr />
+<h3 id="layer-3-plugin-system-required-framework-individual-plugins-optional">Layer 3: Plugin System (Required framework, individual plugins optional)<a class="headerlink" href="#layer-3-plugin-system-required-framework-individual-plugins-optional" title="Permanent link">&para;</a></h3>
+<p><strong>Discovery</strong> (<code>src/plugins/discovery.ts</code>): Scans <code>~/.openclaw/extensions/</code>, bundled <code>extensions/</code>, and workspace paths. Uses <code>jiti</code> for dynamic module loading. Results cached with 1-second TTL.</p>
+<p><strong>Plugin API</strong> (<code>src/plugins/types.ts</code>):</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">api</span><span class="p">.</span><span class="nx">registerChannel</span><span class="p">(</span><span class="nx">registration</span><span class="p">)</span><span class="w">   </span><span class="c1">// Add messaging channel</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerProvider</span><span class="p">(</span><span class="nx">provider</span><span class="p">)</span><span class="w">       </span><span class="c1">// Add AI provider</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerTool</span><span class="p">(</span><span class="nx">tool</span><span class="p">)</span><span class="w">               </span><span class="c1">// Add agent tool</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerHook</span><span class="p">(</span><span class="nx">events</span><span class="p">,</span><span class="w"> </span><span class="nx">handler</span><span class="p">)</span><span class="w">    </span><span class="c1">// Add lifecycle hook</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerHttpRoute</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w">        </span><span class="c1">// Add HTTP endpoint</span>
+</code></pre></div>
+<p><strong>Plugin Registry</strong> (<code>src/plugins/registry.ts:130-143</code>):</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">plugins</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginRecord</span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">channels</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginChannelRegistration</span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">providers</span><span class="o">:</span><span class="w"> </span><span class="kt">ProviderRegistration</span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginToolRegistration</span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">hooks</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginHookRegistration</span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">gatewayHandlers</span><span class="o">:</span><span class="w"> </span><span class="kt">GatewayRequestHandlers</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Extension manifest</strong> (<code>package.json</code>):</p>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;openclaw&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;extensions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;./index.ts&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;discord&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Discord&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;docsPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/channels/discord&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;order&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Plugin SDK</strong> (<code>src/plugin-sdk/index.ts</code>, 150+ exports): Channel plugin types, provider auth helpers, context engine interfaces, tool types, gateway request handler types.</p>
+<hr />
+<h3 id="layer-4-channel-integrations-need-at-least-1">Layer 4: Channel Integrations (Need at least 1)<a class="headerlink" href="#layer-4-channel-integrations-need-at-least-1" title="Permanent link">&para;</a></h3>
+<p><strong>Interface</strong> (<code>src/channels/plugins/types.plugin.ts:49-86</code>):</p>
+<p><code>ChannelPlugin</code> with ~20 optional adapters:</p>
+<ul>
+<li><strong>Required:</strong> <code>id</code>, <code>meta</code>, <code>capabilities</code>, <code>config</code></li>
+<li><strong>Key adapters:</strong></li>
+<li><code>outbound</code> — send messages to the channel</li>
+<li><code>gateway</code> — start/stop accounts, QR login</li>
+<li><code>status</code> — health checks, account validation</li>
+<li><code>messaging</code> — receive, route, thread messages</li>
+<li><code>security</code> — allowlist enforcement</li>
+<li><code>directory</code> — list peers/groups</li>
+<li><code>threading</code> — reply-to mode, context</li>
+<li><code>actions</code> — polls, buttons, cards</li>
+<li><code>agentTools</code> — channel-specific agent tools</li>
+</ul>
+<p><strong>Adapter types</strong> (<code>src/channels/plugins/types.adapters.ts:1-383</code>):</p>
+<ul>
+<li><code>ChannelConfigAdapter</code> (Line 52-81): Account resolution, allowlist config</li>
+<li><code>ChannelOutboundAdapter</code> (Line 108-125): deliveryMode (direct/gateway/hybrid), chunker, sendPayload/sendText/sendMedia/sendPoll</li>
+<li><code>ChannelGatewayAdapter</code> (Line 275-289): startAccount, stopAccount, loginWithQr</li>
+<li><code>ChannelStatusAdapter</code> (Line 127-166): probeAccount, buildAccountSnapshot</li>
+<li><code>ChannelDirectoryAdapter</code> (Line 335-344): self(), listPeers, listGroups</li>
+</ul>
+<p><strong>Core types</strong> (<code>src/channels/plugins/types.core.ts:1-403</code>):</p>
+<ul>
+<li><code>ChannelCapabilities</code> (Line 181-194): chatTypes array, feature flags</li>
+<li><code>ChannelAccountSnapshot</code> (Line 97-159): enabled, configured, linked, connected, lastMessageAt</li>
+<li><code>ChannelSecurityDmPolicy</code> (Line 196-203): DM allowlist policy</li>
+</ul>
+<p><strong>Channel registry</strong> (<code>src/channels/registry.ts:1-201</code>):</p>
+<ul>
+<li>Core channel order: telegram, whatsapp, discord, irc, googlechat, slack, signal, imessage, line</li>
+<li>Aliases: "imsg" → "imessage"</li>
+<li>Functions: <code>listChatChannels()</code>, <code>getChatChannelMeta()</code>, <code>normalizeChatChannelId()</code></li>
+</ul>
+<p><strong>Built-in channels</strong> (in <code>extensions/</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Telegram</td>
+<td><code>extensions/telegram/</code></td>
+</tr>
+<tr>
+<td>WhatsApp</td>
+<td><code>extensions/whatsapp/</code></td>
+</tr>
+<tr>
+<td>Discord</td>
+<td><code>extensions/discord/</code></td>
+</tr>
+<tr>
+<td>Slack</td>
+<td><code>extensions/slack/</code></td>
+</tr>
+<tr>
+<td>Signal</td>
+<td><code>extensions/signal/</code></td>
+</tr>
+<tr>
+<td>iMessage</td>
+<td><code>extensions/imessage/</code></td>
+</tr>
+<tr>
+<td>LINE</td>
+<td><code>extensions/line/</code></td>
+</tr>
+<tr>
+<td>IRC</td>
+<td><code>extensions/irc/</code></td>
+</tr>
+<tr>
+<td>Matrix</td>
+<td><code>extensions/matrix/</code></td>
+</tr>
+<tr>
+<td>Mattermost</td>
+<td><code>extensions/mattermost/</code></td>
+</tr>
+<tr>
+<td>Zalo</td>
+<td><code>extensions/zalo/</code></td>
+</tr>
+<tr>
+<td>Google Chat</td>
+<td><code>extensions/googlechat/</code></td>
+</tr>
+<tr>
+<td>Web UI</td>
+<td><code>src/channels/web/</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each channel is independently removable — just don't configure it.</p>
+<p><strong>Example: Discord registration</strong> (<code>extensions/discord/index.ts:1-19</code>):</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">plugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;discord&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Discord&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Discord channel plugin&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">configSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">emptyPluginConfigSchema</span><span class="p">(),</span>
+<span class="w">  </span><span class="nx">register</span><span class="p">(</span><span class="nx">api</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawPluginApi</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">setDiscordRuntime</span><span class="p">(</span><span class="nx">api</span><span class="p">.</span><span class="nx">runtime</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">api</span><span class="p">.</span><span class="nx">registerChannel</span><span class="p">({</span><span class="w"> </span><span class="nx">plugin</span><span class="o">:</span><span class="w"> </span><span class="kt">discordPlugin</span><span class="w"> </span><span class="p">})</span>
+<span class="w">    </span><span class="nx">registerDiscordSubagentHooks</span><span class="p">(</span><span class="nx">api</span><span class="p">)</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h3 id="layer-5-ai-providers-need-at-least-1">Layer 5: AI Providers (Need at least 1)<a class="headerlink" href="#layer-5-ai-providers-need-at-least-1" title="Permanent link">&para;</a></h3>
+<p><strong>Model config</strong> (<code>src/config/types.models.ts:3-12</code>):</p>
+<p>Supported API protocols:</p>
+<ul>
+<li><code>openai-completions</code></li>
+<li><code>openai-responses</code></li>
+<li><code>anthropic-messages</code></li>
+<li><code>google-generative-ai</code></li>
+<li><code>github-copilot</code></li>
+<li><code>bedrock-converse-stream</code> (AWS)</li>
+<li><code>ollama</code> (local)</li>
+</ul>
+<p><strong>Model definition</strong> (<code>src/config/types.models.ts:34-61</code>):</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">ModelDefinitionConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">reasoning</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">Array</span><span class="o">&lt;</span><span class="s2">&quot;text&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;image&quot;</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">cost</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="p">,</span><span class="w"> </span><span class="nx">cacheRead</span><span class="p">,</span><span class="w"> </span><span class="nx">cacheWrite</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">contextWindow</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">maxTokens</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">compat?</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelCompatConfig</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="nx">ModelProviderConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">baseUrl</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">apiKey?</span><span class="o">:</span><span class="w"> </span><span class="kt">SecretInput</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">auth</span><span class="o">?:</span><span class="w"> </span><span class="s2">&quot;api-key&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;aws-sdk&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;oauth&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;token&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">models</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelDefinitionConfig</span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">headers?</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">SecretInput</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Provider builders</strong> (<code>src/agents/models-config.providers.ts</code>):</p>
+<p>Qwen, BytePlus/Doubao, Minimax, Moonshot/Kimi, Qianfan (Baidu), Xiaomi, OpenRouter, Together, Venice, HuggingFace, Vercel AI Gateway, Kilocode, and more.</p>
+<p><strong>Provider plugin example — Qwen OAuth</strong> (<code>extensions/qwen-portal-auth/index.ts:1-126</code>):</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">register</span><span class="p">(</span><span class="nx">api</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawPluginApi</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">api</span><span class="p">.</span><span class="nx">registerProvider</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;qwen-portal&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Qwen&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">docsPath</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/providers/qwen&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">aliases</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;qwen&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nx">auth</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;device&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">kind</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;device_code&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Qwen OAuth&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">run</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// OAuth device code flow</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">buildOauthProviderAuthResult</span><span class="p">({</span>
+<span class="w">          </span><span class="nx">providerId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;qwen-portal&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nx">configPatch</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">models</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">providers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;qwen-portal&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">baseUrl</span><span class="p">,</span><span class="w"> </span><span class="nx">apiKey</span><span class="p">,</span><span class="w"> </span><span class="nx">models</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}]</span>
+<span class="w">  </span><span class="p">})</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Providers register via the plugin system with auth flows (API key, OAuth, device code).</p>
+<hr />
+<h3 id="layer-6-skills-all-optional">Layer 6: Skills (All Optional)<a class="headerlink" href="#layer-6-skills-all-optional" title="Permanent link">&para;</a></h3>
+<p>Skills are <strong>documentation files</strong> (<code>SKILL.md</code>) — NOT executable code. They teach the agent when and how to use CLI commands/APIs. 53 bundled skills in <code>skills/</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Productivity</td>
+<td>apple-notes, apple-reminders, notion, obsidian, trello, things-mac</td>
+</tr>
+<tr>
+<td>Developer</td>
+<td>coding-agent, github, gh-issues, tmux</td>
+</tr>
+<tr>
+<td>Media</td>
+<td>camsnap, gifgrep, openai-image-gen, openai-whisper, video-frames</td>
+</tr>
+<tr>
+<td>Smart Home</td>
+<td>openhue, sonoscli, spotify-player</td>
+</tr>
+<tr>
+<td>Communication</td>
+<td>discord, slack, bluebubbles</td>
+</tr>
+<tr>
+<td>Utility</td>
+<td>weather, summarize, oracle, goplaces</td>
+</tr>
+<tr>
+<td>Voice</td>
+<td>sherpa-onnx-tts, voice-call</td>
+</tr>
+<tr>
+<td>Meta</td>
+<td>skill-creator, canvas, session-logs, model-usage, healthcheck</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example — Weather skill</strong> (<code>skills/weather/SKILL.md</code>): Documents how to use <code>wttr.in</code> via curl. No API key needed. Teaches the agent formatting and when to use forecasts vs current conditions.</p>
+<p><strong>Example — GitHub skill</strong> (<code>skills/github/SKILL.md</code>): Documents <code>gh</code> CLI commands for PRs, issues, CI. Emphasizes when NOT to use (local git ops, code review).</p>
+<p>Every skill can be removed independently with zero impact on the system.</p>
+<hr />
+<h3 id="layer-7-memory-system-optional">Layer 7: Memory System (Optional)<a class="headerlink" href="#layer-7-memory-system-optional" title="Permanent link">&para;</a></h3>
+<p><code>src/memory/</code> (105 files, 1.7MB) — RAG-based long-term memory.</p>
+<p><strong>Core manager</strong> (<code>src/memory/manager.ts</code>, 28KB):</p>
+<ul>
+<li><code>MemoryIndexManager</code>: Main embedding + search interface</li>
+<li>Handles embeddings, indexing, deduplication</li>
+<li>Supports multiple backend implementations</li>
+</ul>
+<p><strong>Embedding providers:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td><code>src/memory/embeddings-openai.ts</code></td>
+</tr>
+<tr>
+<td>Google Gemini</td>
+<td><code>src/memory/embeddings-gemini.ts</code> (17KB)</td>
+</tr>
+<tr>
+<td>Voyage AI</td>
+<td><code>src/memory/embeddings-voyage.ts</code> (8KB)</td>
+</tr>
+<tr>
+<td>Ollama (local)</td>
+<td><code>src/memory/embeddings-ollama.ts</code> (4KB)</td>
+</tr>
+<tr>
+<td>Mistral</td>
+<td>also supported</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Search &amp; retrieval:</strong></p>
+<ul>
+<li><code>search-manager.ts</code> — query execution and retrieval (7.8KB)</li>
+<li><code>query-expansion.ts</code> — query rewriting for better recall (13KB)</li>
+<li><code>mmr.ts</code> — Maximal Marginal Relevance ranking (6KB)</li>
+<li><code>qmd-manager.ts</code> — Query Markdown processing (70KB)</li>
+<li><code>temporal-decay.ts</code> — recent-message boosting (4KB)</li>
+</ul>
+<p><strong>Batch embedding:</strong> Supports batch APIs for OpenAI, Gemini, and Voyage.</p>
+<p><strong>Storage backends:</strong> Pluggable — e.g., <code>extensions/memory-lancedb/</code> for LanceDB vector storage.</p>
+<p><strong>Export</strong> (<code>src/memory/index.ts:1-12</code>):</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">MemoryIndexManager</span><span class="w"> </span><span class="p">}</span>
+<span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">MemorySearchManager</span><span class="p">,</span><span class="w"> </span><span class="nx">MemorySearchResult</span><span class="w"> </span><span class="p">}</span>
+<span class="k">export</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">getMemorySearchManager</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Without memory, the assistant simply forgets between sessions.</p>
+<hr />
+<h3 id="layer-8-context-engine-optional-but-important">Layer 8: Context Engine (Optional but important)<a class="headerlink" href="#layer-8-context-engine-optional-but-important" title="Permanent link">&para;</a></h3>
+<p><code>src/context-engine/types.ts:1-177</code> — manages the conversation window:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">interface</span><span class="w"> </span><span class="nx">ContextEngine</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">bootstrap</span><span class="p">(</span><span class="nx">sessionId</span><span class="p">,</span><span class="w"> </span><span class="nx">messages</span><span class="o">?</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">ingest</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">ingestBatch</span><span class="p">(</span><span class="nx">messages</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">assemble</span><span class="p">(</span><span class="nx">messages</span><span class="p">,</span><span class="w"> </span><span class="nx">tokenBudget</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">AssembleResult</span>
+<span class="w">  </span><span class="nx">compact</span><span class="p">(</span><span class="nx">tokenBudget</span><span class="p">,</span><span class="w"> </span><span class="nx">force</span><span class="o">?</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">CompactResult</span>
+<span class="w">  </span><span class="nx">afterTurn</span><span class="p">(</span><span class="nx">messages</span><span class="p">,</span><span class="w"> </span><span class="nx">prePromptCount</span><span class="p">,</span><span class="w"> </span><span class="nx">tokenBudget</span><span class="o">?</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">prepareSubagentSpawn</span><span class="p">(</span><span class="nx">parentKey</span><span class="p">,</span><span class="w"> </span><span class="nx">childKey</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">onSubagentEnded</span><span class="p">(</span><span class="nx">reason</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">dispose</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Key features:</strong></p>
+<ul>
+<li><strong>Pluggable contract</strong> — swap implementations (default vs custom) via <code>src/context-engine/registry.ts</code></li>
+<li><strong>Message compaction</strong> — summarize old turns to fit token budget</li>
+<li><strong>Subagent isolation</strong> — prepare child sessions with their own context</li>
+<li><strong>Token budgeting</strong> — proactive compaction to stay within limits</li>
+</ul>
+<p>Removing this severely degrades conversation quality but doesn't crash the system.</p>
+<hr />
+<h3 id="layer-9-voice-tts-optional">Layer 9: Voice / TTS (Optional)<a class="headerlink" href="#layer-9-voice-tts-optional" title="Permanent link">&para;</a></h3>
+<p><code>src/tts/</code> (4 files, 176KB) — text-to-speech with multiple backends:</p>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ElevenLabs</td>
+<td>Cloud, voice cloning, stability/similarity controls</td>
+</tr>
+<tr>
+<td>OpenAI TTS</td>
+<td>tts-1, tts-1-hd models</td>
+</tr>
+<tr>
+<td>Edge TTS</td>
+<td>Offline Microsoft voices via <code>node-edge-tts</code></td>
+</tr>
+<tr>
+<td>Ollama TTS</td>
+<td>Local on-device</td>
+</tr>
+<tr>
+<td>sherpa-onnx</td>
+<td>On-device (via skill)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Configuration</strong> (<code>src/tts/tts-core.ts</code>):</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ResolvedTtsConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">elevenlabs</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">baseUrl</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">apiKey</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">voiceId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">voiceSettings</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">stability</span><span class="p">,</span><span class="w"> </span><span class="nx">similarityBoost</span><span class="p">,</span><span class="w"> </span><span class="nx">style</span><span class="p">,</span><span class="w"> </span><span class="nx">speed</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nx">openai</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">baseUrl</span><span class="p">,</span><span class="w"> </span><span class="nx">apiKey</span><span class="p">,</span><span class="w"> </span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">voice</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Only needed for voice interactions.</p>
+<hr />
+<h3 id="layer-10-canvas-a2ui-optional">Layer 10: Canvas &amp; A2UI (Optional)<a class="headerlink" href="#layer-10-canvas-a2ui-optional" title="Permanent link">&para;</a></h3>
+<p><strong>Canvas host</strong> (<code>src/canvas-host/server.ts:1-120</code>) — HTTP server on port 18793:</p>
+<ul>
+<li>Serves interactive HTML/JS/CSS from <code>~/.openclaw/canvas/</code> or custom root</li>
+<li>Live reload via chokidar file watching + WebSocket injection</li>
+<li>URL prefix: <code>/__openclaw__/canvas/</code></li>
+</ul>
+<p><strong>Architecture:</strong></p>
+<div class="language-text highlight"><pre><span></span><code>Canvas Host (HTTP:18793)
+  |  (TCP:18790 Bridge)
+Node Bridge
+  |  (WebSocket)
+Connected Nodes (Mac/iOS/Android apps)
+</code></pre></div>
+<p><strong>A2UI</strong> (<code>vendor/a2ui/</code>, <code>src/canvas-host/a2ui.ts</code>):</p>
+<ul>
+<li>Declarative JSON-based UI rendering (UIKit-like abstraction)</li>
+<li>Can render HTML/CSS/JS or structured UI components</li>
+<li>Bridge injects actions: <code>openclawSendUserAction()</code> (general), <code>openclawCanvasA2UIAction</code> (iOS/Android)</li>
+</ul>
+<p><strong>Handler interface:</strong></p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">CanvasHostHandler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">handleHttpRequest</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">boolean</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="nx">handleUpgrade</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">socket</span><span class="p">,</span><span class="w"> </span><span class="nx">head</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span>
+<span class="w">  </span><span class="nx">close</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h3 id="layer-11-companion-apps-all-optional">Layer 11: Companion Apps (All Optional)<a class="headerlink" href="#layer-11-companion-apps-all-optional" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>App</th>
+<th>Location</th>
+<th>Tech</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>macOS menu bar</td>
+<td><code>apps/macos/</code> (230 files, 7 modules)</td>
+<td>SwiftUI</td>
+<td>Menu bar app with IPC and protocol layers</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td><code>apps/ios/</code> (32 dirs)</td>
+<td>SwiftUI</td>
+<td>Chat, camera, location, Live Activities, widgets</td>
+</tr>
+<tr>
+<td>Android</td>
+<td><code>apps/android/</code></td>
+<td>Kotlin/Gradle</td>
+<td>Android NDK for native bridging</td>
+</tr>
+<tr>
+<td>Shared library</td>
+<td><code>apps/shared/OpenClawKit/</code></td>
+<td>Swift package</td>
+<td>Shared types/protocols for Apple platforms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>macOS modules:</strong> OpenClaw (main), OpenClawMacCLI, OpenClawIPC, OpenClawProtocol</p>
+<p><strong>iOS capabilities:</strong> Chat, camera, location, contacts, motion sensors, Live Activities, widgets, media handling</p>
+<p><strong>Key design:</strong> These are <strong>thin clients</strong> — they:</p>
+<ol>
+<li>Connect to the OpenClaw gateway via WebSocket</li>
+<li>Receive canvas URLs and bridge notifications</li>
+<li>Render UI and relay user actions back to gateway</li>
+<li><strong>Do NOT</strong> run the agent themselves — the gateway is the backend</li>
+</ol>
+<p>The core runs headless without any companion apps.</p>
+<hr />
+<h3 id="layer-12-infrastructure-all-optionalswappable">Layer 12: Infrastructure (All Optional/Swappable)<a class="headerlink" href="#layer-12-infrastructure-all-optionalswappable" title="Permanent link">&para;</a></h3>
+<p><strong>Docker</strong> (<code>docker-compose.yml</code>, 79 lines):</p>
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">openclaw-gateway</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Main service on port 18789</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">node dist/index.js gateway --bind lan --port 18789</span>
+<span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GET /healthz</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~/.openclaw/</span><span class="w">   </span><span class="c1"># config</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workspace dir</span><span class="w">  </span><span class="c1"># workspace</span>
+
+<span class="w">  </span><span class="nt">openclaw-cli</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># CLI companion, same network as gateway</span>
+<span class="w">    </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;service:openclaw-gateway&quot;</span>
+<span class="w">    </span><span class="c1"># Dropped: NET_RAW, NET_ADMIN capabilities</span>
+</code></pre></div>
+<p><strong>Environment variables:</strong> <code>OPENCLAW_GATEWAY_TOKEN</code>, <code>OPENCLAW_CONFIG_DIR</code>, <code>OPENCLAW_WORKSPACE_DIR</code></p>
+<p><strong>Other deployment options:</strong></p>
+<ul>
+<li><code>fly.toml</code> — Fly.io deployment</li>
+<li><code>render.yaml</code> — Render deployment</li>
+<li><code>src/daemon/</code> — systemd/launchd daemonization</li>
+<li>Tailscale integration for secure remote access</li>
+</ul>
+<hr />
+<h2 id="data-flow">Data Flow<a class="headerlink" href="#data-flow" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code>User sends message on Discord/Telegram/etc.
+         |
+         v
+Channel Plugin (extensions/&lt;channel&gt;/)
+  -&gt; receives via platform SDK, normalizes message
+         |
+         v
+Gateway (src/gateway/)
+  -&gt; authenticates, resolves route via binding hierarchy
+         |
+    +---------+-------------------+
+    |                             |
+    v                             v
+Memory Search              Context Engine
+(RAG retrieval)            (assemble prompt
+                            within token budget)
+    +----------+-----------------+
+               |
+               v
+AI Provider (OpenAI/Anthropic/Google/Ollama/etc.)
+  -&gt; LLM inference with assembled context
+               |
+               v
+Tool Execution (skills inform, plugin tools execute)
+               |
+               v
+Response routed back: Gateway -&gt; Channel -&gt; User
+               |
+          (optionally)
+               v
+Canvas Host renders interactive UI
+Companion Apps receive push via bridge
+</code></pre></div>
+<hr />
+<h2 id="whats-optional-quick-reference">What's Optional — Quick Reference<a class="headerlink" href="#whats-optional-quick-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Removable?</th>
+<th>Impact of Removal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Core Runtime</td>
+<td><strong>No</strong></td>
+<td>System won't start</td>
+</tr>
+<tr>
+<td>Gateway</td>
+<td><strong>No</strong></td>
+<td>Nothing works without the control plane</td>
+</tr>
+<tr>
+<td>Plugin Framework</td>
+<td><strong>No</strong></td>
+<td>Channels/providers can't load</td>
+</tr>
+<tr>
+<td>Any single channel</td>
+<td><strong>Yes</strong></td>
+<td>Lose that platform only</td>
+</tr>
+<tr>
+<td>Any single provider</td>
+<td><strong>Yes</strong></td>
+<td>Lose that LLM only (need &gt;= 1)</td>
+</tr>
+<tr>
+<td>Any skill</td>
+<td><strong>Yes</strong></td>
+<td>Agent loses that capability</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td><strong>Yes</strong></td>
+<td>No long-term recall between sessions</td>
+</tr>
+<tr>
+<td>Context Engine</td>
+<td><strong>Yes</strong></td>
+<td>Degraded conversation quality</td>
+</tr>
+<tr>
+<td>Voice/TTS</td>
+<td><strong>Yes</strong></td>
+<td>Text-only mode</td>
+</tr>
+<tr>
+<td>Canvas/A2UI</td>
+<td><strong>Yes</strong></td>
+<td>No visual workspace</td>
+</tr>
+<tr>
+<td>All companion apps</td>
+<td><strong>Yes</strong></td>
+<td>Headless operation only</td>
+</tr>
+<tr>
+<td>Docker/Fly/Render</td>
+<td><strong>Yes</strong></td>
+<td>Run directly on bare metal instead</td>
+</tr>
+<tr>
+<td>Cron (<code>src/cron/</code>)</td>
+<td><strong>Yes</strong></td>
+<td>No scheduled tasks</td>
+</tr>
+<tr>
+<td>i18n (<code>src/i18n/</code>)</td>
+<td><strong>Yes</strong></td>
+<td>English only</td>
+</tr>
+<tr>
+<td>Browser control</td>
+<td><strong>Yes</strong></td>
+<td>No browser automation</td>
+</tr>
+<tr>
+<td>Link understanding</td>
+<td><strong>Yes</strong></td>
+<td>No URL preview/extraction</td>
+</tr>
+<tr>
+<td>Media understanding</td>
+<td><strong>Yes</strong></td>
+<td>No image/video analysis</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Minimal viable installation:</strong> Core Runtime + Gateway + 1 Channel + 1 AI Provider.</p>
+<hr />
+<h2 id="key-file-reference">Key File Reference<a class="headerlink" href="#key-file-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>File</th>
+<th>Key Lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Entry point</td>
+<td><code>src/entry.ts</code></td>
+<td>36-194</td>
+</tr>
+<tr>
+<td>CLI runtime</td>
+<td><code>src/index.ts</code></td>
+<td>36-93</td>
+</tr>
+<tr>
+<td>CLI orchestration</td>
+<td><code>src/cli/run-main.ts</code></td>
+<td>74-160+</td>
+</tr>
+<tr>
+<td>Config loading</td>
+<td><code>src/config/io.ts</code></td>
+<td>725-869, 1467-1492</td>
+</tr>
+<tr>
+<td>Session store</td>
+<td><code>src/config/sessions/store.ts</code></td>
+<td>195-270</td>
+</tr>
+<tr>
+<td>Session paths</td>
+<td><code>src/config/sessions/paths.ts</code></td>
+<td>1-330</td>
+</tr>
+<tr>
+<td>Message routing</td>
+<td><code>src/routing/resolve-route.ts</code></td>
+<td>614-804</td>
+</tr>
+<tr>
+<td>Session keys</td>
+<td><code>src/routing/session-key.ts</code></td>
+<td>1-254</td>
+</tr>
+<tr>
+<td>Gateway startup</td>
+<td><code>src/gateway/server.impl.ts</code></td>
+<td>267-1070</td>
+</tr>
+<tr>
+<td>Gateway dispatcher</td>
+<td><code>src/gateway/server-methods.ts</code></td>
+<td>100-158</td>
+</tr>
+<tr>
+<td>Protocol schemas</td>
+<td><code>src/gateway/protocol/index.ts</code></td>
+<td>1-200</td>
+</tr>
+<tr>
+<td>WebSocket handler</td>
+<td><code>src/gateway/server/ws-connection.ts</code></td>
+<td>93-200</td>
+</tr>
+<tr>
+<td>Chat handling</td>
+<td><code>src/gateway/server-methods/chat.ts</code></td>
+<td>1-1400+</td>
+</tr>
+<tr>
+<td>Channel lifecycle</td>
+<td><code>src/gateway/server-channels.ts</code></td>
+<td>111-300</td>
+</tr>
+<tr>
+<td>Gateway client</td>
+<td><code>src/gateway/client.ts</code></td>
+<td>122-150+</td>
+</tr>
+<tr>
+<td>Auth system</td>
+<td><code>src/gateway/auth.ts</code></td>
+<td>1-250</td>
+</tr>
+<tr>
+<td>HTTP server</td>
+<td><code>src/gateway/server-http.ts</code></td>
+<td>1-1500+</td>
+</tr>
+<tr>
+<td>Method scopes</td>
+<td><code>src/gateway/method-scopes.ts</code></td>
+<td>role/scope matrix</td>
+</tr>
+<tr>
+<td>Channel plugin interface</td>
+<td><code>src/channels/plugins/types.plugin.ts</code></td>
+<td>49-86</td>
+</tr>
+<tr>
+<td>Channel adapters</td>
+<td><code>src/channels/plugins/types.adapters.ts</code></td>
+<td>1-383</td>
+</tr>
+<tr>
+<td>Channel core types</td>
+<td><code>src/channels/plugins/types.core.ts</code></td>
+<td>1-403</td>
+</tr>
+<tr>
+<td>Channel registry</td>
+<td><code>src/channels/registry.ts</code></td>
+<td>1-201</td>
+</tr>
+<tr>
+<td>Plugin discovery</td>
+<td><code>src/plugins/discovery.ts</code></td>
+<td>1-100</td>
+</tr>
+<tr>
+<td>Plugin loader</td>
+<td><code>src/plugins/loader.ts</code></td>
+<td>1-120</td>
+</tr>
+<tr>
+<td>Plugin registry</td>
+<td><code>src/plugins/registry.ts</code></td>
+<td>130-143</td>
+</tr>
+<tr>
+<td>Plugin SDK</td>
+<td><code>src/plugin-sdk/index.ts</code></td>
+<td>1-150</td>
+</tr>
+<tr>
+<td>Plugin SDK core</td>
+<td><code>src/plugin-sdk/core.ts</code></td>
+<td>1-75</td>
+</tr>
+<tr>
+<td>Model types</td>
+<td><code>src/config/types.models.ts</code></td>
+<td>1-77</td>
+</tr>
+<tr>
+<td>Model builders</td>
+<td><code>src/agents/models-config.providers.ts</code></td>
+<td>1-150+</td>
+</tr>
+<tr>
+<td>Tool interface</td>
+<td><code>src/agents/tools/common.ts</code></td>
+<td>1-100</td>
+</tr>
+<tr>
+<td>Memory manager</td>
+<td><code>src/memory/manager.ts</code></td>
+<td>(28KB)</td>
+</tr>
+<tr>
+<td>Context engine types</td>
+<td><code>src/context-engine/types.ts</code></td>
+<td>1-177</td>
+</tr>
+<tr>
+<td>TTS core</td>
+<td><code>src/tts/tts-core.ts</code></td>
+<td>1-100</td>
+</tr>
+<tr>
+<td>Canvas host</td>
+<td><code>src/canvas-host/server.ts</code></td>
+<td>1-120</td>
+</tr>
+<tr>
+<td>Globals</td>
+<td><code>src/globals.ts</code></td>
+<td>1-52</td>
+</tr>
+<tr>
+<td>Runtime env</td>
+<td><code>src/runtime.ts</code></td>
+<td>37-44</td>
+</tr>
+<tr>
+<td>Docker compose</td>
+<td><code>docker-compose.yml</code></td>
+<td>1-79</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

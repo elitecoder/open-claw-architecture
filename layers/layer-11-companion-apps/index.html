@@ -1,0 +1,3153 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-10-canvas-a2ui/">
+      
+      
+        <link rel="next" href="../layer-12-infrastructure/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 11: Companion Apps - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-11-companion-apps-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 11: Companion Apps
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-the-companion-apps-the-simple-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Are the Companion Apps? (The Simple Version)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-shared-library-openclawkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The Shared Library — OpenClawKit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The Shared Library — OpenClawKit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#module-1-openclawprotocol-the-wire-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module 1: OpenClawProtocol — The Wire Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#module-2-openclawkit-core-types-gateway-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module 2: OpenClawKit — Core Types &amp; Gateway Client
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#module-3-openclawchatui-shared-chat-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module 3: OpenClawChatUI — Shared Chat Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-macos-menu-bar-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: macOS Menu Bar App
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: macOS Menu Bar App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#app-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        App State
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway Connection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canvas-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canvas Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-wake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voice Wake
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipc-inter-process-communication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IPC (Inter-Process Communication)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-ios-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: iOS App
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: iOS App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#main-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#platform-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform Capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canvas-webview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canvas &amp; WebView
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-activities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live Activities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-talk-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voice &amp; Talk Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#push-notifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push Notifications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chat-transport" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chat Transport
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#onboarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Onboarding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-android-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Android App
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Android App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-gateway-sessions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two Gateway Sessions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invoke-command-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invoke Command Registry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#platform-capabilities_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform Capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canvas-webview_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canvas WebView
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-talk-mode_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voice &amp; Talk Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#foreground-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Foreground Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secure-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secure Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-the-thin-client-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Thin Client Pattern
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Thin Client Pattern">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-apps-do-vs-what-the-gateway-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Apps Do vs. What the Gateway Does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#message-flow-user-ai-action-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Message Flow: User → AI → Action → Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capability-advertisement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capability Advertisement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git-history-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git History Evolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Git History Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-december-sprint-dec-514-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The December Sprint (Dec 5–14, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-three-renames-janfeb-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Three Renames (Jan–Feb 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#talk-mode-streaming-tts-febmar-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Talk Mode &amp; Streaming TTS (Feb–Mar 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-security-hardening-mar-23-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iOS Security Hardening (Mar 2–3, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-live-activity-mar-4-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iOS Live Activity (Mar 4, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#android-ui-redesign-mar-13-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Android UI Redesign (Mar 13, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-push-notifications-app-store-mar-712-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iOS Push Notifications &amp; App Store (Mar 7–12, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-evolution-in-four-sentences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Evolution in Four Sentences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Files Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shared-library-openclawkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shared Library (OpenClawKit)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS App
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iOS App
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#android-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Android App
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-the-companion-apps-the-simple-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Are the Companion Apps? (The Simple Version)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-shared-library-openclawkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The Shared Library — OpenClawKit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The Shared Library — OpenClawKit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#module-1-openclawprotocol-the-wire-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module 1: OpenClawProtocol — The Wire Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#module-2-openclawkit-core-types-gateway-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module 2: OpenClawKit — Core Types &amp; Gateway Client
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#module-3-openclawchatui-shared-chat-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module 3: OpenClawChatUI — Shared Chat Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-macos-menu-bar-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: macOS Menu Bar App
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: macOS Menu Bar App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#app-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        App State
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway Connection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canvas-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canvas Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-wake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voice Wake
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipc-inter-process-communication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IPC (Inter-Process Communication)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-ios-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: iOS App
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: iOS App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#main-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#platform-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform Capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canvas-webview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canvas &amp; WebView
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-activities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live Activities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-talk-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voice &amp; Talk Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#push-notifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push Notifications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chat-transport" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chat Transport
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#onboarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Onboarding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-android-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Android App
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Android App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-gateway-sessions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two Gateway Sessions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invoke-command-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invoke Command Registry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#platform-capabilities_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform Capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canvas-webview_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canvas WebView
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-talk-mode_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voice &amp; Talk Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#foreground-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Foreground Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secure-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secure Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-the-thin-client-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Thin Client Pattern
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Thin Client Pattern">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-apps-do-vs-what-the-gateway-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Apps Do vs. What the Gateway Does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#message-flow-user-ai-action-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Message Flow: User → AI → Action → Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capability-advertisement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capability Advertisement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git-history-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git History Evolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Git History Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-december-sprint-dec-514-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The December Sprint (Dec 5–14, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-three-renames-janfeb-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Three Renames (Jan–Feb 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#talk-mode-streaming-tts-febmar-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Talk Mode &amp; Streaming TTS (Feb–Mar 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-security-hardening-mar-23-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iOS Security Hardening (Mar 2–3, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-live-activity-mar-4-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iOS Live Activity (Mar 4, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#android-ui-redesign-mar-13-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Android UI Redesign (Mar 13, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-push-notifications-app-store-mar-712-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iOS Push Notifications &amp; App Store (Mar 7–12, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-evolution-in-four-sentences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Evolution in Four Sentences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Files Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shared-library-openclawkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shared Library (OpenClawKit)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS App
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iOS App
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#android-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Android App
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-11-companion-apps-deep-dive">Layer 11: Companion Apps — Deep Dive<a class="headerlink" href="#layer-11-companion-apps-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-are-the-companion-apps-the-simple-version">What Are the Companion Apps? (The Simple Version)<a class="headerlink" href="#what-are-the-companion-apps-the-simple-version" title="Permanent link">&para;</a></h2>
+<p>Imagine you have a super-smart robot brain sitting in a box on your desk (that's the OpenClaw gateway). This brain can think, talk to AI models, manage your messages, and run tools. But it has no eyes, no ears, no hands. It can't see what's on your screen, hear your voice, take a photo, or check your location.</p>
+<p>That's where the companion apps come in. They're like the robot's <strong>eyes, ears, and hands</strong> on your phone, tablet, or laptop:</p>
+<ul>
+<li><strong>macOS app</strong>: Lives in your menu bar, lets you talk to the AI with voice wake, shows a canvas panel, and provides a CLI tool</li>
+<li><strong>iOS app</strong>: Full iPhone/iPad app with camera, location, motion sensors, contacts, Live Activities, widgets, and push notifications</li>
+<li><strong>Android app</strong>: Similar to iOS but with Kotlin, foreground service, SMS, and Google's APIs</li>
+</ul>
+<p>The critical thing to understand: these apps are <strong>thin clients</strong>. They don't run the AI. They don't process messages. They just:</p>
+<ol>
+<li><strong>Connect</strong> to the gateway via WebSocket</li>
+<li><strong>Expose</strong> platform capabilities (camera, location, mic) the gateway can invoke</li>
+<li><strong>Render</strong> UI the gateway sends them (canvas/A2UI)</li>
+<li><strong>Relay</strong> user messages to the gateway and display responses</li>
+</ol>
+<p>Think of it like a spy movie: the gateway is mission control, and the apps are field agents with special equipment. Mission control tells a field agent "take a photo," the agent takes it and sends it back.</p>
+<hr />
+<h2 id="part-1-the-shared-library-openclawkit">Part 1: The Shared Library — OpenClawKit<a class="headerlink" href="#part-1-the-shared-library-openclawkit" title="Permanent link">&para;</a></h2>
+<p><strong>Directory:</strong> <code>apps/shared/OpenClawKit/</code>
+<strong>Platforms:</strong> iOS 18+, macOS 15+</p>
+<p>The shared library prevents code duplication between the Apple apps. It has three modules:</p>
+<h3 id="module-1-openclawprotocol-the-wire-format">Module 1: OpenClawProtocol — The Wire Format<a class="headerlink" href="#module-1-openclawprotocol-the-wire-format" title="Permanent link">&para;</a></h3>
+<p>Auto-generated Swift types that match the gateway's WebSocket protocol:</p>
+<div class="language-swift highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nv">GATEWAY_PROTOCOL_VERSION</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">3</span>
+
+<span class="c1">// The first message a client sends</span>
+<span class="kd">struct</span><span class="w"> </span><span class="nc">ConnectParams</span><span class="p">:</span><span class="w"> </span><span class="n">Codable</span><span class="p">,</span><span class="w"> </span><span class="n">Sendable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">minprotocol</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="n">maxprotocol</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">client</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">]</span><span class="w">      </span><span class="c1">// Client metadata</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">caps</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">]?</span><span class="w">                    </span><span class="c1">// Capabilities (camera, location, etc.)</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">commands</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">]?</span><span class="w">               </span><span class="c1">// Supported invoke commands</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">permissions</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">]?</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">role</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">?</span><span class="w">                     </span><span class="c1">// &quot;node&quot; or &quot;operator&quot;</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">scopes</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">]?</span><span class="w">                </span><span class="c1">// Permission scopes</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">device</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">]?</span><span class="w">    </span><span class="c1">// Device identity</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">auth</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">]?</span><span class="w">      </span><span class="c1">// Auth credentials</span>
+<span class="p">}</span>
+
+<span class="c1">// Gateway&#39;s hello response</span>
+<span class="kd">struct</span><span class="w"> </span><span class="nc">HelloOk</span><span class="p">:</span><span class="w"> </span><span class="n">Codable</span><span class="p">,</span><span class="w"> </span><span class="n">Sendable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">_protocol</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">server</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">]</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">features</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">]</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">Snapshot</span><span class="w">              </span><span class="c1">// Current gateway state</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">canvashosturl</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">?</span><span class="w">          </span><span class="c1">// Canvas URL for this client</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">policy</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">]</span><span class="w">    </span><span class="c1">// Policy/permissions</span>
+<span class="p">}</span>
+
+<span class="c1">// RPC request/response frames</span>
+<span class="kd">struct</span><span class="w"> </span><span class="nc">RequestFrame</span><span class="p">:</span><span class="w"> </span><span class="n">Codable</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">id</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">method</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">params</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">?</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">struct</span><span class="w"> </span><span class="nc">ResponseFrame</span><span class="p">:</span><span class="w"> </span><span class="n">Codable</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">id</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">ok</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="p">,</span><span class="w"> </span><span class="n">payload</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">?,</span><span class="w"> </span><span class="n">error</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">]?</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">struct</span><span class="w"> </span><span class="nc">EventFrame</span><span class="p">:</span><span class="w"> </span><span class="n">Codable</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">event</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">payload</span><span class="p">:</span><span class="w"> </span><span class="n">AnyCodable</span><span class="p">?,</span><span class="w"> </span><span class="n">seq</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">?</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<h3 id="module-2-openclawkit-core-types-gateway-client">Module 2: OpenClawKit — Core Types &amp; Gateway Client<a class="headerlink" href="#module-2-openclawkit-core-types-gateway-client" title="Permanent link">&para;</a></h3>
+<p><strong>Gateway Channel (<code>GatewayChannel.swift</code>):</strong>
+A generic WebSocket abstraction with:
+- <code>WebSocketTasking</code> protocol (wraps <code>URLSessionWebSocketTask</code>, mockable for tests)
+- <code>GatewayConnectOptions</code> struct with role, scopes, capabilities, commands, permissions
+- Auth sources: <code>deviceToken</code>, <code>sharedToken</code>, <code>bootstrapToken</code>, <code>password</code>, <code>none</code></p>
+<p><strong>Gateway Node Session (<code>GatewayNodeSession.swift</code>, 536 lines):</strong>
+The main connection actor for companion apps:
+<div class="language-swift highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">actor</span><span class="w"> </span><span class="n">GatewayNodeSession</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="w"> </span><span class="n">token</span><span class="p">?,</span><span class="w"> </span><span class="n">bootstrapToken</span><span class="p">?,</span><span class="w"> </span><span class="n">password</span><span class="p">?,</span>
+<span class="w">                 </span><span class="n">connectOptions</span><span class="p">,</span><span class="w"> </span><span class="n">onConnected</span><span class="p">,</span><span class="w"> </span><span class="n">onDisconnected</span><span class="p">,</span><span class="w"> </span><span class="n">onInvoke</span><span class="p">)</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kr">throws</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">currentCanvasHostUrl</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">String</span><span class="p">?</span>
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">refreshNodeCanvasCapability</span><span class="p">(</span><span class="n">timeoutMs</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Bool</span>
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">subscribeServerEvents</span><span class="p">(</span><span class="n">bufferingNewest</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">AsyncStream</span><span class="p">&lt;</span><span class="n">EventFrame</span><span class="p">&gt;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>The <code>onInvoke</code> callback is how the gateway commands the device — it sends a <code>BridgeInvokeRequest</code>, and the app returns a <code>BridgeInvokeResponse</code>.</p>
+<p><strong>Canvas A2UI Action (<code>CanvasA2UIAction.swift</code>, 105 lines):</strong>
+Formats A2UI actions as structured agent messages:
+<div class="language-text highlight"><pre><span></span><code>CANVAS_A2UI action=&lt;name&gt; session=&lt;key&gt; surface=&lt;surfaceId&gt;
+  component=&lt;componentId&gt; host=&lt;machineName&gt; instance=&lt;instanceId&gt;
+  ctx=&lt;contextJSON&gt; default=update_canvas
+</code></pre></div></p>
+<p><strong>Gateway Push (<code>GatewayPush.swift</code>):</strong>
+<div class="language-swift highlight"><pre><span></span><code><span class="kd">enum</span><span class="w"> </span><span class="nc">GatewayPush</span><span class="p">:</span><span class="w"> </span><span class="n">Sendable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">snapshot</span><span class="p">(</span><span class="n">HelloOk</span><span class="p">)</span><span class="w">     </span><span class="c1">// Initial state</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">event</span><span class="p">(</span><span class="n">EventFrame</span><span class="p">)</span><span class="w">     </span><span class="c1">// Server push events</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">seqGap</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span><span class="w"> </span><span class="n">received</span><span class="p">)</span><span class="w">  </span><span class="c1">// Missed frames</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Capabilities:</strong>
+<div class="language-swift highlight"><pre><span></span><code><span class="kd">enum</span><span class="w"> </span><span class="nc">OpenClawCapability</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">Codable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">canvas</span><span class="p">,</span><span class="w"> </span><span class="n">browser</span><span class="p">,</span><span class="w"> </span><span class="n">camera</span><span class="p">,</span><span class="w"> </span><span class="n">screen</span><span class="p">,</span><span class="w"> </span><span class="n">voiceWake</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">location</span><span class="p">,</span><span class="w"> </span><span class="n">device</span><span class="p">,</span><span class="w"> </span><span class="n">watch</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">photos</span><span class="p">,</span><span class="w"> </span><span class="n">contacts</span><span class="p">,</span><span class="w"> </span><span class="n">calendar</span><span class="p">,</span><span class="w"> </span><span class="n">reminders</span><span class="p">,</span><span class="w"> </span><span class="n">motion</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Error Types (<code>GatewayErrors.swift</code>, 147 lines):</strong>
+- <code>GatewayConnectAuthError</code> — auth failures with detail codes (AUTH_REQUIRED, TOKEN_MISMATCH, PAIRING_REQUIRED)
+- <code>GatewayResponseError</code> — RPC errors with method, code, message
+- <code>GatewayDecodingError</code> — JSON decode failures</p>
+<p><strong>Other shared types:</strong>
+- Command parameter types: <code>CameraCommands</code>, <code>LocationCommands</code>, <code>MotionCommands</code>, <code>PhotosCommands</code>, <code>ContactsCommands</code>, <code>CalendarCommands</code>, <code>SystemCommands</code>, <code>BrowserCommands</code>, <code>TalkCommands</code>
+- Platform support: <code>CameraAuthorization</code>, <code>LocationServiceSupport</code>, <code>AudioStreamingProtocols</code>
+- Auth &amp; identity: <code>DeviceAuthPayload</code>, <code>DeviceAuthStore</code>, <code>DeviceIdentity</code>, <code>InstanceIdentity</code>, <code>GatewayTLSPinning</code>
+- Talk/TTS: <code>TalkDirective</code> (voice params), <code>TalkPromptBuilder</code>, <code>TalkSystemSpeechSynthesizer</code></p>
+<h3 id="module-3-openclawchatui-shared-chat-components">Module 3: OpenClawChatUI — Shared Chat Components<a class="headerlink" href="#module-3-openclawchatui-shared-chat-components" title="Permanent link">&para;</a></h3>
+<p>SwiftUI chat UI shared between macOS and iOS:
+- <code>ChatView</code> — the main chat interface
+- <code>ChatViewModel</code> — message state management
+- <code>ChatComposer</code> — input area with attachments
+- <code>ChatMarkdownRenderer</code> — renders AI responses with markdown
+- <code>AssistantTextParser</code> — parses assistant output
+- <code>OpenClawChatTransport</code> protocol — abstract RPC for sending/receiving messages</p>
+<hr />
+<h2 id="part-2-macos-menu-bar-app">Part 2: macOS Menu Bar App<a class="headerlink" href="#part-2-macos-menu-bar-app" title="Permanent link">&para;</a></h2>
+<p><strong>Directory:</strong> <code>apps/macos/</code> (232 Swift files)
+<strong>Platform:</strong> macOS 15+</p>
+<h3 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h3>
+<p>The macOS app is a <strong>menu bar app</strong> — it lives in the menu bar (top-right of your screen) with an animated critter icon. No dock icon by default (configurable).</p>
+<p><strong>Entry Point (<code>MenuBar.swift</code>):</strong>
+<div class="language-swift highlight"><pre><span></span><code><span class="p">@</span><span class="n">main</span>
+<span class="kd">struct</span><span class="w"> </span><span class="nc">OpenClawApp</span><span class="p">:</span><span class="w"> </span><span class="n">App</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">@</span><span class="n">NSApplicationDelegateAdaptor</span><span class="p">(</span><span class="n">AppDelegate</span><span class="p">.</span><span class="kc">self</span><span class="p">)</span><span class="w"> </span><span class="kd">var</span><span class="w"> </span><span class="nv">delegate</span>
+<span class="w">    </span><span class="p">@</span><span class="n">State</span><span class="w"> </span><span class="kd">private</span><span class="w"> </span><span class="kd">var</span><span class="w"> </span><span class="nv">state</span><span class="p">:</span><span class="w"> </span><span class="n">AppState</span>
+
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">body</span><span class="p">:</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">Scene</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">MenuBarExtra</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">MenuContent</span><span class="p">(...)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">label</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">CritterStatusLabel</span><span class="p">(...)</span><span class="w">  </span><span class="c1">// Animated icon</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="p">.</span><span class="n">menuBarExtraStyle</span><span class="p">(.</span><span class="n">menu</span><span class="p">)</span>
+
+<span class="w">        </span><span class="n">Settings</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">SettingsRootView</span><span class="p">(...)</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Interactions:</strong>
+- <strong>Left-click</strong> the icon → toggle web chat panel
+- <strong>Right-click</strong> → show menu with settings, status, quick actions
+- <strong>Hover</strong> → HUD overlay for notifications</p>
+<h3 id="app-state">App State<a class="headerlink" href="#app-state" title="Permanent link">&para;</a></h3>
+<div class="language-swift highlight"><pre><span></span><code><span class="p">@</span><span class="n">MainActor</span><span class="w"> </span><span class="p">@</span><span class="n">Observable</span><span class="w"> </span><span class="kr">final</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">AppState</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">connectionMode</span><span class="p">:</span><span class="w"> </span><span class="n">ConnectionMode</span><span class="w">    </span><span class="c1">// .unconfigured, .local, .remote</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">isPaused</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="w">                    </span><span class="c1">// Pause/resume agent</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">launchAtLogin</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="w">               </span><span class="c1">// Auto-start</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">swabbleEnabled</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="w">              </span><span class="c1">// Voice wake on/off</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">swabbleTriggerWords</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">]</span><span class="w">     </span><span class="c1">// Wake words</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">voiceWakeMicID</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">            </span><span class="c1">// Selected mic</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">voiceWakeLocaleID</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">         </span><span class="c1">// Speech lang</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">voicePushToTalkEnabled</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="w">      </span><span class="c1">// PTT mode</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">talkEnabled</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="w">                 </span><span class="c1">// TTS on/off</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">showDockIcon</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="w">                </span><span class="c1">// Show in dock</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">seamColorHex</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">?</span><span class="w">             </span><span class="c1">// UI accent from gateway</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="gateway-connection">Gateway Connection<a class="headerlink" href="#gateway-connection" title="Permanent link">&para;</a></h3>
+<p><strong><code>GatewayConnection.swift</code> (800+ lines):</strong></p>
+<p>A shared actor managing the WebSocket connection with:
+- <strong>Single shared instance</strong>: <code>GatewayConnection.shared</code>
+- <strong>Auto-reconnection</strong>: Exponential backoff (150ms, 400ms, 900ms)
+- <strong>Push subscription</strong>: <code>AsyncStream&lt;GatewayPush&gt;</code> (replaces NotificationCenter)
+- <strong>Tailnet fallback</strong>: Falls back from local to Tailscale gateway
+- <strong>30+ RPC methods</strong>: agent, status, config, chat, channels, voicewake, cron, skills, health</p>
+<p><strong><code>ControlChannel.swift</code> (425+ lines):</strong></p>
+<p>Higher-level API wrapping GatewayConnection:
+<div class="language-swift highlight"><pre><span></span><code><span class="p">@</span><span class="n">MainActor</span><span class="w"> </span><span class="p">@</span><span class="n">Observable</span><span class="w"> </span><span class="kr">final</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">ControlChannel</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">enum</span><span class="w"> </span><span class="nc">ConnectionState</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="n">disconnected</span><span class="p">,</span><span class="w"> </span><span class="n">connecting</span><span class="p">,</span><span class="w"> </span><span class="n">connected</span><span class="p">,</span><span class="w"> </span><span class="n">degraded</span><span class="p">(</span><span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="p">(</span><span class="kr">set</span><span class="p">)</span><span class="w"> </span><span class="kd">var</span><span class="w"> </span><span class="nv">state</span><span class="p">:</span><span class="w"> </span><span class="n">ConnectionState</span>
+<span class="w">    </span><span class="kd">private</span><span class="p">(</span><span class="kr">set</span><span class="p">)</span><span class="w"> </span><span class="kd">var</span><span class="w"> </span><span class="nv">lastPingMs</span><span class="p">:</span><span class="w"> </span><span class="nb">Double</span><span class="p">?</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>Routes events to the right handlers:
+- "agent" events → <code>AgentEventStore</code>
+- "heartbeat" events → NotificationCenter
+- Friendly error messages for common failures</p>
+<h3 id="canvas-manager">Canvas Manager<a class="headerlink" href="#canvas-manager" title="Permanent link">&para;</a></h3>
+<p><strong><code>CanvasManager.swift</code> (340+ lines):</strong></p>
+<p>Manages canvas WebView windows:
+<div class="language-swift highlight"><pre><span></span><code><span class="p">@</span><span class="n">MainActor</span><span class="w"> </span><span class="kr">final</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">CanvasManager</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="n">sessionKey</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">?,</span><span class="w"> </span><span class="n">placement</span><span class="p">?)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">hide</span><span class="p">(</span><span class="n">sessionKey</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">eval</span><span class="p">(</span><span class="n">sessionKey</span><span class="p">,</span><span class="w"> </span><span class="n">javaScript</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">snapshot</span><span class="p">(</span><span class="n">sessionKey</span><span class="p">,</span><span class="w"> </span><span class="n">outPath</span><span class="p">?)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">String</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>Each canvas gets its own <code>CanvasWindowController</code> with:
+- Session-specific directory (<code>~/Library/Application Support/OpenClaw/canvas/&lt;sessionKey&gt;/</code>)
+- <code>WKWebView</code> with custom URL schemes (<code>openclaw://</code>, <code>openclawlocal://</code>)
+- Injected A2UI action bridge (WKUserScript at document start)
+- File watcher for auto-reload
+- Panel or fullscreen presentation</p>
+<h3 id="voice-wake">Voice Wake<a class="headerlink" href="#voice-wake" title="Permanent link">&para;</a></h3>
+<p>The macOS app has a sophisticated voice wake system (19 files):</p>
+<ul>
+<li><strong><code>VoiceWakeRuntime.swift</code></strong> — On-device speech recognition engine (using Apple's Speech framework via the Swabble library)</li>
+<li><strong><code>VoiceWakeOverlay*.swift</code></strong> — Real-time transcription overlay UI</li>
+<li><strong><code>VoiceWakeForwarder.swift</code></strong> — Sends transcripts to the AI agent:
+  <div class="language-text highlight"><pre><span></span><code>&quot;User talked via voice recognition on [MachineName] - &lt;transcript&gt;&quot;
+</code></pre></div></li>
+<li><strong><code>VoiceWakeChime.swift</code></strong> — Audio feedback: trigger chime (listening) + send chime (submitted)</li>
+<li><strong><code>VoicePushToTalk.swift</code></strong> — Push-to-talk mode</li>
+<li><strong><code>VoiceWakeGlobalSettingsSync.swift</code></strong> — Syncs wake words to gateway</li>
+</ul>
+<h3 id="ipc-inter-process-communication">IPC (Inter-Process Communication)<a class="headerlink" href="#ipc-inter-process-communication" title="Permanent link">&para;</a></h3>
+<p><strong><code>OpenClawIPC/IPC.swift</code> (417 lines):</strong></p>
+<p>Unix domain socket protocol at <code>~/Library/Application Support/OpenClaw/control.sock</code>:</p>
+<div class="language-swift highlight"><pre><span></span><code><span class="kd">enum</span><span class="w"> </span><span class="nc">Request</span><span class="p">:</span><span class="w"> </span><span class="n">Codable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">notify</span><span class="p">(</span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="n">body</span><span class="p">,</span><span class="w"> </span><span class="n">sound</span><span class="p">?,</span><span class="w"> </span><span class="n">priority</span><span class="p">?)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">ensurePermissions</span><span class="p">([</span><span class="n">Capability</span><span class="p">],</span><span class="w"> </span><span class="n">interactive</span><span class="p">)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">runShell</span><span class="p">(</span><span class="n">command</span><span class="p">,</span><span class="w"> </span><span class="n">cwd</span><span class="p">?,</span><span class="w"> </span><span class="n">env</span><span class="p">?,</span><span class="w"> </span><span class="n">timeout</span><span class="p">?)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">agent</span><span class="p">(</span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">thinking</span><span class="p">?,</span><span class="w"> </span><span class="n">session</span><span class="p">?,</span><span class="w"> </span><span class="n">deliver</span><span class="p">,</span><span class="w"> </span><span class="n">to</span><span class="p">?)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">canvasPresent</span><span class="p">(</span><span class="n">session</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">?,</span><span class="w"> </span><span class="n">placement</span><span class="p">?)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">canvasEval</span><span class="p">(</span><span class="n">session</span><span class="p">,</span><span class="w"> </span><span class="n">javaScript</span><span class="p">)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">canvasSnapshot</span><span class="p">(</span><span class="n">session</span><span class="p">,</span><span class="w"> </span><span class="n">outPath</span><span class="p">?)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">canvasA2UI</span><span class="p">(</span><span class="n">session</span><span class="p">,</span><span class="w"> </span><span class="n">command</span><span class="p">,</span><span class="w"> </span><span class="n">jsonl</span><span class="p">?)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">cameraSnap</span><span class="p">(</span><span class="n">facing</span><span class="p">?,</span><span class="w"> </span><span class="n">maxWidth</span><span class="p">?,</span><span class="w"> </span><span class="n">quality</span><span class="p">?,</span><span class="w"> </span><span class="n">outPath</span><span class="p">?)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">cameraClip</span><span class="p">(</span><span class="n">facing</span><span class="p">?,</span><span class="w"> </span><span class="n">duration</span><span class="p">?,</span><span class="w"> </span><span class="n">includeAudio</span><span class="p">,</span><span class="w"> </span><span class="n">outPath</span><span class="p">?)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">screenRecord</span><span class="p">(</span><span class="n">screenIndex</span><span class="p">?,</span><span class="w"> </span><span class="n">duration</span><span class="p">?,</span><span class="w"> </span><span class="n">fps</span><span class="p">?,</span><span class="w"> </span><span class="n">includeAudio</span><span class="p">,</span><span class="w"> </span><span class="n">outPath</span><span class="p">?)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">nodeList</span><span class="p">,</span><span class="w"> </span><span class="n">nodeDescribe</span><span class="p">(</span><span class="n">nodeId</span><span class="p">),</span><span class="w"> </span><span class="n">nodeInvoke</span><span class="p">(</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">command</span><span class="p">,</span><span class="w"> </span><span class="n">params</span><span class="p">?)</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">rpcStatus</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This lets the CLI tool (<code>openclaw-mac</code>), external scripts, and even the gateway's shell tools communicate with the menu bar app.</p>
+<h3 id="cli-tool">CLI Tool<a class="headerlink" href="#cli-tool" title="Permanent link">&para;</a></h3>
+<p><strong><code>OpenClawMacCLI/EntryPoint.swift</code> (57 lines):</strong></p>
+<div class="language-bash highlight"><pre><span></span><code>openclaw-mac<span class="w"> </span>connect<span class="w"> </span><span class="o">[</span>--url<span class="w"> </span>ws://host:port<span class="o">]</span><span class="w"> </span><span class="o">[</span>--token<span class="w"> </span>&lt;token&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--mode<span class="w"> </span>local<span class="p">|</span>remote<span class="o">]</span>
+openclaw-mac<span class="w"> </span>discover<span class="w"> </span><span class="o">[</span>--timeout<span class="w"> </span>ms<span class="o">]</span><span class="w"> </span><span class="o">[</span>--json<span class="o">]</span><span class="w"> </span><span class="o">[</span>--include-local<span class="o">]</span>
+openclaw-mac<span class="w"> </span>wizard<span class="w"> </span><span class="o">[</span>--url<span class="w"> </span>ws://host:port<span class="o">]</span><span class="w"> </span><span class="o">[</span>--token<span class="w"> </span>&lt;token&gt;<span class="o">]</span>
+</code></pre></div>
+<h3 id="gateway-discovery">Gateway Discovery<a class="headerlink" href="#gateway-discovery" title="Permanent link">&para;</a></h3>
+<p>Multiple discovery mechanisms:
+- <strong>Bonjour/mDNS</strong>: Local network gateway discovery
+- <strong>Tailscale Serve</strong>: Auto-discover via Tailscale's serve feature
+- <strong>Wide-area</strong>: Manual remote gateway configuration
+- <strong>TCP probe</strong>: Direct connection testing</p>
+<h3 id="other-features">Other Features<a class="headerlink" href="#other-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Sparkle auto-updater</strong>: Automatic update checks</li>
+<li><strong>Node pairing approval</strong>: Prompts when new devices try to pair</li>
+<li><strong>Device pairing approval</strong>: Prompts for new device connections</li>
+<li><strong>Exec approval prompting</strong>: Shows prompts when the AI wants to run commands</li>
+<li><strong>Cron settings</strong>: Manage scheduled tasks</li>
+<li><strong>Channel status</strong>: View connected messaging channels</li>
+</ul>
+<hr />
+<h2 id="part-3-ios-app">Part 3: iOS App<a class="headerlink" href="#part-3-ios-app" title="Permanent link">&para;</a></h2>
+<p><strong>Directory:</strong> <code>apps/ios/</code> (32+ directories)
+<strong>Platform:</strong> iOS 18+</p>
+<h3 id="architecture_1">Architecture<a class="headerlink" href="#architecture_1" title="Permanent link">&para;</a></h3>
+<p>The iOS app uses SwiftUI with the Observation framework (<code>@Observable</code>). It maintains <strong>two parallel gateway connections</strong>:</p>
+<ol>
+<li><strong>Node session</strong> (role=node) — device capabilities, node.invoke</li>
+<li><strong>Operator session</strong> (role=operator) — chat, config, talk</li>
+</ol>
+<h3 id="main-model">Main Model<a class="headerlink" href="#main-model" title="Permanent link">&para;</a></h3>
+<p><strong><code>NodeAppModel.swift</code> (3,020 lines):</strong></p>
+<p>This is the heart of the iOS app — a massive <code>@MainActor @Observable</code> class that coordinates everything:
+- Gateway connection lifecycle
+- Device capability routing (camera, location, motion, SMS, contacts, calendar, reminders)
+- Live Activity updates
+- Chat session management
+- Voice wake coordination
+- Talk mode state &amp; TTS playback
+- Deep link handling
+- Push notification handling
+- Background wake triggers</p>
+<h3 id="platform-capabilities">Platform Capabilities<a class="headerlink" href="#platform-capabilities" title="Permanent link">&para;</a></h3>
+<h4 id="camera-cameracontrollerswift-354-lines">Camera (<code>CameraController.swift</code>, 354 lines)<a class="headerlink" href="#camera-cameracontrollerswift-354-lines" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>snap</strong>: AVFoundation → JPEG/PNG with quality control, max width 1600px, device selection</li>
+<li><strong>clip</strong>: Video capture → MOV → MP4 export (medium quality), 250ms–60s duration</li>
+<li><strong>Permissions</strong>: Video + Audio via <code>AVCaptureDevice</code></li>
+</ul>
+<h4 id="location-locationserviceswift-179-lines">Location (<code>LocationService.swift</code>, 179 lines)<a class="headerlink" href="#location-locationserviceswift-179-lines" title="Permanent link">&para;</a></h4>
+<ul>
+<li>One-shot location with timeout</li>
+<li>Streaming location updates (async stream)</li>
+<li>Significant change monitoring (background capable)</li>
+<li>When-in-use or Always authorization modes</li>
+<li>Background location updates support</li>
+</ul>
+<h4 id="motion-motionserviceswift-101-lines">Motion (<code>MotionService.swift</code>, 101 lines)<a class="headerlink" href="#motion-motionserviceswift-101-lines" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Activity classification: walking, running, cycling, automotive, stationary, unknown</li>
+<li>Pedometer data: steps, distance, floors ascended/descended</li>
+<li>Uses <code>CMMotionActivityManager</code> and <code>CMPedometer</code></li>
+</ul>
+<h4 id="contacts-contactsserviceswift">Contacts (<code>ContactsService.swift</code>)<a class="headerlink" href="#contacts-contactsserviceswift" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Search and read contacts with framework permissions</li>
+</ul>
+<h4 id="calendar-reminders-calendarserviceswift-remindersserviceswift">Calendar &amp; Reminders (<code>CalendarService.swift</code>, <code>RemindersService.swift</code>)<a class="headerlink" href="#calendar-reminders-calendarserviceswift-remindersserviceswift" title="Permanent link">&para;</a></h4>
+<ul>
+<li>List, create, modify events and reminders via EventKit</li>
+</ul>
+<h4 id="photos-photosserviceswift">Photos (<code>PhotosService.swift</code>)<a class="headerlink" href="#photos-photosserviceswift" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Access latest photo metadata via Photos framework</li>
+</ul>
+<h3 id="canvas-webview">Canvas &amp; WebView<a class="headerlink" href="#canvas-webview" title="Permanent link">&para;</a></h3>
+<p><strong><code>ScreenWebView.swift</code> (195 lines):</strong></p>
+<p>UIViewRepresentable wrapping WKWebView:
+- A2UI action handler intercepts <code>window.webkit.messageHandlers.openclawCanvasA2UIAction</code>
+- Deep link interception for <code>openclaw://</code> URLs
+- Non-persistent data store (no cookies)
+- Full-bleed layout (no safe area insets)
+- Black background</p>
+<h3 id="live-activities">Live Activities<a class="headerlink" href="#live-activities" title="Permanent link">&para;</a></h3>
+<p><strong><code>LiveActivityManager.swift</code> (126 lines):</strong></p>
+<p>Uses iOS ActivityKit for Dynamic Island and Lock Screen:
+<div class="language-swift highlight"><pre><span></span><code><span class="kd">struct</span><span class="w"> </span><span class="nc">OpenClawActivityAttributes</span><span class="p">:</span><span class="w"> </span><span class="n">ActivityAttributes</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nv">agentName</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">sessionKey</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+
+<span class="w">    </span><span class="kd">struct</span><span class="w"> </span><span class="nc">ContentState</span><span class="p">:</span><span class="w"> </span><span class="n">Codable</span><span class="p">,</span><span class="w"> </span><span class="nb">Hashable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nv">statusText</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nv">isIdle</span><span class="p">,</span><span class="w"> </span><span class="n">isDisconnected</span><span class="p">,</span><span class="w"> </span><span class="n">isConnecting</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nv">startedAt</span><span class="p">:</span><span class="w"> </span><span class="n">Date</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>The Dynamic Island shows:
+- Green = idle (ready)
+- Red = disconnected
+- Gray = connecting
+- Elapsed time or spinner</p>
+<h3 id="voice-talk-mode">Voice &amp; Talk Mode<a class="headerlink" href="#voice-talk-mode" title="Permanent link">&para;</a></h3>
+<p><strong><code>TalkModeManager.swift</code> (2,000+ lines):</strong></p>
+<p>The largest file in the iOS app:
+- <strong>Microphone</strong>: <code>AVAudioEngine</code> with tap
+- <strong>Speech recognition</strong>: <code>SFSpeechRecognizer</code> (on-device or cloud)
+- <strong>TTS</strong>: ElevenLabs streaming (PCM 24kHz preferred, MP3 fallback)
+- <strong>Modes</strong>: Continuous listening, push-to-talk with auto-stop
+- <strong>Silence detection</strong>: Configurable timeout (~1.5s default), noise floor calibration
+- <strong>Incremental speech</strong>: Streams partial recognition results to the gateway
+- <strong>Directive support</strong>: Can switch voices/models, interrupt TTS on speech</p>
+<h3 id="push-notifications">Push Notifications<a class="headerlink" href="#push-notifications" title="Permanent link">&para;</a></h3>
+<p>The iOS app supports APNs for:
+- <strong>Silent push wakes</strong>: Gateway can wake the app in background
+- <strong>Watch prompt mirroring</strong>: Prompts from the gateway shown as rich notifications
+- <strong>Background refresh</strong>: Scheduled reconnection attempts
+- <strong>Action buttons</strong>: Up to 4 configurable action buttons per notification</p>
+<h3 id="chat-transport">Chat Transport<a class="headerlink" href="#chat-transport" title="Permanent link">&para;</a></h3>
+<p><strong><code>IOSGatewayChatTransport.swift</code> (150 lines):</strong></p>
+<p>Implements <code>OpenClawChatTransport</code> for the shared ChatUI:
+<div class="language-swift highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nf">sendMessage</span><span class="p">(</span><span class="n">sessionKey</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">thinking</span><span class="p">,</span><span class="w"> </span><span class="n">attachments</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">OpenClawChatSendResponse</span>
+<span class="w">    </span><span class="c1">// RPC: &quot;chat.send&quot; with 35s timeout</span>
+<span class="kd">func</span><span class="w"> </span><span class="nf">requestHistory</span><span class="p">(</span><span class="n">sessionKey</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">OpenClawChatHistoryPayload</span>
+<span class="w">    </span><span class="c1">// RPC: &quot;chat.history&quot;</span>
+<span class="kd">func</span><span class="w"> </span><span class="nf">events</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="n">AsyncStream</span><span class="p">&lt;</span><span class="n">OpenClawChatTransportEvent</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="c1">// Subscribes to &quot;tick&quot;, &quot;seqGap&quot;, &quot;health&quot;, &quot;chat&quot;, &quot;agent&quot; events</span>
+</code></pre></div></p>
+<h3 id="onboarding">Onboarding<a class="headerlink" href="#onboarding" title="Permanent link">&para;</a></h3>
+<ul>
+<li>QR code scanner for gateway pairing</li>
+<li>Wizard-based setup flow</li>
+<li>TLS fingerprint trust prompt (TOFU — trust on first use)</li>
+</ul>
+<hr />
+<h2 id="part-4-android-app">Part 4: Android App<a class="headerlink" href="#part-4-android-app" title="Permanent link">&para;</a></h2>
+<p><strong>Directory:</strong> <code>apps/android/</code>
+<strong>Platform:</strong> Android SDK 31+ (Android 12+), Target SDK 36</p>
+<h3 id="build-configuration">Build Configuration<a class="headerlink" href="#build-configuration" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Namespace:</strong> <code>ai.openclaw.app</code></li>
+<li><strong>NDK ABIs:</strong> armeabi-v7a, arm64-v8a, x86, x86_64</li>
+<li><strong>ProGuard</strong>: Enabled for release builds</li>
+<li><strong>Version</strong>: <code>2026.3.13</code> (versionCode: 202603130)</li>
+</ul>
+<h3 id="architecture_2">Architecture<a class="headerlink" href="#architecture_2" title="Permanent link">&para;</a></h3>
+<p>Jetpack Compose + Kotlin Coroutines with MVVM:
+- <code>NodeApp</code> (Application) → <code>NodeRuntime</code> (953 lines, main logic)
+- <code>MainViewModel</code> (150 lines) → exposes StateFlows to Compose UI
+- <code>MainActivity</code> (63 lines) → Compose entry with <code>RootScreen</code></p>
+<h3 id="two-gateway-sessions">Two Gateway Sessions<a class="headerlink" href="#two-gateway-sessions" title="Permanent link">&para;</a></h3>
+<p>Like iOS, the Android app maintains two parallel connections:
+<div class="language-kotlin highlight"><pre><span></span><code><span class="n">nodeSession</span><span class="p">:</span><span class="w"> </span><span class="n">GatewaySession</span><span class="w">    </span><span class="c1">// role=node, device capabilities</span>
+<span class="n">operatorSession</span><span class="p">:</span><span class="w"> </span><span class="n">GatewaySession</span><span class="w"> </span><span class="c1">// role=operator, chat/config/talk</span>
+</code></pre></div></p>
+<p><strong><code>GatewaySession.kt</code> (250+ lines):</strong>
+- Uses OkHttp3 WebSocket
+- RPC via <code>ConcurrentHashMap&lt;String, CompletableDeferred&lt;RpcResponse&gt;&gt;</code>
+- Auth sources: DEVICE_TOKEN, SHARED_TOKEN, BOOTSTRAP_TOKEN, PASSWORD
+- Device token retry fallback (1 retry budget)</p>
+<h3 id="invoke-command-registry">Invoke Command Registry<a class="headerlink" href="#invoke-command-registry" title="Permanent link">&para;</a></h3>
+<p><strong><code>InvokeCommandRegistry.kt</code>:</strong></p>
+<p>Maps gateway commands to handlers:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Commands</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Canvas</td>
+<td>present, hide, navigate, eval, snapshot</td>
+</tr>
+<tr>
+<td>A2UI</td>
+<td>reset, push, pushJsonl</td>
+</tr>
+<tr>
+<td>Camera</td>
+<td>list, snap, clip</td>
+</tr>
+<tr>
+<td>Location</td>
+<td>get</td>
+</tr>
+<tr>
+<td>Device</td>
+<td>status, info, permissions, health</td>
+</tr>
+<tr>
+<td>Notifications</td>
+<td>list, actions</td>
+</tr>
+<tr>
+<td>System</td>
+<td>notify</td>
+</tr>
+<tr>
+<td>Photos</td>
+<td>latest</td>
+</tr>
+<tr>
+<td>Contacts</td>
+<td>search</td>
+</tr>
+<tr>
+<td>Calendar</td>
+<td>list, get</td>
+</tr>
+<tr>
+<td>Motion</td>
+<td>activities, pedometer</td>
+</tr>
+<tr>
+<td>SMS</td>
+<td>send</td>
+</tr>
+</tbody>
+</table>
+<h3 id="platform-capabilities_1">Platform Capabilities<a class="headerlink" href="#platform-capabilities_1" title="Permanent link">&para;</a></h3>
+<h4 id="camera-cameracapturemanagerkt-150-lines">Camera (<code>CameraCaptureManager.kt</code>, 150+ lines)<a class="headerlink" href="#camera-cameracapturemanagerkt-150-lines" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Uses <strong>CameraX</strong> (androidx.camera)</li>
+<li>snap: EXIF rotation handling, bitmap scaling, JPEG compression</li>
+<li>clip: MP4 video recording</li>
+<li>Smart size limiter: dynamically reduces quality to stay under 5MB</li>
+<li>Permissions: CAMERA + RECORD_AUDIO</li>
+</ul>
+<h4 id="location-locationcapturemanagerkt">Location (<code>LocationCaptureManager.kt</code>)<a class="headerlink" href="#location-locationcapturemanagerkt" title="Permanent link">&para;</a></h4>
+<ul>
+<li>One-shot and streaming location</li>
+<li>FusedLocationProviderClient integration</li>
+</ul>
+<h4 id="motion-motionhandlerkt">Motion (<code>MotionHandler.kt</code>)<a class="headerlink" href="#motion-motionhandlerkt" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Step counter, accelerometer, gyroscope via SensorManager</li>
+<li>Activity recognition via <code>ACTIVITY_RECOGNITION</code> permission</li>
+</ul>
+<h4 id="sms-smshandlerkt-smsmanagerkt">SMS (<code>SmsHandler.kt</code>, <code>SmsManager.kt</code>)<a class="headerlink" href="#sms-smshandlerkt-smsmanagerkt" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Send SMS programmatically (with <code>SEND_SMS</code> permission)</li>
+<li>Not available on iOS (Apple restriction)</li>
+</ul>
+<h4 id="contacts-contactshandlerkt">Contacts (<code>ContactsHandler.kt</code>)<a class="headerlink" href="#contacts-contactshandlerkt" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Search via <code>ContactsContract</code> provider</li>
+</ul>
+<h4 id="calendar-calendarhandlerkt">Calendar (<code>CalendarHandler.kt</code>)<a class="headerlink" href="#calendar-calendarhandlerkt" title="Permanent link">&para;</a></h4>
+<ul>
+<li>List and get events via <code>CalendarContract</code> provider</li>
+</ul>
+<h4 id="photos-photoshandlerkt">Photos (<code>PhotosHandler.kt</code>)<a class="headerlink" href="#photos-photoshandlerkt" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Query MediaStore for latest images</li>
+</ul>
+<h3 id="canvas-webview_1">Canvas WebView<a class="headerlink" href="#canvas-webview_1" title="Permanent link">&para;</a></h3>
+<p><strong><code>CanvasController.kt</code> (200 lines):</strong>
+<div class="language-kotlin highlight"><pre><span></span><code><span class="kd">class</span><span class="w"> </span><span class="nc">CanvasController</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">fun</span><span class="w"> </span><span class="nf">attach</span><span class="p">(</span><span class="n">webView</span><span class="p">:</span><span class="w"> </span><span class="n">WebView</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">fun</span><span class="w"> </span><span class="nf">navigate</span><span class="p">(</span><span class="n">url</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">suspend</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">eval</span><span class="p">(</span><span class="n">javaScript</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span><span class="p">):</span><span class="w"> </span><span class="kt">String</span>
+<span class="w">    </span><span class="kd">suspend</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">snapshotBase64</span><span class="p">(</span><span class="n">format</span><span class="p">,</span><span class="w"> </span><span class="n">quality?,</span><span class="w"> </span><span class="n">maxWidth?)</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<ul>
+<li>Loads scaffold from <code>file:///android_asset/CanvasScaffold/scaffold.html</code></li>
+<li>A2UI via <code>WebView.evaluateJavascript()</code></li>
+<li>Snapshot: Bitmap → scale → JPEG → Base64</li>
+</ul>
+<h3 id="voice-talk-mode_1">Voice &amp; Talk Mode<a class="headerlink" href="#voice-talk-mode_1" title="Permanent link">&para;</a></h3>
+<p><strong><code>TalkModeManager.kt</code> (200+ lines):</strong>
+- Speech recognition: <code>android.speech.SpeechRecognizer</code>
+- TTS: ElevenLabs WebSocket streaming (<code>ElevenLabsStreamingTts.kt</code>) with system TTS fallback
+- Audio focus management via <code>AudioFocusRequest</code>
+- Modes: continuous listening, push-to-talk
+- State flows: isEnabled, isListening, isSpeaking, statusText, micInputLevel</p>
+<h3 id="foreground-service">Foreground Service<a class="headerlink" href="#foreground-service" title="Permanent link">&para;</a></h3>
+<p><strong><code>NodeForegroundService.kt</code> (150 lines):</strong></p>
+<p>Android requires a foreground service to keep the WebSocket alive when the app is backgrounded:
+- Persistent notification showing connection status + mic state
+- <code>FOREGROUND_SERVICE_TYPE_DATA_SYNC</code>
+- Observes runtime state and updates notification text dynamically</p>
+<h3 id="permissions">Permissions<a class="headerlink" href="#permissions" title="Permanent link">&para;</a></h3>
+<div class="language-xml highlight"><pre><span></span><code><span class="cm">&lt;!-- From AndroidManifest.xml --&gt;</span>
+INTERNET,<span class="w"> </span>ACCESS_NETWORK_STATE,<span class="w"> </span>NEARBY_WIFI_DEVICES
+ACCESS_FINE_LOCATION,<span class="w"> </span>ACCESS_COARSE_LOCATION
+CAMERA,<span class="w"> </span>RECORD_AUDIO
+READ_CONTACTS,<span class="w"> </span>WRITE_CONTACTS
+READ_CALENDAR,<span class="w"> </span>WRITE_CALENDAR
+SEND_SMS
+READ_MEDIA_IMAGES,<span class="w"> </span>READ_MEDIA_VISUAL_USER_SELECTED
+ACTIVITY_RECOGNITION
+POST_NOTIFICATIONS,<span class="w"> </span>FOREGROUND_SERVICE,<span class="w"> </span>FOREGROUND_SERVICE_DATA_SYNC
+</code></pre></div>
+<h3 id="secure-storage">Secure Storage<a class="headerlink" href="#secure-storage" title="Permanent link">&para;</a></h3>
+<p><strong><code>SecurePrefs.kt</code>:</strong>
+- Uses <code>EncryptedSharedPreferences</code> for credentials
+- Gateway tokens, TLS fingerprints, device identity</p>
+<hr />
+<h2 id="part-5-the-thin-client-pattern">Part 5: The Thin Client Pattern<a class="headerlink" href="#part-5-the-thin-client-pattern" title="Permanent link">&para;</a></h2>
+<h3 id="what-the-apps-do-vs-what-the-gateway-does">What the Apps Do vs. What the Gateway Does<a class="headerlink" href="#what-the-apps-do-vs-what-the-gateway-does" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Responsibility</th>
+<th>App</th>
+<th>Gateway</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Run the AI agent</td>
+<td></td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Process messages</td>
+<td></td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Manage sessions</td>
+<td></td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Execute tools</td>
+<td></td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Take photos</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Read location</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Access contacts</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Read motion data</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Send SMS</td>
+<td>✓ (Android)</td>
+<td></td>
+</tr>
+<tr>
+<td>Render UI</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Play TTS audio</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Recognize speech</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Show notifications</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Manage Live Activities</td>
+<td>✓ (iOS)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="connection-architecture">Connection Architecture<a class="headerlink" href="#connection-architecture" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>Companion App
+├── nodeSession (role=node)
+│   ├── Capabilities: [camera, location, motion, SMS, contacts, ...]
+│   ├── Commands: [camera.snap, location.get, device.status, ...]
+│   └── Handles: node.invoke requests FROM the gateway
+│
+└── operatorSession (role=operator)
+    ├── Scopes: [operator.read, operator.write, operator.talk.secrets]
+    └── Methods: chat.send, chat.history, sessions.list, talk.get.config
+</code></pre></div>
+<h3 id="message-flow-user-ai-action-response">Message Flow: User → AI → Action → Response<a class="headerlink" href="#message-flow-user-ai-action-response" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>1. User types &quot;take a photo of my desk&quot; in chat
+   ↓
+2. App sends chat.send via operatorSession
+   ↓
+3. Gateway receives message, runs AI agent
+   ↓
+4. AI decides to use camera tool
+   ↓
+5. Gateway sends node.invoke(command: &quot;camera.snap&quot;) via nodeSession
+   ↓
+6. App&#39;s CameraController takes photo → JPEG → Base64
+   ↓
+7. App returns BridgeInvokeResponse with image data
+   ↓
+8. Gateway gives image to AI for analysis
+   ↓
+9. AI generates text response: &quot;I can see a desk with...&quot;
+   ↓
+10. Gateway sends chat event via operatorSession
+    ↓
+11. App displays response in ChatView
+</code></pre></div>
+<h3 id="capability-advertisement">Capability Advertisement<a class="headerlink" href="#capability-advertisement" title="Permanent link">&para;</a></h3>
+<p>On connect, apps advertise what they can do:</p>
+<div class="language-swift highlight"><pre><span></span><code><span class="c1">// iOS</span>
+<span class="n">GatewayConnectOptions</span><span class="p">(</span>
+<span class="w">    </span><span class="n">role</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;node&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">caps</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;camera&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;location&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;motion&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;contacts&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;calendar&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;reminders&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;canvas&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="n">commands</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;camera.snap&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;camera.clip&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;location.get&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;device.status&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="s">&quot;canvas.present&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;canvas.eval&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;canvas.snapshot&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">...],</span>
+<span class="w">    </span><span class="n">permissions</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;camera&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;microphone&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>The gateway only sends invoke commands the app has advertised. If the app doesn't support <code>sms.send</code> (like iOS), the gateway won't try.</p>
+<hr />
+<h2 id="git-history-evolution">Git History Evolution<a class="headerlink" href="#git-history-evolution" title="Permanent link">&para;</a></h2>
+<h3 id="the-december-sprint-dec-514-2025">The December Sprint (Dec 5–14, 2025)<a class="headerlink" href="#the-december-sprint-dec-514-2025" title="Permanent link">&para;</a></h3>
+<p>Peter Steinberger created all three apps and the shared library in a 10-day sprint:</p>
+<p><strong>Dec 5</strong>: The <strong>macOS app</strong> was born — 1,236 lines creating the menu bar app with CLI, IPC, and animated critter icon. Settings, onboarding, and menu bar icon animations followed within hours.</p>
+<p><strong>Dec 6–8</strong>: <strong>Voice wake</strong> was added to macOS — live speech recognition listener with animated ears, mic picker, voice wake overlay (291 lines), and adaptive delays.</p>
+<p><strong>Dec 9</strong>: <strong>Relay renamed to gateway</strong> — establishing the term used throughout the project.</p>
+<p><strong>Dec 12</strong>: Two major milestones:
+- <strong>Shared library created</strong> as <code>ClawdisNodeKit</code> (1,002 lines, 17 files) — Bonjour types, bridge frames, screen commands
+- <strong>iOS app created</strong> (1,348 lines, 17 files) — bridge client, discovery, session, keychain, voice wake, screen controller</p>
+<p><strong>Dec 13</strong>: Shared library renamed to <code>ClawdisKit</code> for broader scope. Bonjour beacons and bridge presence added.</p>
+<p><strong>Dec 14</strong>: Three more milestones in one day:
+- <strong>Shared chat UI</strong> — <code>ClawdisChatUI</code> module (1,997 lines) with ChatComposer, ChatView, ChatViewModel
+- <strong>Camera integration</strong> — snap/clip capture for iOS + macOS (1,669 lines)
+- <strong>Android app created</strong> — 2,518 lines, 27 files: Jetpack Compose, bridge discovery, camera, canvas, chat, settings, and foreground service</p>
+<p>By December 14, all three platforms had functional apps connecting to the gateway.</p>
+<h3 id="the-three-renames-janfeb-2026">The Three Renames (Jan–Feb 2026)<a class="headerlink" href="#the-three-renames-janfeb-2026" title="Permanent link">&para;</a></h3>
+<p>The project went through three name changes:</p>
+<ol>
+<li><strong>Clawdis → Clawdbot</strong> (Jan 4, 2026) — <code>246adaa11</code></li>
+<li><strong>Clawdbot → Moltbot</strong> (Jan 27, 2026) — <code>6d16a658e</code>, 110KB diff</li>
+<li><strong>Moltbot → OpenClaw</strong> (Jan 30, 2026) — <code>9a7160786</code>, 140KB diff. Package IDs changed from <code>bot.molt</code> to <code>ai.openclaw</code></li>
+</ol>
+<p>Each rename required updating bundle identifiers, package names, file paths, and references across all three apps plus the shared library. Residual cleanup continued into March.</p>
+<h3 id="talk-mode-streaming-tts-febmar-2026">Talk Mode &amp; Streaming TTS (Feb–Mar 2026)<a class="headerlink" href="#talk-mode-streaming-tts-febmar-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Feb 21</strong>: <strong>Nimrod Gutman</strong> added provider-agnostic talk mode config with legacy compatibility</li>
+<li><strong>Feb 28</strong>: <strong>Greg Mousseau</strong> created <strong>Android ElevenLabs streaming TTS</strong> — WebSocket-based streaming with PCM playback (325 lines), wired into NodeRuntime, with thread safety fixes and TTS fallback</li>
+<li><strong>Feb 28</strong>: <strong>Ayaan Zaidi</strong> added speaker toggle in Android voice tab</li>
+<li><strong>Mar 3</strong>: Nimrod Gutman added talk mode latency tracing</li>
+</ul>
+<h3 id="ios-security-hardening-mar-23-2026">iOS Security Hardening (Mar 2–3, 2026)<a class="headerlink" href="#ios-security-hardening-mar-23-2026" title="Permanent link">&para;</a></h3>
+<p><strong>Mariano</strong> delivered a 5-part security stack for iOS:
+1. <strong>Keychain Migrations + Tests</strong> — secure credential storage
+2. <strong>Concurrency Locks</strong> — thread-safe access to shared state
+3. <strong>Runtime Security Guards</strong> — validation at critical boundaries
+4. <strong>TTS PCM→MP3 Fallback</strong> — graceful degradation when PCM fails
+5. (Part 5 delivered separately)</p>
+<p><strong>Rocuts</strong> moved gateway connection metadata to Keychain, and <strong>Josh Avant</strong> expanded SecretRef coverage across credentials.</p>
+<h3 id="ios-live-activity-mar-4-2026">iOS Live Activity (Mar 4, 2026)<a class="headerlink" href="#ios-live-activity-mar-4-2026" title="Permanent link">&para;</a></h3>
+<p><strong>Mariano</strong> added Live Activity support — Dynamic Island and Lock Screen status display showing connection state (connected/disconnected/connecting) with elapsed time. Created <code>ActivityWidget</code> bundle, <code>LiveActivityManager</code> (126 lines), and <code>OpenClawActivityAttributes</code>.</p>
+<h3 id="android-ui-redesign-mar-13-2026">Android UI Redesign (Mar 13, 2026)<a class="headerlink" href="#android-ui-redesign-mar-13-2026" title="Permanent link">&para;</a></h3>
+<p><strong>Ayaan Zaidi</strong> delivered a complete UI overhaul in a single day:
+- Redesigned onboarding flow
+- New Connect tab with unified status cards
+- Speaker label and status pill for Voice tab
+- Compact chat composer layout
+- Google Code Scanner for QR onboarding</p>
+<h3 id="ios-push-notifications-app-store-mar-712-2026">iOS Push Notifications &amp; App Store (Mar 7–12, 2026)<a class="headerlink" href="#ios-push-notifications-app-store-mar-712-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Nimrod Gutman</strong> added iOS APNs relay gateway (#43369) — enabling push notifications for the iOS app</li>
+<li><strong>Nimrod Gutman</strong> prepared App Store Connect release assets</li>
+<li><strong>Nimrod Gutman</strong> added iOS beta release flow</li>
+<li><strong>Nimrod Gutman</strong> added onboarding welcome pager</li>
+</ul>
+<h3 id="the-evolution-in-four-sentences">The Evolution in Four Sentences<a class="headerlink" href="#the-evolution-in-four-sentences" title="Permanent link">&para;</a></h3>
+<p>Peter Steinberger created all three companion apps (macOS, iOS, Android) and the shared library in a 10-day sprint in December 2025, establishing the thin-client architecture from day one. The project went through three name changes (Clawdis → Clawdbot → Moltbot → OpenClaw) by January 30, 2026. February–March brought community contributions: Greg Mousseau built Android streaming TTS, Mariano delivered the iOS security stack and Live Activities, Ayaan Zaidi redesigned the Android UI, and Nimrod Gutman prepared the iOS App Store release. Throughout it all, the core design remained constant: apps are thin clients exposing platform capabilities, while the gateway runs the AI.</p>
+<hr />
+<h2 id="architecture-diagram">Architecture Diagram<a class="headerlink" href="#architecture-diagram" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────────┐
+│                      OpenClaw Gateway                                │
+│                                                                      │
+│  AI Agent  │  Sessions  │  Channels  │  Tools  │  Memory  │  TTS   │
+│                                                                      │
+│  WebSocket Server (port 18789)                                       │
+│  ├── node.invoke → commands device capabilities                     │
+│  ├── chat.send/history → chat RPCs                                  │
+│  ├── events → push (agent, heartbeat, chat)                        │
+│  └── canvas.* → A2UI push/reset/eval                               │
+└───────────┬──────────────────┬──────────────────┬────────────────────┘
+            │                  │                  │
+     ┌──────┴───────┐  ┌──────┴───────┐  ┌──────┴───────┐
+     │   macOS App   │  │   iOS App    │  │ Android App  │
+     │  (SwiftUI)    │  │  (SwiftUI)   │  │ (Compose)    │
+     │               │  │              │  │              │
+     │ ┌───────────┐ │  │ ┌──────────┐ │  │ ┌──────────┐ │
+     │ │ nodeSession│ │  │ │nodeSession│ │  │ │nodeSession│ │
+     │ │ (role=node)│ │  │ │(role=node)│ │  │ │(role=node)│ │
+     │ └─────┬─────┘ │  │ └─────┬────┘ │  │ └─────┬────┘ │
+     │       │        │  │      │       │  │       │      │
+     │ ┌─────▼─────┐  │  │ ┌────▼────┐  │  │ ┌─────▼────┐ │
+     │ │ operSession│  │  │ │operSess │  │  │ │operSess  │ │
+     │ │(role=oper) │  │  │ │(r=oper) │  │  │ │(r=oper)  │ │
+     │ └───────────┘  │  │ └─────────┘  │  │ └──────────┘ │
+     │                │  │              │  │              │
+     │ Capabilities:  │  │ Capabilities:│  │ Capabilities:│
+     │ • Voice wake   │  │ • Camera     │  │ • Camera    │
+     │ • Camera       │  │ • Location   │  │ • Location  │
+     │ • Screen rec   │  │ • Motion     │  │ • Motion    │
+     │ • Canvas       │  │ • Contacts   │  │ • Contacts  │
+     │ • IPC socket   │  │ • Calendar   │  │ • Calendar  │
+     │ • CLI tool     │  │ • Reminders  │  │ • SMS       │
+     │                │  │ • Photos     │  │ • Photos    │
+     │ UI:            │  │ • Push (APNs)│  │ • Notif.    │
+     │ • Menu bar     │  │ • Live Act.  │  │             │
+     │ • Chat panel   │  │ • Widgets    │  │ UI:         │
+     │ • Canvas panel │  │              │  │ • Compose   │
+     │ • Voice overlay│  │ UI:          │  │ • Canvas WV │
+     │ • Settings     │  │ • SwiftUI    │  │ • Voice tab │
+     │                │  │ • Canvas WV  │  │ • Settings  │
+     │                │  │ • Talk orb   │  │ • FG Service│
+     │                │  │ • Onboarding │  │ • Onboarding│
+     └────────────────┘  └──────────────┘  └─────────────┘
+
+     Shared Library: OpenClawKit
+     ├── OpenClawProtocol  (wire types)
+     ├── OpenClawKit       (gateway client, commands, auth)
+     └── OpenClawChatUI    (shared chat components)
+</code></pre></div>
+<hr />
+<h2 id="key-files-reference">Key Files Reference<a class="headerlink" href="#key-files-reference" title="Permanent link">&para;</a></h2>
+<h3 id="shared-library-openclawkit">Shared Library (OpenClawKit)<a class="headerlink" href="#shared-library-openclawkit" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>apps/shared/OpenClawKit/Package.swift</code></td>
+<td>SPM manifest (iOS 18+, macOS 15+)</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClawProtocol/GatewayModels.swift</code></td>
+<td>Auto-generated wire types</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClawKit/GatewayChannel.swift</code></td>
+<td>WebSocket abstraction</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClawKit/GatewayNodeSession.swift</code></td>
+<td>Main connection actor (536 lines)</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClawKit/GatewayPush.swift</code></td>
+<td>Push subscription types</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClawKit/GatewayErrors.swift</code></td>
+<td>Error types (147 lines)</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClawKit/CanvasA2UIAction.swift</code></td>
+<td>A2UI action formatting (105 lines)</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClawKit/TalkDirective.swift</code></td>
+<td>TTS directive parsing (202 lines)</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClawKit/Capabilities.swift</code></td>
+<td>Capability enum</td>
+</tr>
+</tbody>
+</table>
+<h3 id="macos-app">macOS App<a class="headerlink" href="#macos-app" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Sources/OpenClaw/MenuBar.swift</code></td>
+<td>—</td>
+<td>@main entry, menu bar app</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClaw/AppState.swift</code></td>
+<td>150+</td>
+<td>Observable app state</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClaw/GatewayConnection.swift</code></td>
+<td>800+</td>
+<td>Gateway WebSocket actor</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClaw/ControlChannel.swift</code></td>
+<td>425+</td>
+<td>High-level gateway API</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClaw/CanvasManager.swift</code></td>
+<td>340+</td>
+<td>Canvas window management</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClaw/CanvasWindowController.swift</code></td>
+<td>200+</td>
+<td>WKWebView canvas</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClaw/VoiceWakeForwarder.swift</code></td>
+<td>74</td>
+<td>Speech → agent messages</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClawIPC/IPC.swift</code></td>
+<td>417</td>
+<td>Unix socket IPC protocol</td>
+</tr>
+<tr>
+<td><code>Sources/OpenClawMacCLI/EntryPoint.swift</code></td>
+<td>57</td>
+<td>CLI entry point</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ios-app">iOS App<a class="headerlink" href="#ios-app" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Sources/OpenClawApp.swift</code></td>
+<td>549</td>
+<td>App delegate, push, background</td>
+</tr>
+<tr>
+<td><code>Sources/Model/NodeAppModel.swift</code></td>
+<td>3,020</td>
+<td>Main state model</td>
+</tr>
+<tr>
+<td><code>Sources/Voice/TalkModeManager.swift</code></td>
+<td>2,000+</td>
+<td>Speech recognition + TTS</td>
+</tr>
+<tr>
+<td><code>Sources/Camera/CameraController.swift</code></td>
+<td>354</td>
+<td>AVFoundation camera</td>
+</tr>
+<tr>
+<td><code>Sources/Location/LocationService.swift</code></td>
+<td>179</td>
+<td>CoreLocation wrapper</td>
+</tr>
+<tr>
+<td><code>Sources/Motion/MotionService.swift</code></td>
+<td>101</td>
+<td>CoreMotion activities + pedometer</td>
+</tr>
+<tr>
+<td><code>Sources/Chat/IOSGatewayChatTransport.swift</code></td>
+<td>150</td>
+<td>Chat RPC adapter</td>
+</tr>
+<tr>
+<td><code>Sources/Screen/ScreenWebView.swift</code></td>
+<td>195</td>
+<td>WKWebView + A2UI</td>
+</tr>
+<tr>
+<td><code>Sources/LiveActivity/LiveActivityManager.swift</code></td>
+<td>126</td>
+<td>Dynamic Island</td>
+</tr>
+<tr>
+<td><code>ActivityWidget/OpenClawLiveActivity.swift</code></td>
+<td>85</td>
+<td>Widget UI</td>
+</tr>
+</tbody>
+</table>
+<h3 id="android-app">Android App<a class="headerlink" href="#android-app" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NodeRuntime.kt</code></td>
+<td>953</td>
+<td>Main runtime, handler coordination</td>
+</tr>
+<tr>
+<td><code>gateway/GatewaySession.kt</code></td>
+<td>250+</td>
+<td>OkHttp WebSocket RPC</td>
+</tr>
+<tr>
+<td><code>node/InvokeDispatcher.kt</code></td>
+<td>150+</td>
+<td>Command → handler routing</td>
+</tr>
+<tr>
+<td><code>node/CanvasController.kt</code></td>
+<td>200</td>
+<td>Android WebView canvas</td>
+</tr>
+<tr>
+<td><code>node/CameraCaptureManager.kt</code></td>
+<td>150+</td>
+<td>CameraX integration</td>
+</tr>
+<tr>
+<td><code>chat/ChatController.kt</code></td>
+<td>150+</td>
+<td>Chat state management</td>
+</tr>
+<tr>
+<td><code>voice/TalkModeManager.kt</code></td>
+<td>200+</td>
+<td>Speech + ElevenLabs TTS</td>
+</tr>
+<tr>
+<td><code>voice/ElevenLabsStreamingTts.kt</code></td>
+<td>—</td>
+<td>WebSocket streaming TTS</td>
+</tr>
+<tr>
+<td><code>NodeForegroundService.kt</code></td>
+<td>150</td>
+<td>Persistent notification service</td>
+</tr>
+<tr>
+<td><code>MainActivity.kt</code></td>
+<td>63</td>
+<td>Compose entry point</td>
+</tr>
+<tr>
+<td><code>MainViewModel.kt</code></td>
+<td>150</td>
+<td>MVVM ViewModel</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

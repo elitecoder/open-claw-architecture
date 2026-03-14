@@ -1,0 +1,2288 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../../architecture-reference/">
+      
+      
+        <link rel="next" href="../layer-2-gateway/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 1: Core Runtime - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-1-core-runtime-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 1: Core Runtime
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 1?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-boot-sequence-how-the-robot-wakes-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The Boot Sequence (How the Robot Wakes Up)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The Boot Sequence (How the Robot Wakes Up)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-three-files-that-start-everything" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Three Files That Start Everything
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-1-srcentryts-the-alarm-clock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File 1: src/entry.ts — The Alarm Clock
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-2-srcclirun-maints-getting-dressed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File 2: src/cli/run-main.ts — Getting Dressed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-3-srcindexts-the-swiss-army-knife" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File 3: src/index.ts — The Swiss Army Knife
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supporting-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supporting Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-the-config-system-the-robots-instruction-manual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: The Config System (The Robot's Instruction Manual)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: The Config System (The Robot&#39;s Instruction Manual)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-does-config-live" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Does Config Live?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-14-step-config-loading-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 14-Step Config Loading Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-writing-the-reverse-journey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Writing (The Reverse Journey)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependency-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependency Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-session-management-the-robots-notebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Session Management (The Robot's Notebook)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Session Management (The Robot&#39;s Notebook)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is a Session?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-do-sessions-live" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Do Sessions Live?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-session-store-srcconfigsessionsstorets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Session Store (src/config/sessions/store.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-paths-srcconfigsessionspathsts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session Paths (src/config/sessions/paths.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-routing-the-robots-switchboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Routing (The Robot's Switchboard)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Routing (The Robot&#39;s Switchboard)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Routing?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-7-tier-routing-hierarchy-srcroutingresolve-routets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 7-Tier Routing Hierarchy (src/routing/resolve-route.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-two-tier-lru-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Two-Tier LRU Cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-key-generation-srcroutingsession-keyts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session Key Generation (src/routing/session-key.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-1-evolved-the-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 1 Evolved: The Git History
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 1 Evolved: The Git History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-genesis-warelay-november-24-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Genesis — "Warelay" (November 24, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-rapid-growth-nov-dec-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Rapid Growth (Nov-Dec 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-the-great-modularization-january-4-14-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: The Great Modularization (January 4-14, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-the-name-carousel-january-18-30-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: The Name Carousel (January 18-30, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-polish-and-performance-february-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Polish and Performance (February-March 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evolution-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evolution Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways-from-the-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways from the History
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 1?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-boot-sequence-how-the-robot-wakes-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The Boot Sequence (How the Robot Wakes Up)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The Boot Sequence (How the Robot Wakes Up)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-three-files-that-start-everything" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Three Files That Start Everything
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-1-srcentryts-the-alarm-clock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File 1: src/entry.ts — The Alarm Clock
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-2-srcclirun-maints-getting-dressed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File 2: src/cli/run-main.ts — Getting Dressed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-3-srcindexts-the-swiss-army-knife" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File 3: src/index.ts — The Swiss Army Knife
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supporting-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supporting Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-the-config-system-the-robots-instruction-manual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: The Config System (The Robot's Instruction Manual)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: The Config System (The Robot&#39;s Instruction Manual)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-does-config-live" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Does Config Live?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-14-step-config-loading-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 14-Step Config Loading Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-writing-the-reverse-journey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Writing (The Reverse Journey)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependency-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependency Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-session-management-the-robots-notebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Session Management (The Robot's Notebook)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Session Management (The Robot&#39;s Notebook)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is a Session?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-do-sessions-live" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Do Sessions Live?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-session-store-srcconfigsessionsstorets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Session Store (src/config/sessions/store.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-paths-srcconfigsessionspathsts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session Paths (src/config/sessions/paths.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-routing-the-robots-switchboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Routing (The Robot's Switchboard)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Routing (The Robot&#39;s Switchboard)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Routing?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-7-tier-routing-hierarchy-srcroutingresolve-routets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 7-Tier Routing Hierarchy (src/routing/resolve-route.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-two-tier-lru-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Two-Tier LRU Cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-key-generation-srcroutingsession-keyts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session Key Generation (src/routing/session-key.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-1-evolved-the-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 1 Evolved: The Git History
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 1 Evolved: The Git History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-genesis-warelay-november-24-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Genesis — "Warelay" (November 24, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-rapid-growth-nov-dec-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Rapid Growth (Nov-Dec 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-the-great-modularization-january-4-14-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: The Great Modularization (January 4-14, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-the-name-carousel-january-18-30-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: The Name Carousel (January 18-30, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-polish-and-performance-february-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Polish and Performance (February-March 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evolution-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evolution Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways-from-the-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways from the History
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-1-core-runtime-deep-dive">Layer 1: Core Runtime — Deep Dive<a class="headerlink" href="#layer-1-core-runtime-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-layer-1">What Is Layer 1?<a class="headerlink" href="#what-is-layer-1" title="Permanent link">&para;</a></h2>
+<p>Imagine OpenClaw is a robot butler that lives on your computer. Layer 1 is the robot's <strong>brain stem</strong> — the part that handles waking up, remembering its settings, knowing who's talking to it, and keeping notes about past conversations.</p>
+<p>Without Layer 1, the robot can't even turn on. Everything else — talking on Discord, using AI, remembering things — sits on top of this foundation.</p>
+<p>Layer 1 has <strong>four major parts</strong>:</p>
+<ol>
+<li><strong>Boot Sequence</strong> — How the robot wakes up</li>
+<li><strong>Config System</strong> — How the robot reads its instruction manual</li>
+<li><strong>Session Management</strong> — How the robot keeps a notebook of conversations</li>
+<li><strong>Routing</strong> — How the robot figures out which "personality" should answer a message</li>
+</ol>
+<p>Let's go through each one.</p>
+<hr />
+<h2 id="part-1-the-boot-sequence-how-the-robot-wakes-up">Part 1: The Boot Sequence (How the Robot Wakes Up)<a class="headerlink" href="#part-1-the-boot-sequence-how-the-robot-wakes-up" title="Permanent link">&para;</a></h2>
+<h3 id="the-three-files-that-start-everything">The Three Files That Start Everything<a class="headerlink" href="#the-three-files-that-start-everything" title="Permanent link">&para;</a></h3>
+<p>When you type <code>openclaw</code> in your terminal, three files run in sequence, like dominoes falling:</p>
+<div class="language-text highlight"><pre><span></span><code>src/entry.ts  →  src/cli/run-main.ts  →  src/index.ts
+   (Wake up)       (Get ready)           (Do the work)
+</code></pre></div>
+<h3 id="file-1-srcentryts-the-alarm-clock">File 1: <code>src/entry.ts</code> — The Alarm Clock<a class="headerlink" href="#file-1-srcentryts-the-alarm-clock" title="Permanent link">&para;</a></h3>
+<p>This is the <strong>very first code</strong> that runs. Think of it as the alarm clock that wakes up the robot. It does a lot of careful checking before letting anything else happen.</p>
+<h4 id="step-1-am-i-really-supposed-to-be-running-lines-36-41">Step 1: Am I really supposed to be running? (Lines 36-41)<a class="headerlink" href="#step-1-am-i-really-supposed-to-be-running-lines-36-41" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">isMainModule</span><span class="p">({</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Nope, I was imported as a helper. Do nothing.</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Yes! I&#39;m the main show. Boot up!</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Why?</strong> JavaScript bundling tools sometimes accidentally import this file twice. This guard says "only run the boot sequence if I'm the ACTUAL entry point, not a copy."</p>
+<p>Think of it like checking your alarm — if your mom already woke you up, you don't need the alarm to go off again.</p>
+<h4 id="step-2-set-my-name-tag-lines-44-54">Step 2: Set my name tag (Lines 44-54)<a class="headerlink" href="#step-2-set-my-name-tag-lines-44-54" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">process</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;openclaw&quot;</span>
+<span class="nx">ensureOpenClawExecMarkerOnProcess</span><span class="p">()</span>
+<span class="nx">installProcessWarningFilter</span><span class="p">()</span>
+<span class="nx">normalizeEnv</span><span class="p">()</span>
+<span class="nx">enableCompileCache</span><span class="p">()</span><span class="w">  </span><span class="c1">// best-effort, won&#39;t crash if it fails</span>
+</code></pre></div>
+<ul>
+<li><strong><code>process.title = "openclaw"</code></strong>: When you open Activity Monitor (Mac) or Task Manager (Windows), you'll see "openclaw" instead of "node". It's like writing your name on your lunchbox.</li>
+<li><strong><code>ensureOpenClawExecMarkerOnProcess()</code></strong>: Stamps <code>OPENCLAW_EXEC</code> onto the environment so any child processes know they're part of the OpenClaw family.</li>
+<li><strong><code>installProcessWarningFilter()</code></strong>: Tells Node.js "stop showing me annoying warnings about experimental features." Like putting noise-canceling headphones on.</li>
+<li><strong><code>normalizeEnv()</code></strong>: Cleans up environment variables — makes sure they're all formatted consistently.</li>
+<li><strong><code>enableCompileCache()</code></strong>: Node 22+ can cache compiled code so next time you start, it's faster. Like pre-heating your oven.</li>
+</ul>
+<h4 id="step-3-the-respawn-trick-lines-80-126">Step 3: The Respawn Trick (Lines 80-126)<a class="headerlink" href="#step-3-the-respawn-trick-lines-80-126" title="Permanent link">&para;</a></h4>
+<p>This is the cleverest part. Sometimes Node.js shows warnings like "ExperimentalWarning: this feature is experimental." OpenClaw uses experimental features, so these warnings would spam your terminal.</p>
+<p>The fix? <strong>The process restarts itself</strong> with a special flag that silences the warnings:</p>
+<div class="language-text highlight"><pre><span></span><code>First run:  openclaw send &quot;hello&quot;
+  → &quot;Hmm, warnings aren&#39;t suppressed.&quot;
+  → Spawns: node --disable-warning=ExperimentalWarning openclaw send &quot;hello&quot;
+  → Sets OPENCLAW_NODE_OPTIONS_READY=1 (so the child doesn&#39;t respawn AGAIN)
+  → Parent waits for child, then exits with child&#39;s exit code.
+
+Second run (the child):
+  → &quot;OPENCLAW_NODE_OPTIONS_READY is set? Great, skip respawn.&quot;
+  → Continues with actual work.
+</code></pre></div>
+<p><strong>Why not just add the flag to the original command?</strong> Because users run <code>openclaw</code> directly — you can't control what flags they pass. This self-healing respawn ensures the environment is always correct, no matter how the user invoked it.</p>
+<p>The <code>OPENCLAW_NODE_OPTIONS_READY=1</code> guard prevents an infinite loop (robot keeps waking itself up forever).</p>
+<h4 id="step-4-fast-paths-for-simple-questions-lines-128-164">Step 4: Fast Paths for Simple Questions (Lines 128-164)<a class="headerlink" href="#step-4-fast-paths-for-simple-questions-lines-128-164" title="Permanent link">&para;</a></h4>
+<p>If you just typed <code>openclaw --version</code> or <code>openclaw --help</code>, the robot doesn't need to load ALL its plugins, config files, and channels. That would be like hiring a moving company to hand someone a business card.</p>
+<p>Instead:
+- <strong><code>--version</code></strong>: Immediately imports just the version number, prints it, exits. Done in milliseconds.
+- <strong><code>--help</code></strong>: Imports just the help text generator, prints it, exits.</p>
+<p>These "fast paths" skip 95% of the startup work.</p>
+<h4 id="step-5-profile-handling-lines-166-179">Step 5: Profile Handling (Lines 166-179)<a class="headerlink" href="#step-5-profile-handling-lines-166-179" title="Permanent link">&para;</a></h4>
+<p>You can run <code>openclaw --profile dev</code> to load a different set of environment variables (like having a "school outfit" vs "weekend outfit"). This step:
+1. Parses the <code>--profile</code> flag from your command
+2. Loads the profile's environment overrides
+3. Strips the <code>--profile</code> flag from argv so later code doesn't get confused</p>
+<h4 id="step-6-hand-off-to-run-maints-lines-183-192">Step 6: Hand Off to run-main.ts (Lines 183-192)<a class="headerlink" href="#step-6-hand-off-to-run-maints-lines-183-192" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">runCli</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="k">import</span><span class="p">(</span><span class="s2">&quot;./cli/run-main.js&quot;</span><span class="p">)</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">runCli</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">)</span>
+</code></pre></div>
+<p>Dynamic <code>import()</code> is used (not static <code>import</code>) because we only want to load <code>run-main.ts</code> if we actually need it (didn't take a fast path). This keeps startup fast.</p>
+<h3 id="file-2-srcclirun-maints-getting-dressed">File 2: <code>src/cli/run-main.ts</code> — Getting Dressed<a class="headerlink" href="#file-2-srcclirun-maints-getting-dressed" title="Permanent link">&para;</a></h3>
+<p>Now the robot is awake. Time to get dressed and ready for the day.</p>
+<h4 id="step-1-load-environment-lines-85-89">Step 1: Load Environment (Lines 85-89)<a class="headerlink" href="#step-1-load-environment-lines-85-89" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">loadDotEnv</span><span class="p">({</span><span class="w"> </span><span class="nx">quiet</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">})</span><span class="w">   </span><span class="c1">// Read .env file if it exists</span>
+<span class="nx">normalizeEnv</span><span class="p">()</span><span class="w">                  </span><span class="c1">// Clean up env vars again</span>
+<span class="nx">ensureOpenClawCliOnPath</span><span class="p">()</span><span class="w">       </span><span class="c1">// Make sure &#39;openclaw&#39; command is available in PATH</span>
+</code></pre></div>
+<ul>
+<li><strong><code>.env</code> file</strong>: A file where you store secrets like API keys. Loading it puts those values into the environment.</li>
+<li><strong>Ensure CLI on PATH</strong>: If you installed OpenClaw but it's not in your system PATH, this adds it. Like making sure your pencils are in your pencil case before school.</li>
+</ul>
+<p>Some commands skip the PATH step — if you're just running <code>openclaw status</code> (read-only), there's no need.</p>
+<h4 id="step-2-check-your-age-line-92">Step 2: Check Your Age (Line 92)<a class="headerlink" href="#step-2-check-your-age-line-92" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">assertSupportedRuntime</span><span class="p">()</span><span class="w">  </span><span class="c1">// Node &gt;= 22 required</span>
+</code></pre></div>
+<p>OpenClaw requires Node.js version 22 or higher. If you're running Node 18, this throws an error immediately rather than crashing mysteriously later. Like a roller coaster height check — "you must be THIS tall to ride."</p>
+<h4 id="step-3-try-the-express-lane-lines-94-100">Step 3: Try the Express Lane (Lines 94-100)<a class="headerlink" href="#step-3-try-the-express-lane-lines-94-100" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">routed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">tryRouteCli</span><span class="p">(</span><span class="nx">normalizedArgv</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">routed</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w">  </span><span class="c1">// Handled! Skip everything below.</span>
+</code></pre></div>
+<p>Certain commands (like <code>gateway</code>, <code>config</code>, <code>status</code>) have special "fast routes" that bypass the full program initialization. If your command matches one, it runs immediately and returns — no need to load the entire Commander program, plugins, etc.</p>
+<h4 id="step-4-build-the-commander-program-lines-102-103">Step 4: Build the Commander Program (Lines 102-103)<a class="headerlink" href="#step-4-build-the-commander-program-lines-102-103" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">buildProgram</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="k">import</span><span class="p">(</span><span class="s2">&quot;./program.js&quot;</span><span class="p">)</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">program</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">buildProgram</span><span class="p">()</span>
+</code></pre></div>
+<p><a href="https://github.com/tj/commander.js">Commander</a> is a library that defines CLI commands. <code>buildProgram()</code> creates the main program with all its root options (<code>--verbose</code>, <code>--yes</code>, <code>--profile</code>, etc.).</p>
+<h4 id="step-5-install-safety-nets-lines-105-112">Step 5: Install Safety Nets (Lines 105-112)<a class="headerlink" href="#step-5-install-safety-nets-lines-105-112" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">installUnhandledRejectionHandler</span><span class="p">()</span>
+<span class="nx">process</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;uncaughtException&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">})</span>
+</code></pre></div>
+<p>These are crash catchers. If any code throws an error that nobody catches, these handlers:
+1. Log the error nicely (with stack trace)
+2. Exit with code 1 (failure)</p>
+<p>Without them, Node.js would just crash silently or show an ugly error.</p>
+<h4 id="step-6-register-commands-lines-114-145">Step 6: Register Commands (Lines 114-145)<a class="headerlink" href="#step-6-register-commands-lines-114-145" title="Permanent link">&para;</a></h4>
+<p>This is where the actual commands get wired up:</p>
+<ol>
+<li><strong>Rewrite <code>--update</code> to <code>update</code></strong>: Users can type <code>openclaw --update</code> or <code>openclaw update</code> — both work.</li>
+<li><strong>Register the primary command</strong>: If you typed <code>openclaw send</code>, this loads and registers the <code>send</code> command definition.</li>
+<li><strong>Register plugin commands</strong>: Plugins can add their own CLI commands (like <code>openclaw discord setup</code>). These are loaded from the config and registered dynamically.</li>
+</ol>
+<p>The system is smart about skipping plugin loading when unnecessary — if you typed <code>--help</code>, why load Discord's plugin just to show help text?</p>
+<h4 id="step-7-go-line-147">Step 7: Go! (Line 147)<a class="headerlink" href="#step-7-go-line-147" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">await</span><span class="w"> </span><span class="nx">program</span><span class="p">.</span><span class="nx">parseAsync</span><span class="p">(</span><span class="nx">parseArgv</span><span class="p">)</span>
+</code></pre></div>
+<p>Commander parses your command and calls the right handler. This is where the actual work happens.</p>
+<h4 id="step-8-clean-up-lines-148-150">Step 8: Clean Up (Lines 148-150)<a class="headerlink" href="#step-8-clean-up-lines-148-150" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">closeCliMemoryManagers</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Even if something crashes, always clean up memory search managers. Like making sure you turn off the stove even if dinner burned.</p>
+<h3 id="file-3-srcindexts-the-swiss-army-knife">File 3: <code>src/index.ts</code> — The Swiss Army Knife<a class="headerlink" href="#file-3-srcindexts-the-swiss-army-knife" title="Permanent link">&para;</a></h3>
+<p>This file serves double duty:
+1. <strong>As an alternative entry point</strong>: Can be run directly as <code>node dist/index.js</code>
+2. <strong>As a library</strong>: Other code can <code>import</code> utilities from it</p>
+<p>When run directly, it does the same setup as <code>entry.ts</code> + <code>run-main.ts</code> but in a single file. When imported, it just exports helpful functions.</p>
+<h3 id="supporting-files">Supporting Files<a class="headerlink" href="#supporting-files" title="Permanent link">&para;</a></h3>
+<h4 id="srcglobalsts-the-shared-whiteboard"><code>src/globals.ts</code> — The Shared Whiteboard<a class="headerlink" href="#srcglobalsts-the-shared-whiteboard" title="Permanent link">&para;</a></h4>
+<p>A tiny module (about 50 lines) that holds global state accessible everywhere:</p>
+<ul>
+<li><strong><code>verbose</code> flag</strong>: Are we in verbose/debug mode?</li>
+<li><strong><code>yes</code> flag</strong>: Auto-confirm all prompts?</li>
+<li><strong>Theme colors</strong>: <code>success</code> (green), <code>warn</code> (yellow), <code>info</code> (blue), <code>danger</code> (red)</li>
+</ul>
+<p>Why globals? Because <code>--verbose</code> is parsed at the top level but used deep inside config loading, routing, etc. Passing it through every function would be tedious.</p>
+<h4 id="srcruntimets-the-stunt-double"><code>src/runtime.ts</code> — The Stunt Double<a class="headerlink" href="#srcruntimets-the-stunt-double" title="Permanent link">&para;</a></h4>
+<p>Defines a <code>RuntimeEnv</code> type with three methods: <code>log</code>, <code>error</code>, <code>exit</code>. The real runtime logs to the console and calls <code>process.exit()</code>. But in tests, you can swap in a "stunt double" that throws an error instead of exiting (so your test doesn't die).</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// Real runtime (production):</span>
+<span class="nx">exit</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">code</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">restoreTerminalState</span><span class="p">();</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">(</span><span class="nx">code</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+
+<span class="c1">// Test runtime:</span>
+<span class="nx">exit</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">code</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="sb">`exit </span><span class="si">${</span><span class="nx">code</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="part-2-the-config-system-the-robots-instruction-manual">Part 2: The Config System (The Robot's Instruction Manual)<a class="headerlink" href="#part-2-the-config-system-the-robots-instruction-manual" title="Permanent link">&para;</a></h2>
+<h3 id="where-does-config-live">Where Does Config Live?<a class="headerlink" href="#where-does-config-live" title="Permanent link">&para;</a></h3>
+<p>Your config file is at <code>~/.openclaw/config.json5</code>. JSON5 is like JSON but friendlier — it allows comments, trailing commas, and unquoted keys. Think of it as JSON's cool older sibling.</p>
+<h3 id="the-14-step-config-loading-pipeline">The 14-Step Config Loading Pipeline<a class="headerlink" href="#the-14-step-config-loading-pipeline" title="Permanent link">&para;</a></h3>
+<p>When OpenClaw reads your config, it goes through <strong>14 steps</strong>. Here's each one explained simply:</p>
+<h4 id="step-1-load-env-file">Step 1: Load .env File<a class="headerlink" href="#step-1-load-env-file" title="Permanent link">&para;</a></h4>
+<p>If you have a <code>.env</code> file with secrets (like <code>OPENAI_API_KEY=sk-...</code>), load those into the environment first. The config file might reference them.</p>
+<h4 id="step-2-check-if-config-file-exists">Step 2: Check if Config File Exists<a class="headerlink" href="#step-2-check-if-config-file-exists" title="Permanent link">&para;</a></h4>
+<p>If there's no <code>config.json5</code>, return an empty config. The system will use defaults for everything.</p>
+<h4 id="step-3-read-and-parse-the-file">Step 3: Read and Parse the File<a class="headerlink" href="#step-3-read-and-parse-the-file" title="Permanent link">&para;</a></h4>
+<p>Read the raw text from disk and parse it as JSON5.</p>
+<h4 id="step-4-process-include-directives">Step 4: Process <code>$include</code> Directives<a class="headerlink" href="#step-4-process-include-directives" title="Permanent link">&para;</a></h4>
+<p>This is like a "paste from another file" feature:</p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">&quot;$include&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;./agents.json5&quot;</span><span class="p">,</span><span class="w">      </span><span class="c1">// Single file</span>
+<span class="w">  </span><span class="nv">&quot;$include&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;./a.json5&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;./b.json5&quot;</span><span class="p">]</span><span class="w">  </span><span class="c1">// Multiple files, merged together</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Security protections:</strong>
+- <strong>Max depth of 10</strong>: Can't include a file that includes a file that includes a file... more than 10 levels deep.
+- <strong>Circular detection</strong>: If A includes B and B includes A, it catches the loop.
+- <strong>Path containment</strong>: Included files must be inside the config directory. You can't <code>$include: "/etc/passwd"</code>.
+- <strong>Symlink protection</strong>: Even if you create a symlink pointing outside, it's caught.
+- <strong>Max file size</strong>: Each included file capped at 2MB.</p>
+<p>When multiple files are included, they're <strong>deep-merged</strong>: arrays get concatenated, objects get recursively merged (later values win on conflicts).</p>
+<h4 id="step-5-substitute-environment-variables">Step 5: Substitute Environment Variables<a class="headerlink" href="#step-5-substitute-environment-variables" title="Permanent link">&para;</a></h4>
+<p>Any <code>${VARIABLE_NAME}</code> in the config gets replaced with the actual environment variable value:</p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">models</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nv">providers</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">openai</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">apiKey</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${OPENAI_API_KEY}&quot;</span><span class="w"> </span><span class="p">}</span><span class="w">  </span><span class="c1">// Becomes &quot;sk-ant-...&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>If a variable is missing, it warns you (but doesn't crash).</p>
+<h4 id="step-6-check-for-duplicate-agent-directories">Step 6: Check for Duplicate Agent Directories<a class="headerlink" href="#step-6-check-for-duplicate-agent-directories" title="Permanent link">&para;</a></h4>
+<p>If two agents point to the same directory, that's a conflict. Caught early before anything else happens.</p>
+<h4 id="step-7-validate-with-zod-schema">Step 7: Validate with Zod Schema<a class="headerlink" href="#step-7-validate-with-zod-schema" title="Permanent link">&para;</a></h4>
+<p>The config is validated against a strict schema using the Zod library. Every field must be the right type, within allowed values, etc. If validation fails, you get a clear error message listing exactly what's wrong.</p>
+<h4 id="step-8-version-compatibility-check">Step 8: Version Compatibility Check<a class="headerlink" href="#step-8-version-compatibility-check" title="Permanent link">&para;</a></h4>
+<p>If the config was last edited by a NEWER version of OpenClaw (e.g., you downgraded), it warns you. Like opening a Word document from a newer version of Word — "this might not work perfectly."</p>
+<h4 id="step-9-apply-cascading-defaults-the-layer-cake">Step 9: Apply Cascading Defaults (The Layer Cake)<a class="headerlink" href="#step-9-apply-cascading-defaults-the-layer-cake" title="Permanent link">&para;</a></h4>
+<p>This is where the magic happens. Defaults are applied in a specific order, like building a layer cake:</p>
+<div class="language-text highlight"><pre><span></span><code>applyMessageDefaults        ← Bottom layer: message/chat settings
+  applyLoggingDefaults      ← Log levels, formats
+    applySessionDefaults    ← Session TTL, pruning rules
+      applyAgentDefaults    ← Agent concurrency, model choices
+        applyContextPruningDefaults  ← Context window limits
+          applyCompactionDefaults    ← Session compaction thresholds
+            applyModelDefaults       ← Model aliases, costs
+              applyTalkConfigNormalization  ← Top layer: voice settings
+</code></pre></div>
+<p>Each layer can reference values set by the layer below it. These defaults are ONLY applied at load time — when writing config back to disk, they're stripped out so your file stays clean.</p>
+<h4 id="step-10-normalize-paths">Step 10: Normalize Paths<a class="headerlink" href="#step-10-normalize-paths" title="Permanent link">&para;</a></h4>
+<p>Resolve <code>~</code> to your home directory, make relative paths absolute, etc.</p>
+<h4 id="step-11-post-defaults-duplicate-check">Step 11: Post-defaults Duplicate Check<a class="headerlink" href="#step-11-post-defaults-duplicate-check" title="Permanent link">&para;</a></h4>
+<p>Check for duplicate agent dirs again (defaults might have created new conflicts).</p>
+<h4 id="step-12-apply-config-defined-environment-variables">Step 12: Apply Config-Defined Environment Variables<a class="headerlink" href="#step-12-apply-config-defined-environment-variables" title="Permanent link">&para;</a></h4>
+<p>Your config can set environment variables:
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">env</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nv">vars</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">MY_CUSTOM_VAR</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;value&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+These get applied to <code>process.env</code>, but ONLY if they're not already set (your real environment always wins) and they're not dangerous system vars like <code>PATH</code> or <code>HOME</code>.</p>
+<h4 id="step-13-shell-environment-fallback">Step 13: Shell Environment Fallback<a class="headerlink" href="#step-13-shell-environment-fallback" title="Permanent link">&para;</a></h4>
+<p>If API keys are still missing after all the above, OpenClaw can optionally spawn a shell and capture its environment. This helps when API keys are set in your <code>.zshrc</code> but not in the current process environment.</p>
+<h4 id="step-14-auto-generate-owner-display-secret">Step 14: Auto-Generate Owner Display Secret<a class="headerlink" href="#step-14-auto-generate-owner-display-secret" title="Permanent link">&para;</a></h4>
+<p>If the config is missing an owner display secret (used for identifying the owner), one is generated automatically and queued for async write-back. Non-blocking — startup isn't delayed.</p>
+<h3 id="config-caching">Config Caching<a class="headerlink" href="#config-caching" title="Permanent link">&para;</a></h3>
+<p>Reading and parsing a config file 14 steps deep every time would be slow. So there's a cache:</p>
+<ul>
+<li><strong>Default TTL: 200ms</strong> (not 45 seconds — that's sessions)</li>
+<li>Configurable via <code>OPENCLAW_CONFIG_CACHE_MS</code> environment variable</li>
+<li>Cleared whenever config is written or runtime snapshots change</li>
+</ul>
+<h3 id="config-writing-the-reverse-journey">Config Writing (The Reverse Journey)<a class="headerlink" href="#config-writing-the-reverse-journey" title="Permanent link">&para;</a></h3>
+<p>Writing config is even more careful than reading:</p>
+<ol>
+<li><strong>Merge-patch</strong>: Only writes values YOU changed, not runtime defaults</li>
+<li><strong>Environment variable preservation</strong>: If your config had <code>"${OPENAI_API_KEY}"</code> and the resolved value hasn't changed, the <code>${...}</code> reference is preserved in the file (so your secrets stay as references, not plaintext)</li>
+<li><strong>Atomic writes</strong>: Writes to a temp file first, then renames it. If the rename fails mid-way, your original config is still intact.</li>
+<li><strong>Backup rotation</strong>: Maintains a <code>.bak</code> copy of your previous config</li>
+<li><strong>Audit logging</strong>: Every config write is logged to <code>~/.openclaw/logs/config-audit.jsonl</code> with SHA256 hashes, timestamps, and suspicious activity detection (like config shrinking to less than half its previous size)</li>
+</ol>
+<h3 id="dependency-injection">Dependency Injection<a class="headerlink" href="#dependency-injection" title="Permanent link">&para;</a></h3>
+<p>The entire config system accepts injectable dependencies:
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ConfigIoDeps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">fs?</span><span class="o">:</span><span class="w"> </span><span class="kt">typeof</span><span class="w"> </span><span class="nx">fs</span><span class="w">          </span><span class="c1">// File system (can be mocked in tests)</span>
+<span class="w">  </span><span class="nx">json5?</span><span class="o">:</span><span class="w"> </span><span class="kt">typeof</span><span class="w"> </span><span class="nx">JSON5</span><span class="w">    </span><span class="c1">// Parser (can be mocked)</span>
+<span class="w">  </span><span class="nx">env?</span><span class="o">:</span><span class="w"> </span><span class="kt">NodeJS.ProcessEnv</span><span class="w"> </span><span class="c1">// Environment (can be faked)</span>
+<span class="w">  </span><span class="nx">homedir</span><span class="o">?:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">string</span><span class="w">  </span><span class="c1">// Home directory (can be overridden)</span>
+<span class="w">  </span><span class="nx">logger?</span><span class="o">:</span><span class="w"> </span><span class="kt">...</span><span class="w">            </span><span class="c1">// Logger (can be captured)</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>This makes the config system fully testable without touching the real filesystem.</p>
+<hr />
+<h2 id="part-3-session-management-the-robots-notebook">Part 3: Session Management (The Robot's Notebook)<a class="headerlink" href="#part-3-session-management-the-robots-notebook" title="Permanent link">&para;</a></h2>
+<h3 id="what-is-a-session">What Is a Session?<a class="headerlink" href="#what-is-a-session" title="Permanent link">&para;</a></h3>
+<p>A session is a conversation. When you chat with OpenClaw on Telegram, that's a session. When you chat on Discord in a different channel, that's another session. Each session has:
+- A unique key (like <code>agent:main:telegram:direct:john</code>)
+- Metadata (last message time, channel, thread info)
+- A transcript file (<code>.jsonl</code>) with the actual messages</p>
+<h3 id="where-do-sessions-live">Where Do Sessions Live?<a class="headerlink" href="#where-do-sessions-live" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>~/.openclaw/
+  agents/
+    main/                          ← Default agent
+      sessions/
+        sessions.json              ← The index (list of all sessions)
+        main.jsonl                 ← Transcript for the main session
+        agent-main-telegram-direct-john.jsonl  ← John&#39;s Telegram session
+    support/                       ← A custom &quot;support&quot; agent
+      sessions/
+        sessions.json
+        ...
+</code></pre></div>
+<h3 id="the-session-store-srcconfigsessionsstorets">The Session Store (<code>src/config/sessions/store.ts</code>)<a class="headerlink" href="#the-session-store-srcconfigsessionsstorets" title="Permanent link">&para;</a></h3>
+<p>The <code>sessions.json</code> file is the <strong>index</strong> — it maps session keys to metadata entries. Think of it as the table of contents in a notebook.</p>
+<h4 id="reading-sessions-the-cache-and-retry-dance">Reading Sessions: The Cache and Retry Dance<a class="headerlink" href="#reading-sessions-the-cache-and-retry-dance" title="Permanent link">&para;</a></h4>
+<p>Reading <code>sessions.json</code> has a sophisticated caching and retry system:</p>
+<p><strong>Cache Layer (45-second TTL):</strong>
+- Before reading from disk, check if we have a cached version
+- Cache is validated by comparing the file's modification time (mtime) and size
+- If the file hasn't changed, use the cache
+- 45-second TTL means even if the file hasn't changed, we re-read every 45 seconds (just in case)</p>
+<p><strong>Retry Logic (Windows vs Unix):</strong></p>
+<p>Windows has a problem: file writes aren't truly atomic. When one process writes <code>sessions.json</code>, another process reading at the exact same moment might see:
+- An empty file (0 bytes — between truncate and write)
+- A half-written file (corrupt JSON)</p>
+<p>The fix:
+- <strong>Windows: Retry 3 times</strong> with 50ms pauses between attempts (using <code>Atomics.wait()</code> for precise timing)
+- <strong>Unix: Try once</strong> (file renames ARE atomic on Unix, so this problem doesn't exist)</p>
+<div class="language-text highlight"><pre><span></span><code>Windows retry flow:
+  Attempt 1: Read file → Empty! → Wait 50ms
+  Attempt 2: Read file → JSON parse error! → Wait 50ms
+  Attempt 3: Read file → Success! Parse JSON, cache it.
+</code></pre></div>
+<h4 id="writing-sessions-locks-and-atomic-safety">Writing Sessions: Locks and Atomic Safety<a class="headerlink" href="#writing-sessions-locks-and-atomic-safety" title="Permanent link">&para;</a></h4>
+<p>Multiple parts of OpenClaw might try to update sessions at the same time (incoming Discord message + Telegram message simultaneously). To prevent corruption:</p>
+<p><strong>In-Memory Lock Queue:</strong>
+- Each <code>sessions.json</code> file has a lock queue
+- Tasks queue up and execute one at a time
+- Lock timeout: 10 seconds (if a lock is held too long, it's considered stale at 30 seconds)</p>
+<p><strong>Atomic Write Pattern:</strong>
+<div class="language-text highlight"><pre><span></span><code>1. Write to temp file: sessions.json.12345.abc123.tmp
+2. Rename temp file to sessions.json (atomic on Unix)
+3. On Windows: If rename fails (EPERM/EEXIST), fall back to copy + chmod
+</code></pre></div></p>
+<p><strong>Write Retries:</strong>
+- Windows: 5 attempts with exponential backoff (50ms, 100ms, 150ms, 200ms, 250ms)
+- Unix: 1 attempt, with a best-effort retry if ENOENT (directory was deleted)</p>
+<h4 id="session-maintenance-automatic-cleanup">Session Maintenance (Automatic Cleanup)<a class="headerlink" href="#session-maintenance-automatic-cleanup" title="Permanent link">&para;</a></h4>
+<p>Every time sessions are saved, automatic maintenance runs:
+- <strong>Prune stale entries</strong>: Sessions older than <code>pruneAfterMs</code> get removed
+- <strong>Cap total entries</strong>: If you have more than <code>maxEntries</code> sessions, oldest ones are evicted
+- <strong>Archive transcripts</strong>: Removed session transcripts are moved to an archive
+- <strong>Disk budget enforcement</strong>: Total session storage is capped</p>
+<h4 id="legacy-key-normalization">Legacy Key Normalization<a class="headerlink" href="#legacy-key-normalization" title="Permanent link">&para;</a></h4>
+<p>Older versions of OpenClaw stored session keys with mixed casing (e.g., <code>Agent:Main:Discord:Direct:John</code>). New versions normalize everything to lowercase. When loading, the system:
+1. Looks for the normalized (lowercase) key
+2. Also searches for any case-variant legacy keys
+3. If multiple variants exist, picks the most recently updated one
+4. Migrates to the normalized key going forward</p>
+<h3 id="session-paths-srcconfigsessionspathsts">Session Paths (<code>src/config/sessions/paths.ts</code>)<a class="headerlink" href="#session-paths-srcconfigsessionspathsts" title="Permanent link">&para;</a></h3>
+<p>This file handles all the path math — figuring out WHERE session files should live.</p>
+<p><strong>Key Functions:</strong></p>
+<ul>
+<li><strong><code>resolveAgentSessionsDir(agentId)</code></strong>: Returns <code>~/.openclaw/agents/{agentId}/sessions/</code></li>
+<li><strong><code>resolveSessionTranscriptPathInDir(sessionId, dir, topicId?)</code></strong>: Builds the transcript filename</li>
+<li>Without topic: <code>{sessionId}.jsonl</code></li>
+<li>With topic: <code>{sessionId}-topic-{encodedTopicId}.jsonl</code></li>
+<li><strong><code>resolvePathWithinSessionsDir(path, sessionsDir)</code></strong>: Security function that ensures a path stays INSIDE the sessions directory. No <code>../../etc/passwd</code> tricks.</li>
+</ul>
+<p><strong>Cross-Agent Session Access:</strong>
+Sometimes one agent needs to look up another agent's sessions (e.g., for handoff). The path system supports this by detecting the <code>agents/{agentId}/sessions/</code> structure and rewriting the agent ID portion.</p>
+<hr />
+<h2 id="part-4-routing-the-robots-switchboard">Part 4: Routing (The Robot's Switchboard)<a class="headerlink" href="#part-4-routing-the-robots-switchboard" title="Permanent link">&para;</a></h2>
+<h3 id="what-is-routing">What Is Routing?<a class="headerlink" href="#what-is-routing" title="Permanent link">&para;</a></h3>
+<p>Imagine you have three AI personalities set up:
+- <strong>"main"</strong>: Your general assistant
+- <strong>"work"</strong>: Handles work-related questions
+- <strong>"support"</strong>: Handles customer support</p>
+<p>When a message arrives on Discord, routing decides which personality should answer. It's like a phone switchboard — "this call goes to the sales department, that call goes to tech support."</p>
+<h3 id="the-7-tier-routing-hierarchy-srcroutingresolve-routets">The 7-Tier Routing Hierarchy (<code>src/routing/resolve-route.ts</code>)<a class="headerlink" href="#the-7-tier-routing-hierarchy-srcroutingresolve-routets" title="Permanent link">&para;</a></h3>
+<p>Routing uses a <strong>priority ladder</strong>. It checks the most specific match first and falls through to more general matches. First match wins.</p>
+<h4 id="tier-1-direct-peer-binding-most-specific">Tier 1: Direct Peer Binding (Most Specific)<a class="headerlink" href="#tier-1-direct-peer-binding-most-specific" title="Permanent link">&para;</a></h4>
+<p>"Is there a rule specifically for THIS person?"</p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">routing</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nv">bindings</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">      </span><span class="nv">match</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">peer</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">kind</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;direct&quot;</span><span class="p">,</span><span class="w"> </span><span class="nv">id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;jane&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nv">agentId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;support&quot;</span>
+<span class="w">    </span><span class="p">}]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>If Jane sends a DM, she always gets the "support" agent. Nobody else is affected.</p>
+<h4 id="tier-2-parent-peer-binding-thread-inheritance">Tier 2: Parent Peer Binding (Thread Inheritance)<a class="headerlink" href="#tier-2-parent-peer-binding-thread-inheritance" title="Permanent link">&para;</a></h4>
+<p>"Is this a reply in a thread? What agent handles the thread's parent?"</p>
+<p>If someone replies in a Discord thread, the message inherits the agent from the thread's parent channel/message. This prevents agent-switching mid-conversation.</p>
+<h4 id="tier-3-guild-roles-binding">Tier 3: Guild + Roles Binding<a class="headerlink" href="#tier-3-guild-roles-binding" title="Permanent link">&para;</a></h4>
+<p>"Is this person in a specific Discord server WITH a specific role?"</p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">match</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">guild</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;acme-guild&quot;</span><span class="p">,</span><span class="w"> </span><span class="nv">roles</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;admin&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nv">agentId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin-agent&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Only people with the "admin" role in the "acme-guild" server get the admin agent.</p>
+<h4 id="tier-4-guild-binding-no-role-requirement">Tier 4: Guild Binding (No Role Requirement)<a class="headerlink" href="#tier-4-guild-binding-no-role-requirement" title="Permanent link">&para;</a></h4>
+<p>"Is this person in a specific Discord server?"</p>
+<p>Same as Tier 3, but without checking roles. Everyone in the server gets the same agent.</p>
+<h4 id="tier-5-team-binding">Tier 5: Team Binding<a class="headerlink" href="#tier-5-team-binding" title="Permanent link">&para;</a></h4>
+<p>"Is this person in a specific team?"</p>
+<p>For platforms like Microsoft Teams or Slack workspaces.</p>
+<h4 id="tier-6-account-binding">Tier 6: Account Binding<a class="headerlink" href="#tier-6-account-binding" title="Permanent link">&para;</a></h4>
+<p>"Which of my accounts received this message?"</p>
+<p>If you have multiple Discord accounts (personal + work), you can route each account to a different agent.</p>
+<h4 id="tier-7-channel-binding-least-specific">Tier 7: Channel Binding (Least Specific)<a class="headerlink" href="#tier-7-channel-binding-least-specific" title="Permanent link">&para;</a></h4>
+<p>"What agent handles ALL messages from this channel?"</p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">match</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">channel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;discord&quot;</span><span class="p">,</span><span class="w"> </span><span class="nv">account</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nv">agentId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;main&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The wildcard <code>*</code> means "any account on Discord."</p>
+<h4 id="tier-8-default-agent-fallback">Tier 8: Default Agent (Fallback)<a class="headerlink" href="#tier-8-default-agent-fallback" title="Permanent link">&para;</a></h4>
+<p>If nothing matches, use the default agent from config. This is always <code>"main"</code> unless you changed it.</p>
+<h3 id="the-two-tier-lru-cache">The Two-Tier LRU Cache<a class="headerlink" href="#the-two-tier-lru-cache" title="Permanent link">&para;</a></h3>
+<p>Route resolution involves walking through all bindings, checking each one against the message context. This is expensive if done for every single message. So there are TWO caches:</p>
+<ol>
+<li>
+<p><strong>Binding Cache (2,000 entries)</strong>: Caches the evaluated bindings for a given channel+account combination. Key: <code>"discord\taccount1"</code>.</p>
+</li>
+<li>
+<p><strong>Route Cache (4,000 entries)</strong>: Caches the final resolved route for a given full context (channel + account + peer + guild + team + roles). Key: a multi-segment string.</p>
+</li>
+</ol>
+<p>Both caches are LRU (Least Recently Used) — when full, the oldest unused entry gets evicted.</p>
+<p><strong>Cache bypass</strong>: When verbose logging is enabled, caches are skipped so you can see the full resolution debug output.</p>
+<h3 id="session-key-generation-srcroutingsession-keyts">Session Key Generation (<code>src/routing/session-key.ts</code>)<a class="headerlink" href="#session-key-generation-srcroutingsession-keyts" title="Permanent link">&para;</a></h3>
+<p>Once routing determines which agent handles a message, it needs a <strong>session key</strong> — a unique string that identifies the conversation.</p>
+<p><strong>Format:</strong> <code>agent:{agentId}:{scope}</code></p>
+<p><strong>DM Scope Variants:</strong></p>
+<p>For direct messages, you can control how sessions are grouped:</p>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Pattern</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main</code></td>
+<td><code>agent:main:main</code></td>
+<td>ALL DMs collapse into one session</td>
+</tr>
+<tr>
+<td><code>per-peer</code></td>
+<td><code>agent:main:direct:jane</code></td>
+<td>Each person gets their own session</td>
+</tr>
+<tr>
+<td><code>per-channel-peer</code></td>
+<td><code>agent:main:telegram:direct:jane</code></td>
+<td>Jane on Telegram ≠ Jane on Discord</td>
+</tr>
+<tr>
+<td><code>per-account-channel-peer</code></td>
+<td><code>agent:main:telegram:acct1:direct:jane</code></td>
+<td>Most granular — per account + channel + peer</td>
+</tr>
+</tbody>
+</table>
+<p>For group/channel messages, it's always: <code>agent:{agentId}:{channel}:{peerKind}:{peerId}</code></p>
+<p><strong>Identity Links:</strong></p>
+<p>If the same person talks to you on Telegram AND Discord, they normally get two separate sessions. But with identity links, you can merge them:</p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">identityLinks</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nv">&quot;jane@example.com&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;telegram:123456&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;discord:jane#1234&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Now messages from both platforms resolve to the same canonical identity, and can share a session.</p>
+<p><strong>Agent ID Normalization:</strong></p>
+<p>Agent IDs are cleaned up to be filesystem-safe:
+- Lowercased
+- Invalid characters replaced with <code>-</code>
+- Leading/trailing dashes removed
+- Max 64 characters
+- Empty → defaults to <code>"main"</code></p>
+<hr />
+<h2 id="how-layer-1-evolved-the-git-history">How Layer 1 Evolved: The Git History<a class="headerlink" href="#how-layer-1-evolved-the-git-history" title="Permanent link">&para;</a></h2>
+<h3 id="phase-1-genesis-warelay-november-24-2025">Phase 1: Genesis — "Warelay" (November 24, 2025)<a class="headerlink" href="#phase-1-genesis-warelay-november-24-2025" title="Permanent link">&para;</a></h3>
+<p>The project started as <strong>warelay</strong> — a simple Twilio WhatsApp relay. A single developer (Peter Steinberger) created everything.</p>
+<p><strong><code>src/index.ts</code></strong> was the very first file: a <strong>511-line monolith</strong> containing EVERYTHING — Commander CLI setup, Twilio client, Express webhook server, auto-reply logic, config loading (from <code>~/.warelay/warelay.json</code>), and the main entry point. All in one file.</p>
+<p><strong><code>src/globals.ts</code></strong> was extracted the same day — a tiny 29-line module holding <code>--verbose</code> and <code>--yes</code> flags. This was the first sign of modularization.</p>
+<p><strong><code>src/runtime.ts</code></strong> appeared the next day (Nov 25) — a minimal 14-line module making auto-reply helpers testable.</p>
+<h3 id="phase-2-rapid-growth-nov-dec-2025">Phase 2: Rapid Growth (Nov-Dec 2025)<a class="headerlink" href="#phase-2-rapid-growth-nov-dec-2025" title="Permanent link">&para;</a></h3>
+<p>The monolith (<code>index.ts</code>) grew explosively across ~60 commits:
+- WhatsApp Web provider added
+- Tailscale integration
+- Structured logging via pino
+- Discord transport (Dec 15)</p>
+<p>The project rebranded from <strong>"warelay"</strong> to <strong>"clawdis"</strong> in December (commit <code>b3e50cbb3</code>).</p>
+<h3 id="phase-3-the-great-modularization-january-4-14-2026">Phase 3: The Great Modularization (January 4-14, 2026)<a class="headerlink" href="#phase-3-the-great-modularization-january-4-14-2026" title="Permanent link">&para;</a></h3>
+<p>This was the <strong>pivotal period</strong> where the monolith was surgically broken apart.</p>
+<p><strong>January 4 — Config system extracted:</strong>
+<code>src/config/io.ts</code> was born (188 lines), pulling config reading/writing/validation out of <code>index.ts</code> into a proper module with dependency injection, JSON5 parsing, and Zod validation.</p>
+<p>Same day: project renamed from "clawdis" to <strong>"clawdbot"</strong>.</p>
+<p><strong>January 5 — Boot sequence split:</strong>
+<code>src/entry.ts</code> (20 lines) and <code>src/cli/run-main.ts</code> (48 lines) were created. This was the architectural breakthrough:
+- <code>entry.ts</code> became the shebang entry point handling profiles and early setup
+- <code>run-main.ts</code> became the CLI orchestration layer
+- <code>index.ts</code> was demoted from "everything" to a support module</p>
+<p><strong>January 6 — Routing system created:</strong>
+<code>src/routing/resolve-route.ts</code> (223 lines) and <code>src/routing/session-key.ts</code> (77 lines) were brand new concepts. Before this, there was only ONE agent. Now the system could route different messages to different agents based on peer/guild/team bindings.</p>
+<p><strong>January 11 — <code>$include</code> directive:</strong>
+~230 lines added to <code>config/io.ts</code> implementing modular config includes with circular detection and path security. Contributed by an external developer who needed isolated per-client agent configs for a legal case management use case.</p>
+<p><strong>January 13 — Two key changes:</strong>
+1. The experimental warning respawn trick was added to <code>entry.ts</code>
+2. "Providers" were renamed to "Channels" throughout the routing system — reflecting the evolution from "WhatsApp relay" to "multi-platform message router"</p>
+<p><strong>January 14 — Session system extracted:</strong>
+<code>src/config/sessions/store.ts</code> (299 lines) and <code>src/config/sessions/paths.ts</code> (75 lines) were created, pulling session persistence out of the config module into its own subsystem with caching, retry logic, and per-agent directories.</p>
+<h3 id="phase-4-the-name-carousel-january-18-30-2026">Phase 4: The Name Carousel (January 18-30, 2026)<a class="headerlink" href="#phase-4-the-name-carousel-january-18-30-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Jan 18</strong>: Startup optimization — fast-path routing added to <code>run-main.ts</code></li>
+<li><strong>Jan 27</strong>: Renamed to <strong>"moltbot"</strong> (all references updated, legacy compat maintained)</li>
+<li><strong>Jan 30</strong>: Final rename to <strong>"openclaw"</strong> — types became <code>OpenClawConfig</code>, env vars became <code>OPENCLAW_*</code></li>
+</ul>
+<p>Each rename preserved backward compatibility for config and state directories.</p>
+<h3 id="phase-5-polish-and-performance-february-march-2026">Phase 5: Polish and Performance (February-March 2026)<a class="headerlink" href="#phase-5-polish-and-performance-february-march-2026" title="Permanent link">&para;</a></h3>
+<p><strong>February 8</strong>: <code>ChatType</code> unification — <code>"dm"</code> became <code>"direct"</code> throughout session keys, with backward compatibility (<code>normalizeChatType('dm')</code> → <code>'direct'</code>).</p>
+<p><strong>February 14</strong>: Startup speed improvements — lazy subcommand registration and smarter plugin loading to avoid expensive imports for <code>--help</code>.</p>
+<p><strong>February 16</strong>: <code>runtime.ts</code> refactored to extract shared <code>createRuntimeIo()</code> factory.</p>
+<p><strong>March 1</strong>: Two performance features added to <code>entry.ts</code>:
+- Fast-path for <code>openclaw --version</code> (skip full CLI load)
+- Node compile cache enabled at startup</p>
+<p><strong>March 9</strong>: Latest change — child process environment marking with <code>OPENCLAW_CLI</code>.</p>
+<h3 id="evolution-summary">Evolution Summary<a class="headerlink" href="#evolution-summary" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Event</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nov 24, 2025</td>
+<td>Project created as "warelay"</td>
+<td>511-line monolith</td>
+</tr>
+<tr>
+<td>Dec 2025</td>
+<td>Rename to "clawdis"</td>
+<td>Branding change</td>
+</tr>
+<tr>
+<td>Jan 4, 2026</td>
+<td>Config system extracted</td>
+<td>First real module split</td>
+</tr>
+<tr>
+<td>Jan 4, 2026</td>
+<td>Rename to "clawdbot"</td>
+<td>Branding change</td>
+</tr>
+<tr>
+<td>Jan 5, 2026</td>
+<td>Boot sequence split</td>
+<td><code>entry.ts</code> + <code>run-main.ts</code> created</td>
+</tr>
+<tr>
+<td>Jan 6, 2026</td>
+<td>Routing system created</td>
+<td>Multi-agent support born</td>
+</tr>
+<tr>
+<td>Jan 11, 2026</td>
+<td><code>$include</code> directives</td>
+<td>Modular config files</td>
+</tr>
+<tr>
+<td>Jan 13, 2026</td>
+<td>Respawn trick + providers→channels</td>
+<td>Key architectural patterns</td>
+</tr>
+<tr>
+<td>Jan 14, 2026</td>
+<td>Session system extracted</td>
+<td>Own subsystem with caching/retry</td>
+</tr>
+<tr>
+<td>Jan 27, 2026</td>
+<td>Rename to "moltbot"</td>
+<td>Branding change</td>
+</tr>
+<tr>
+<td>Jan 30, 2026</td>
+<td>Final rename to "openclaw"</td>
+<td>Final brand identity</td>
+</tr>
+<tr>
+<td>Feb 8, 2026</td>
+<td>ChatType unification</td>
+<td><code>dm</code> → <code>direct</code></td>
+</tr>
+<tr>
+<td>Mar 1-9, 2026</td>
+<td>Performance optimizations</td>
+<td>Compile cache, fast paths</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-takeaways-from-the-history">Key Takeaways from the History<a class="headerlink" href="#key-takeaways-from-the-history" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Monolith → Modules</strong>: The project started as a single file and was methodically decomposed. Each extraction happened when the monolith became painful to work with.</p>
+</li>
+<li>
+<p><strong>Names tell the story</strong>: warelay → clawdis → clawdbot → moltbot → openclaw. Each rename reflected an expanding scope — from "WhatsApp relay" to "multi-platform AI assistant."</p>
+</li>
+<li>
+<p><strong>Backward compatibility always preserved</strong>: Every rename maintained legacy config directory support. No user data was ever broken by a rename.</p>
+</li>
+<li>
+<p><strong>Boot sequence grew from necessity</strong>: The respawn trick, fast paths, and profile support were all added because real users hit real problems. None were "designed upfront."</p>
+</li>
+<li>
+<p><strong>Config system grew organically</strong>: Started as a 20-line JSON reader, grew to 1,500+ lines with includes, env substitution, atomic writes, auditing, and security protections. Each feature was driven by a specific use case.</p>
+</li>
+<li>
+<p><strong>Routing was a later addition</strong>: For the first 6 weeks, there was only ONE agent. Multi-agent routing was added January 6, 2026, and has been refined ever since.</p>
+</li>
+</ol>
+<hr />
+<h2 id="file-reference">File Reference<a class="headerlink" href="#file-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/entry.ts</code></td>
+<td>~194</td>
+<td>Boot entry: guards, respawn, fast paths, profiles</td>
+</tr>
+<tr>
+<td><code>src/cli/run-main.ts</code></td>
+<td>~155</td>
+<td>CLI orchestration: env, runtime check, command registration</td>
+</tr>
+<tr>
+<td><code>src/index.ts</code></td>
+<td>~93</td>
+<td>Alternative entry + library exports</td>
+</tr>
+<tr>
+<td><code>src/globals.ts</code></td>
+<td>~52</td>
+<td>Global verbose/yes flags + theme colors</td>
+</tr>
+<tr>
+<td><code>src/runtime.ts</code></td>
+<td>~53</td>
+<td>Runtime I/O abstraction (log, error, exit)</td>
+</tr>
+<tr>
+<td><code>src/config/io.ts</code></td>
+<td>~1559</td>
+<td>Config load/write pipeline (14-step read, atomic write)</td>
+</tr>
+<tr>
+<td><code>src/config/includes.ts</code></td>
+<td>~346</td>
+<td><code>$include</code> directive processing with security</td>
+</tr>
+<tr>
+<td><code>src/config/defaults.ts</code></td>
+<td>~536</td>
+<td>8-stage cascading defaults</td>
+</tr>
+<tr>
+<td><code>src/config/validation.ts</code></td>
+<td>~611</td>
+<td>Zod schema + domain validation</td>
+</tr>
+<tr>
+<td><code>src/config/env-substitution.ts</code></td>
+<td>~150</td>
+<td><code>${VAR}</code> substitution at load time</td>
+</tr>
+<tr>
+<td><code>src/config/env-preserve.ts</code></td>
+<td>~135</td>
+<td><code>${VAR}</code> restoration at write time</td>
+</tr>
+<tr>
+<td><code>src/config/sessions/store.ts</code></td>
+<td>~883</td>
+<td>Session persistence with cache, retry, locks</td>
+</tr>
+<tr>
+<td><code>src/config/sessions/paths.ts</code></td>
+<td>~330</td>
+<td>Session path resolution + security</td>
+</tr>
+<tr>
+<td><code>src/routing/resolve-route.ts</code></td>
+<td>~804</td>
+<td>7-tier binding resolution + 2-tier LRU cache</td>
+</tr>
+<tr>
+<td><code>src/routing/session-key.ts</code></td>
+<td>~254</td>
+<td>Session key generation + DM scope + identity links</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

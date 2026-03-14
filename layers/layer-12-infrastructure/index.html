@@ -1,0 +1,2908 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-11-companion-apps/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 12: Infrastructure - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-12-infrastructure-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 12: Infrastructure
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-the-infrastructure-layer-the-simple-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is the Infrastructure Layer? (The Simple Version)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-docker-the-container-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Docker — The Container System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Docker — The Container System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-main-dockerfile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Main Dockerfile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sandbox-dockerfiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sandbox Dockerfiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Compose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-setup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Setup Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Endpoints
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-the-daemon-system-auto-start-on-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: The Daemon System — Auto-Start on Boot
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: The Daemon System — Auto-Start on Boot">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#platform-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-gatewayservice-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The GatewayService Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-launchagent-launchd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS: LaunchAgent (launchd)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-systemd-user-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux: systemd User Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-task-scheduler-schtasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows: Task Scheduler (schtasks)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-auditing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Service Auditing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#legacy-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Legacy Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profile Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-the-sandbox-isolated-code-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: The Sandbox — Isolated Code Execution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: The Sandbox — Isolated Code Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sandbox-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sandbox Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-container-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Container Defaults
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-sanitization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Sanitization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filesystem-bridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filesystem Bridge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workspace-access-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workspace Access Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#browser-sandbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser Sandbox
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Registry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-pruning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Pruning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-tailscale-integration-secure-remote-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Tailscale Integration — Secure Remote Access
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Tailscale Integration — Secure Remote Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#binary-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binary Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tailnet-hostname" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tailnet Hostname
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sudo-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sudo Fallback
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-cloud-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Cloud Deployments
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Cloud Deployments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flyio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fly.io
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#render" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Render
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubernetes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kubernetes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-cicd-docker-release-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: CI/CD — Docker Release Workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git-history-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git History Evolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Git History Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-cloud-deployment-foundation-jan-2430-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Cloud Deployment Foundation (Jan 24–30, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-docker-foundations-feb-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Docker Foundations (Feb 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-daemon-sandbox-and-gateway-hardening-mar-17-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Daemon, Sandbox, and Gateway Hardening (Mar 1–7, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-platform-polish-mar-814-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Platform Polish (Mar 8–14, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-evolution-in-four-sentences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Evolution in Four Sentences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Files Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#daemon-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Daemon System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sandbox-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sandbox System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tailscale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tailscale
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-the-infrastructure-layer-the-simple-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is the Infrastructure Layer? (The Simple Version)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-docker-the-container-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Docker — The Container System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Docker — The Container System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-main-dockerfile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Main Dockerfile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sandbox-dockerfiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sandbox Dockerfiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Compose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-setup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Setup Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Endpoints
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-the-daemon-system-auto-start-on-boot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: The Daemon System — Auto-Start on Boot
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: The Daemon System — Auto-Start on Boot">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#platform-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Platform Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-gatewayservice-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The GatewayService Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-launchagent-launchd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS: LaunchAgent (launchd)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-systemd-user-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux: systemd User Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-task-scheduler-schtasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows: Task Scheduler (schtasks)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-auditing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Service Auditing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#legacy-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Legacy Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profile Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-the-sandbox-isolated-code-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: The Sandbox — Isolated Code Execution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: The Sandbox — Isolated Code Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sandbox-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sandbox Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-container-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Container Defaults
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-sanitization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Sanitization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filesystem-bridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filesystem Bridge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workspace-access-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workspace Access Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#browser-sandbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser Sandbox
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Registry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-pruning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Pruning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-tailscale-integration-secure-remote-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Tailscale Integration — Secure Remote Access
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Tailscale Integration — Secure Remote Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#binary-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binary Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tailnet-hostname" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tailnet Hostname
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sudo-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sudo Fallback
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-cloud-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Cloud Deployments
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Cloud Deployments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flyio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fly.io
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#render" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Render
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubernetes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kubernetes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-cicd-docker-release-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: CI/CD — Docker Release Workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git-history-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git History Evolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Git History Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-cloud-deployment-foundation-jan-2430-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Cloud Deployment Foundation (Jan 24–30, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-docker-foundations-feb-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Docker Foundations (Feb 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-daemon-sandbox-and-gateway-hardening-mar-17-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Daemon, Sandbox, and Gateway Hardening (Mar 1–7, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-platform-polish-mar-814-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Platform Polish (Mar 8–14, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-evolution-in-four-sentences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Evolution in Four Sentences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Files Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#daemon-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Daemon System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sandbox-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sandbox System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tailscale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tailscale
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-12-infrastructure-deep-dive">Layer 12: Infrastructure — Deep Dive<a class="headerlink" href="#layer-12-infrastructure-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-the-infrastructure-layer-the-simple-version">What Is the Infrastructure Layer? (The Simple Version)<a class="headerlink" href="#what-is-the-infrastructure-layer-the-simple-version" title="Permanent link">&para;</a></h2>
+<p>Imagine you've built an amazing robot (OpenClaw). It can think, talk, and do things. But now you need to figure out: <strong>where does this robot live?</strong> How does it turn on when you start your computer? How do you put it in a box (container) so it runs the same way everywhere? And how do you keep it safe from bad actors?</p>
+<p>That's what the Infrastructure layer does:</p>
+<ol>
+<li><strong>Docker</strong> — Puts OpenClaw in a container (like a shipping container for software) so it runs identically everywhere</li>
+<li><strong>Daemon</strong> — Makes OpenClaw start automatically when your computer boots, like a background service</li>
+<li><strong>Sandbox</strong> — Puts the AI's code execution in a locked room (isolated container) so it can't break your system</li>
+<li><strong>Tailscale</strong> — Lets you securely access OpenClaw from anywhere using a private mesh network</li>
+<li><strong>Cloud Deployments</strong> — One-click deployment to Fly.io, Render, or Kubernetes</li>
+</ol>
+<p>Think of it like building a house for the robot: Docker is the prefab house, the daemon is the alarm clock that wakes it up every morning, the sandbox is a padded playroom where it can experiment safely, and Tailscale is a secure tunnel connecting the house to the outside world.</p>
+<hr />
+<h2 id="part-1-docker-the-container-system">Part 1: Docker — The Container System<a class="headerlink" href="#part-1-docker-the-container-system" title="Permanent link">&para;</a></h2>
+<h3 id="the-main-dockerfile">The Main Dockerfile<a class="headerlink" href="#the-main-dockerfile" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>Dockerfile</code> (249 lines)</p>
+<p>The Dockerfile builds the OpenClaw container in multiple stages, like an assembly line:</p>
+<h4 id="stage-1-ext-deps-extension-dependencies">Stage 1: ext-deps (Extension Dependencies)<a class="headerlink" href="#stage-1-ext-deps-extension-dependencies" title="Permanent link">&para;</a></h4>
+<p>Extracts only <code>package.json</code> files from opted-in extensions. This prevents rebuilding the entire image when only extension source code changes (not their dependencies).</p>
+<h4 id="stage-2-build">Stage 2: build<a class="headerlink" href="#stage-2-build" title="Permanent link">&para;</a></h4>
+<p>The heavy lifting stage:
+1. <strong>Install Bun</strong> with 5-attempt retry logic (network failures happen)
+2. <strong>Enable corepack</strong> for pnpm package management
+3. <strong>Install dependencies</strong> via pnpm with aggressive caching:
+   - Cache mount: <code>openclaw-pnpm-store</code> (persists across builds)
+   - <code>NODE_OPTIONS=--max-old-space-size=2048</code> (prevents OOM on small hosts)
+4. <strong>Normalize permissions</strong> for extensions and agent directories
+5. <strong>Bundle A2UI</strong> (with stub fallback if sources missing)
+6. <strong>Build all TypeScript</strong> → JavaScript</p>
+<h4 id="stage-3-runtime-assets">Stage 3: runtime-assets<a class="headerlink" href="#stage-3-runtime-assets" title="Permanent link">&para;</a></h4>
+<p>Prunes development dependencies and removes TypeScript declaration files (<code>.d.ts</code>, <code>.d.mts</code>, <code>.map</code>) — they're not needed at runtime.</p>
+<h4 id="stage-4-runtime-base-selection">Stage 4: Runtime Base Selection<a class="headerlink" href="#stage-4-runtime-base-selection" title="Permanent link">&para;</a></h4>
+<p>Two variants:
+- <strong>default</strong> (<code>node:24-bookworm</code>, ~900MB) — full Debian with all tools
+- <strong>slim</strong> (<code>node:24-bookworm-slim</code>, ~300MB) — minimal Debian</p>
+<p>Both use <strong>SHA256-pinned digests</strong> for reproducible builds — the exact same base image every time.</p>
+<h4 id="stage-5-final-runtime">Stage 5: Final Runtime<a class="headerlink" href="#stage-5-final-runtime" title="Permanent link">&para;</a></h4>
+<p>Assembles the production image:</p>
+<p><strong>System packages:</strong> <code>procps</code>, <code>hostname</code>, <code>curl</code>, <code>git</code>, <code>openssl</code> (with apt cache mounts for fast rebuilds)</p>
+<p><strong>Artifact copy</strong> (as non-root <code>node</code> user):
+- <code>dist/</code> — compiled JavaScript
+- <code>node_modules/</code> — production dependencies only
+- <code>extensions/</code> — channel and plugin extensions
+- <code>skills/</code> — AI skill documentation
+- <code>docs/</code> — documentation</p>
+<p><strong>Corepack persistence:</strong> Installs pnpm into a shared directory so it survives container restarts.</p>
+<p><strong>Optional features</strong> (build args):
+- <code>OPENCLAW_INSTALL_BROWSER</code> — adds Chromium + Xvfb (~300MB extra) for browser automation
+- <code>OPENCLAW_INSTALL_DOCKER_CLI</code> — adds Docker CLI (~50MB) for sandbox management. Validates the GPG key fingerprint before trusting it.</p>
+<p><strong>Security hardening:</strong>
+- Runs as non-root <code>node</code> user (UID 1000)
+- <code>NODE_ENV=production</code>
+- Symlinks CLI to <code>/usr/local/bin/openclaw</code></p>
+<p><strong>Healthcheck:</strong>
+<div class="language-dockerfile highlight"><pre><span></span><code><span class="k">HEALTHCHECK</span><span class="w"> </span>--interval<span class="o">=</span>3m<span class="w"> </span>--timeout<span class="o">=</span>10s<span class="w"> </span>--start-period<span class="o">=</span>15s<span class="w"> </span>--retries<span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>CMD<span class="w"> </span>node<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;fetch(&#39;http://127.0.0.1:18789/healthz&#39;).then(r=&gt;process.exit(r.ok?0:1)).catch(()=&gt;process.exit(1))&quot;</span>
+</code></pre></div></p>
+<p><strong>Default command:</strong> <code>node openclaw.mjs gateway --allow-unconfigured</code></p>
+<h3 id="sandbox-dockerfiles">Sandbox Dockerfiles<a class="headerlink" href="#sandbox-dockerfiles" title="Permanent link">&para;</a></h3>
+<p>Three additional Dockerfiles for isolated code execution:</p>
+<p><strong>Dockerfile.sandbox</strong> — Basic sandbox:
+- Debian bookworm-slim with bash, curl, git, jq, python3, ripgrep
+- Non-root <code>sandbox</code> user
+- CMD: <code>sleep infinity</code> (kept alive, commands run via <code>docker exec</code>)</p>
+<p><strong>Dockerfile.sandbox-browser</strong> — Browser sandbox:
+- Adds Chromium, fonts, noVNC, Xvfb, x11vnc, websockify
+- Exposes ports: 9222 (Chrome DevTools), 5900 (VNC), 6080 (noVNC web)
+- Custom entrypoint script</p>
+<p><strong>Dockerfile.sandbox-common</strong> — Full development environment:
+- Build arg controlled installations:
+  - Packages: curl, wget, nodejs, npm, python3, git, golang, rustc, cargo, build-essential
+  - Optional: pnpm, Bun, Homebrew (Linux)
+- Used for agents that need to compile code</p>
+<h3 id="docker-compose">Docker Compose<a class="headerlink" href="#docker-compose" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>docker-compose.yml</code> (79 lines)</p>
+<p>Two services:</p>
+<p><strong>openclaw-gateway:</strong>
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${OPENCLAW_IMAGE:-openclaw:local}</span>
+<span class="nt">ports</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;${OPENCLAW_GATEWAY_PORT:-18789}:18789&quot;</span><span class="w">  </span><span class="c1"># Gateway</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;${OPENCLAW_BRIDGE_PORT:-18790}:18790&quot;</span><span class="w">    </span><span class="c1"># Bridge</span>
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace</span>
+<span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="nt">init</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">healthcheck</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">test: fetch /healthz (interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s, timeout</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5s, retries</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5)</span>
+</code></pre></div></p>
+<p><strong>openclaw-cli:</strong>
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;service:openclaw-gateway&quot;</span><span class="w">  </span><span class="c1"># Shared network namespace</span>
+<span class="nt">cap_drop</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">NET_RAW</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">NET_ADMIN</span><span class="p p-Indicator">]</span><span class="w">            </span><span class="c1"># Security restriction</span>
+<span class="nt">security_opt</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;no-new-privileges:true&quot;</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># Can&#39;t escalate</span>
+<span class="nt">stdin_open</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">                          </span><span class="c1"># Interactive</span>
+<span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div></p>
+<h3 id="docker-setup-script">Docker Setup Script<a class="headerlink" href="#docker-setup-script" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>docker-setup.sh</code> (617 lines)</p>
+<p>An interactive setup wizard that:</p>
+<ol>
+<li><strong>Validates dependencies</strong> — requires Docker and Docker Compose v2</li>
+<li><strong>Sets up directories</strong> — creates <code>~/.openclaw/</code>, <code>identity/</code>, <code>agents/main/</code>, <code>sessions/</code></li>
+<li><strong>Manages tokens</strong> — generates <code>OPENCLAW_GATEWAY_TOKEN</code> via <code>openssl rand -hex 32</code> (or Python fallback)</li>
+<li><strong>Token priority</strong>: existing config → <code>.env</code> file → generate new</li>
+<li><strong>Builds or pulls</strong> the Docker image</li>
+<li><strong>Fixes permissions</strong> — runs as root to chown <code>/home/node/.openclaw</code></li>
+<li><strong>Runs onboarding</strong> interactively</li>
+<li><strong>Optionally sets up sandbox</strong> — builds sandbox image, mounts Docker socket, configures sandbox mode</li>
+<li><strong>Starts the gateway</strong> — <code>docker compose up -d openclaw-gateway</code></li>
+</ol>
+<p><strong>Security features:</strong>
+- Validates mount paths (no control chars, no whitespace)
+- Validates timezone against <code>/usr/share/zoneinfo/</code>
+- Token stored in config file, not in compose file
+- Named volume validation with strict regex</p>
+<h3 id="health-endpoints">Health Endpoints<a class="headerlink" href="#health-endpoints" title="Permanent link">&para;</a></h3>
+<p><strong>In the gateway (<code>server-http.ts</code>):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Type</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/health</code>, <code>/healthz</code></td>
+<td>Liveness</td>
+<td>Always returns 200 <code>{ ok: true, status: "live" }</code></td>
+</tr>
+<tr>
+<td><code>/ready</code>, <code>/readyz</code></td>
+<td>Readiness</td>
+<td>Returns 200 if ready, 503 if not. Includes details (channels, agents, sessions) for authenticated/local requests</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="part-2-the-daemon-system-auto-start-on-boot">Part 2: The Daemon System — Auto-Start on Boot<a class="headerlink" href="#part-2-the-daemon-system-auto-start-on-boot" title="Permanent link">&para;</a></h2>
+<p><strong>Directory:</strong> <code>src/daemon/</code> (52 files)</p>
+<p>The daemon system makes OpenClaw start automatically when your computer boots and restart if it crashes. It supports three platforms:</p>
+<h3 id="platform-detection">Platform Detection<a class="headerlink" href="#platform-detection" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// service.ts</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">PLATFORM_REGISTRY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">darwin</span><span class="o">:</span><span class="w"> </span><span class="kt">LaunchdService</span><span class="p">,</span><span class="w">   </span><span class="c1">// macOS</span>
+<span class="w">  </span><span class="nx">linux</span><span class="o">:</span><span class="w"> </span><span class="kt">SystemdService</span><span class="p">,</span><span class="w">    </span><span class="c1">// Linux</span>
+<span class="w">  </span><span class="nx">win32</span><span class="o">:</span><span class="w"> </span><span class="kt">SchtasksService</span><span class="p">,</span><span class="w">   </span><span class="c1">// Windows</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="the-gatewayservice-interface">The GatewayService Interface<a class="headerlink" href="#the-gatewayservice-interface" title="Permanent link">&para;</a></h3>
+<p>Every platform implements:
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">GatewayService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">install</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">uninstall</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">restart</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">GatewayServiceRestartResult</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">readCommand</span><span class="p">(</span><span class="nx">env</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">GatewayServiceCommandConfig</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">readRuntime</span><span class="p">(</span><span class="nx">env</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">GatewayServiceRuntime</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">isLoaded</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">boolean</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></p>
+<h3 id="macos-launchagent-launchd">macOS: LaunchAgent (launchd)<a class="headerlink" href="#macos-launchagent-launchd" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/daemon/launchd.ts</code> (542 lines)</p>
+<p>LaunchAgents are macOS's way of running background services for a user.</p>
+<p><strong>Installation:</strong>
+1. Ensure secure directories (mode 0o755)
+2. Remove any legacy agents (from clawdbot/moltbot era)
+3. Generate a <code>.plist</code> XML file
+4. <code>launchctl enable gui/$UID/ai.openclaw.gateway</code>
+5. <code>launchctl bootstrap gui/$UID /path/to/plist</code></p>
+<p><strong>Plist generation (<code>launchd-plist.ts</code>):</strong>
+<div class="language-xml highlight"><pre><span></span><code><span class="nt">&lt;plist&gt;</span>
+<span class="w">  </span><span class="nt">&lt;dict&gt;</span>
+<span class="w">    </span><span class="nt">&lt;key&gt;</span>Label<span class="nt">&lt;/key&gt;&lt;string&gt;</span>ai.openclaw.gateway<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;key&gt;</span>RunAtLoad<span class="nt">&lt;/key&gt;&lt;true/&gt;</span><span class="w">           </span><span class="cm">&lt;!-- Start on login --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;key&gt;</span>KeepAlive<span class="nt">&lt;/key&gt;&lt;true/&gt;</span><span class="w">           </span><span class="cm">&lt;!-- Restart on crash --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;key&gt;</span>ThrottleInterval<span class="nt">&lt;/key&gt;&lt;integer&gt;</span>1<span class="nt">&lt;/integer&gt;</span><span class="w">  </span><span class="cm">&lt;!-- Min 1s between restarts --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;key&gt;</span>Umask<span class="nt">&lt;/key&gt;&lt;integer&gt;</span>63<span class="nt">&lt;/integer&gt;</span><span class="w"> </span><span class="cm">&lt;!-- 0o077 — owner-only files --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;key&gt;</span>ProgramArguments<span class="nt">&lt;/key&gt;&lt;array&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>/usr/local/bin/node<span class="nt">&lt;/string&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>/path/to/dist/index.js<span class="nt">&lt;/string&gt;</span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>gateway<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/array&gt;</span>
+<span class="w">    </span><span class="nt">&lt;key&gt;</span>StandardOutPath<span class="nt">&lt;/key&gt;&lt;string&gt;</span>~/.openclaw/logs/gateway.log<span class="nt">&lt;/string&gt;</span>
+<span class="w">    </span><span class="nt">&lt;key&gt;</span>StandardErrorPath<span class="nt">&lt;/key&gt;&lt;string&gt;</span>~/.openclaw/logs/gateway.err.log<span class="nt">&lt;/string&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/dict&gt;</span>
+<span class="nt">&lt;/plist&gt;</span>
+</code></pre></div></p>
+<p><strong>Restart trick (<code>launchd-restart-handoff.ts</code>):</strong>
+When the service process restarts itself, it can't use <code>launchctl kickstart</code> directly (it would kill itself first). Instead, it spawns a <strong>detached shell script</strong> that:
+1. Waits for the parent PID to exit
+2. Runs <code>launchctl kickstart -k gui/$UID/ai.openclaw.gateway</code>
+3. Falls back to <code>launchctl bootstrap</code> if kickstart fails</p>
+<h3 id="linux-systemd-user-service">Linux: systemd User Service<a class="headerlink" href="#linux-systemd-user-service" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/daemon/systemd.ts</code> (300+ lines)</p>
+<p><strong>Unit file generation (<code>systemd-unit.ts</code>):</strong>
+<div class="language-ini highlight"><pre><span></span><code><span class="k">[Unit]</span>
+<span class="na">Description</span><span class="o">=</span><span class="s">OpenClaw Gateway</span>
+<span class="na">After</span><span class="o">=</span><span class="s">network-online.target</span>
+<span class="na">Wants</span><span class="o">=</span><span class="s">network-online.target</span>
+
+<span class="k">[Service]</span>
+<span class="na">ExecStart</span><span class="o">=</span><span class="s">/usr/local/bin/node /path/to/dist/index.js gateway --port 18789</span>
+<span class="na">Restart</span><span class="o">=</span><span class="s">always</span>
+<span class="na">RestartSec</span><span class="o">=</span><span class="s">5</span>
+<span class="na">TimeoutStopSec</span><span class="o">=</span><span class="s">30</span>
+<span class="na">TimeoutStartSec</span><span class="o">=</span><span class="s">30</span>
+<span class="na">SuccessExitStatus</span><span class="o">=</span><span class="s">0 143</span>
+<span class="na">KillMode</span><span class="o">=</span><span class="s">control-group</span>
+<span class="na">WorkingDirectory</span><span class="o">=</span><span class="s">/path/to/openclaw</span>
+<span class="na">Environment</span><span class="o">=</span><span class="s">PATH=/usr/local/bin:/usr/bin:/bin</span>
+
+<span class="k">[Install]</span>
+<span class="na">WantedBy</span><span class="o">=</span><span class="s">default.target</span>
+</code></pre></div></p>
+<p><strong>Unit file path:</strong> <code>~/.config/systemd/user/openclaw-gateway.service</code></p>
+<p><strong>Linger mode (<code>systemd-linger.ts</code>):</strong>
+By default, systemd user services only run while the user has an active login session. <code>loginctl enable-linger</code> makes them persistent — the service runs even after logout. The daemon detects if sudo is needed and prompts accordingly.</p>
+<p><strong>WSL2 detection (<code>systemd-hints.ts</code>):</strong>
+WSL2 needs systemd enabled via <code>/etc/wsl.conf [boot]systemd=true</code>. The daemon detects this and provides instructions. It also detects container environments (no systemd available) and suggests foreground mode instead.</p>
+<h3 id="windows-task-scheduler-schtasks">Windows: Task Scheduler (schtasks)<a class="headerlink" href="#windows-task-scheduler-schtasks" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/daemon/schtasks.ts</code> (400+ lines)</p>
+<p>Windows uses Task Scheduler for background services:</p>
+<p><strong>Task script generation:</strong>
+<div class="language-batch highlight"><pre><span></span><code><span class="p">@</span><span class="k">echo</span> off
+<span class="c1">REM OpenClaw Gateway Service</span>
+<span class="k">cd</span> /d C:\path\to\openclaw
+<span class="k">SET</span> <span class="nv">OPENCLAW_GATEWAY_TOKEN</span><span class="p">=</span>abc123
+node dist\index.js gateway --port 18789
+</code></pre></div></p>
+<p><strong>Startup fallback:</strong> If <code>schtasks /Create</code> fails (permission issues, timeout), it creates a startup launcher in the user's Startup folder instead — a <code>.cmd</code> file that runs <code>start "" /min cmd.exe /d /c gateway-script.cmd</code>.</p>
+<p><strong>Important:</strong> Windows doesn't override PATH — it inherits the Task Scheduler's PATH, unlike macOS/Linux where a minimal explicit PATH is set.</p>
+<h3 id="environment-resolution">Environment Resolution<a class="headerlink" href="#environment-resolution" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/daemon/service-env.ts</code> (340 lines)</p>
+<p>The daemon builds a minimal, secure PATH for each platform:</p>
+<p><strong>macOS:</strong>
+- fnm: <code>~/Library/Application Support/fnm/aliases/default/bin</code>
+- pnpm: <code>~/Library/pnpm</code>
+- System: <code>/opt/homebrew/bin</code>, <code>/usr/local/bin</code>, <code>/usr/bin</code>, <code>/bin</code>
+- Extra: <code>NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem</code>, <code>NODE_USE_SYSTEM_CA=1</code></p>
+<p><strong>Linux:</strong>
+- fnm: <code>~/.fnm/current/bin</code>
+- nvm: <code>~/.nvm/current/bin</code>
+- pnpm: <code>~/.local/share/pnpm</code>
+- System: <code>/usr/local/bin</code>, <code>/usr/bin</code>, <code>/bin</code></p>
+<p><strong>Windows:</strong>
+- Inherits Task Scheduler PATH (no override)</p>
+<h3 id="service-auditing">Service Auditing<a class="headerlink" href="#service-auditing" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/daemon/service-audit.ts</code> (424 lines)</p>
+<p>The audit system checks installed services for common issues:</p>
+<ul>
+<li><strong>Token drift</strong> — service has a different token than config (stale)</li>
+<li><strong>Embedded tokens</strong> — tokens should be in environment files, not plist/unit files</li>
+<li><strong>PATH validation</strong> — detects version-manager paths that could break on updates</li>
+<li><strong>Runtime check</strong> — verifies Node version (22.16+ or 24 required)</li>
+<li><strong>Gateway command</strong> — ensures "gateway" subcommand is present</li>
+<li><strong>Platform-specific</strong>: Linux checks <code>After=network-online.target</code>, macOS checks <code>RunAtLoad=true</code></li>
+</ul>
+<h3 id="legacy-support">Legacy Support<a class="headerlink" href="#legacy-support" title="Permanent link">&para;</a></h3>
+<p>The daemon handles migration from previous project names:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">LEGACY_GATEWAY_SYSTEMD_SERVICE_NAMES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;clawdbot-gateway&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;moltbot-gateway&quot;</span><span class="p">]</span>
+<span class="c1">// Plus legacy launchd labels and Windows task names</span>
+</code></pre></div>
+<p>Old services are automatically detected, cleaned up, and replaced.</p>
+<h3 id="profile-support">Profile Support<a class="headerlink" href="#profile-support" title="Permanent link">&para;</a></h3>
+<p>Multiple gateway instances can run with profiles:
+- Default: <code>ai.openclaw.gateway</code> / <code>openclaw-gateway.service</code>
+- Profile: <code>ai.openclaw.myprofile</code> / <code>openclaw-gateway-myprofile.service</code></p>
+<hr />
+<h2 id="part-3-the-sandbox-isolated-code-execution">Part 3: The Sandbox — Isolated Code Execution<a class="headerlink" href="#part-3-the-sandbox-isolated-code-execution" title="Permanent link">&para;</a></h2>
+<p><strong>Directory:</strong> <code>src/agents/sandbox/</code> (52 files)</p>
+<p>When the AI runs code (bash commands, Python scripts, etc.), you might not want it running directly on your machine. The sandbox puts code execution inside a Docker container — an isolated environment where the AI can't accidentally (or maliciously) damage your system.</p>
+<h3 id="sandbox-configuration">Sandbox Configuration<a class="headerlink" href="#sandbox-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/sandbox/config.ts</code> (217 lines)</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">SandboxConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">mode</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;off&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;non-main&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;all&quot;</span><span class="p">;</span><span class="w">     </span><span class="c1">// When to sandbox</span>
+<span class="w">  </span><span class="nx">scope</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;session&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;agent&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;shared&quot;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Container per-session, per-agent, or shared</span>
+<span class="w">  </span><span class="nx">docker</span><span class="o">:</span><span class="w"> </span><span class="kt">SandboxDockerConfig</span><span class="p">;</span><span class="w">           </span><span class="c1">// Container settings</span>
+<span class="w">  </span><span class="nx">browser</span><span class="o">:</span><span class="w"> </span><span class="kt">SandboxBrowserConfig</span><span class="p">;</span><span class="w">         </span><span class="c1">// Browser container</span>
+<span class="w">  </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="kt">SandboxToolPolicy</span><span class="p">;</span><span class="w">              </span><span class="c1">// Tool allow/deny</span>
+<span class="w">  </span><span class="nx">prune</span><span class="o">:</span><span class="w"> </span><span class="kt">SandboxPruneConfig</span><span class="p">;</span><span class="w">             </span><span class="c1">// Cleanup rules</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><strong>Mode:</strong>
+- <code>off</code> — no sandboxing
+- <code>non-main</code> — sandbox everything except the main agent
+- <code>all</code> — sandbox everything</p>
+<p><strong>Scope:</strong>
+- <code>session</code> — fresh container per conversation session
+- <code>agent</code> — one container per agent (reused across sessions)
+- <code>shared</code> — single container for all agents</p>
+<h3 id="docker-container-defaults">Docker Container Defaults<a class="headerlink" href="#docker-container-defaults" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">DEFAULT_SANDBOX_IMAGE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;openclaw-sandbox:bookworm-slim&quot;</span>
+<span class="nx">containerPrefix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;openclaw-sbx-&quot;</span>
+<span class="nx">workdir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/workspace&quot;</span>
+<span class="nx">readOnlyRoot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="w">        </span><span class="c1">// Root filesystem is read-only</span>
+<span class="nx">capDrop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ALL&quot;</span><span class="p">]</span><span class="w">          </span><span class="c1">// Drop ALL Linux capabilities</span>
+<span class="nx">tmpfs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/tmp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;/var/tmp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;/run&quot;</span><span class="p">]</span><span class="w">  </span><span class="c1">// Ephemeral scratch space</span>
+<span class="nx">network</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="w">           </span><span class="c1">// No network by default</span>
+<span class="nx">pidsLimit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">256</span><span class="w">            </span><span class="c1">// Max 256 processes</span>
+<span class="nx">memory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1g&quot;</span><span class="w">              </span><span class="c1">// 1GB RAM limit</span>
+<span class="nx">memorySwap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2g&quot;</span><span class="w">          </span><span class="c1">// 2GB total (1GB RAM + 1GB swap)</span>
+<span class="nx">cpus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1</span><span class="w">                   </span><span class="c1">// 1 CPU core</span>
+</code></pre></div>
+<h3 id="tool-policy">Tool Policy<a class="headerlink" href="#tool-policy" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/sandbox/tool-policy.ts</code> (110 lines)</p>
+<p>Controls which tools the AI can use inside the sandbox:</p>
+<p><strong>Default allow:</strong> exec, process, read, write, edit, apply_patch, image, sessions_*, subagents, session_status</p>
+<p><strong>Default deny:</strong> browser, canvas, nodes, cron, gateway, discord, telegram, whatsapp, slack, signal, imessage (all channel IDs)</p>
+<p>Deny always wins over allow. Glob patterns are supported. The AI agent config can override per-agent.</p>
+<h3 id="security-validation">Security Validation<a class="headerlink" href="#security-validation" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/sandbox/validate-sandbox-security.ts</code> (200+ lines)</p>
+<p><strong>Blocked host paths</strong> (never mountable):
+- <code>/etc</code>, <code>/proc</code>, <code>/sys</code>, <code>/dev</code>, <code>/root</code>, <code>/boot</code> — OS critical
+- <code>/run</code>, <code>/var/run</code>, <code>/var/run/docker.sock</code> — Docker socket escape vectors
+- <code>/private/etc</code>, <code>/private/var/run</code> — macOS equivalents</p>
+<p><strong>Network mode restrictions:</strong>
+- <code>host</code> — always blocked (escapes to host network)
+- <code>container:*</code> — blocked unless explicitly allowed (namespace join)
+- Default: <code>none</code> (complete network isolation)</p>
+<p><strong>Reserved container targets:</strong>
+- <code>/workspace</code> and <code>/agent</code> can't be overridden by bind mounts</p>
+<h3 id="environment-sanitization">Environment Sanitization<a class="headerlink" href="#environment-sanitization" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/sandbox/sanitize-env-vars.ts</code> (111 lines)</p>
+<p>Prevents leaking secrets into sandbox containers:</p>
+<p><strong>Always blocked:</strong>
+- <code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code>, <code>GEMINI_API_KEY</code>
+- <code>TELEGRAM_BOT_TOKEN</code>, <code>DISCORD_BOT_TOKEN</code>, <code>SLACK_*_TOKEN</code>
+- <code>AWS_SECRET_ACCESS_KEY</code>, <code>AWS_SESSION_TOKEN</code>
+- <code>GH_TOKEN</code>, <code>GITHUB_TOKEN</code>
+- Catch-alls: <code>*_API_KEY</code>, <code>*_TOKEN</code>, <code>*_PASSWORD</code>, <code>*_PRIVATE_KEY</code>, <code>*_SECRET</code></p>
+<p><strong>Always allowed:</strong> <code>LANG</code>, <code>LC_*</code>, <code>PATH</code>, <code>HOME</code>, <code>USER</code>, <code>SHELL</code>, <code>TERM</code>, <code>TZ</code>, <code>NODE_ENV</code></p>
+<p><strong>Value validation:</strong>
+- Rejects null bytes
+- Max 32KB per value
+- Detects base64-like credential patterns (80+ alphanumeric chars)</p>
+<h3 id="filesystem-bridge">Filesystem Bridge<a class="headerlink" href="#filesystem-bridge" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/sandbox/fs-bridge.ts</code> (200+ lines)</p>
+<p>When the AI reads/writes files from inside the sandbox, the filesystem bridge translates between host and container paths:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">SandboxFsBridge</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">resolvePath</span><span class="p">(</span><span class="nx">filePath</span><span class="p">,</span><span class="w"> </span><span class="nx">cwd</span><span class="o">?</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">SandboxResolvedPath</span><span class="p">;</span><span class="w">  </span><span class="c1">// host ↔ container path mapping</span>
+<span class="w">  </span><span class="nx">readFile</span><span class="p">(</span><span class="nx">filePath</span><span class="p">,</span><span class="w"> </span><span class="nx">cwd</span><span class="o">?</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Buffer</span><span class="o">&gt;</span><span class="p">;</span><span class="w">          </span><span class="c1">// Read via docker exec</span>
+<span class="w">  </span><span class="nx">writeFile</span><span class="p">(</span><span class="nx">filePath</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span><span class="w">           </span><span class="c1">// Write via docker stdin</span>
+<span class="w">  </span><span class="nx">stat</span><span class="p">(</span><span class="nx">filePath</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">SandboxFsStat</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="o">&gt;</span><span class="p">;</span><span class="w">      </span><span class="c1">// File info</span>
+<span class="w">  </span><span class="nx">mkdirp</span><span class="p">(</span><span class="nx">filePath</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span><span class="w">                    </span><span class="c1">// Create directories</span>
+<span class="w">  </span><span class="nx">remove</span><span class="p">(</span><span class="nx">filePath</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span><span class="w">                    </span><span class="c1">// Delete files</span>
+<span class="w">  </span><span class="nx">rename</span><span class="p">(</span><span class="nx">old</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span><span class="w">                    </span><span class="c1">// Move files</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>All operations validate path safety before execution — no escaping the sandbox.</p>
+<h3 id="workspace-access-modes">Workspace Access Modes<a class="headerlink" href="#workspace-access-modes" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>none</code></td>
+<td>No workspace visible inside container</td>
+</tr>
+<tr>
+<td><code>ro</code></td>
+<td>Read-only access to sandbox workspace</td>
+</tr>
+<tr>
+<td><code>rw</code></td>
+<td>Read-write access to agent workspace</td>
+</tr>
+</tbody>
+</table>
+<h3 id="browser-sandbox">Browser Sandbox<a class="headerlink" href="#browser-sandbox" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/sandbox/browser.ts</code> (250+ lines)</p>
+<p>A separate container for browser automation (Chromium + noVNC):</p>
+<ul>
+<li><strong>Image:</strong> <code>openclaw-sandbox-browser:bookworm-slim</code></li>
+<li><strong>Ports:</strong> CDP (9222), VNC (5900), noVNC web (6080)</li>
+<li><strong>Network:</strong> Separate <code>openclaw-sandbox-browser</code> Docker network</li>
+<li><strong>CDP waiting:</strong> Polls <code>http://127.0.0.1:{port}/json/version</code> until ready</li>
+<li><strong>noVNC auth:</strong> Random password generated for web VNC access</li>
+<li><strong>Config hash matching:</strong> Detects when config changes require container recreation</li>
+</ul>
+<h3 id="container-registry">Container Registry<a class="headerlink" href="#container-registry" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/sandbox/registry.ts</code> (187 lines)</p>
+<p>Tracks running sandbox containers in JSON files:
+- <code>~/.openclaw/sandbox/containers.json</code> — sandbox containers
+- <code>~/.openclaw/sandbox/browsers.json</code> — browser containers</p>
+<p>Atomic updates with write locks prevent corruption. Each entry tracks: containerName, sessionKey, createdAt, lastUsedAt, image, configHash.</p>
+<h3 id="container-pruning">Container Pruning<a class="headerlink" href="#container-pruning" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/sandbox/prune.ts</code> (112 lines)</p>
+<p>Automatic cleanup of stale containers:
+- <strong>Idle threshold:</strong> 24 hours since last use
+- <strong>Max age:</strong> 7 days since creation
+- <strong>Check interval:</strong> Every 5 minutes
+- Removes containers and updates registry atomically</p>
+<hr />
+<h2 id="part-4-tailscale-integration-secure-remote-access">Part 4: Tailscale Integration — Secure Remote Access<a class="headerlink" href="#part-4-tailscale-integration-secure-remote-access" title="Permanent link">&para;</a></h2>
+<p><strong>Files:</strong> <code>src/infra/tailscale.ts</code> (300+ lines), <code>src/shared/tailscale-status.ts</code> (71 lines)</p>
+<p>Tailscale creates a secure mesh network between your devices. OpenClaw uses it for remote gateway access without exposing ports to the internet.</p>
+<h3 id="binary-discovery">Binary Discovery<a class="headerlink" href="#binary-discovery" title="Permanent link">&para;</a></h3>
+<p>The system searches for Tailscale in multiple locations:
+1. <code>which tailscale</code> (standard PATH)
+2. <code>/Applications/Tailscale.app/Contents/MacOS/Tailscale</code> (macOS app)
+3. <code>find /Applications</code> for Tailscale.app
+4. <code>locate Tailscale.app</code></p>
+<p>Each candidate is verified with <code>tailscale --version</code> (3s timeout). The result is cached.</p>
+<h3 id="tailnet-hostname">Tailnet Hostname<a class="headerlink" href="#tailnet-hostname" title="Permanent link">&para;</a></h3>
+<p>Reads <code>tailscale status --json</code>, parses <code>Self.DNSName</code> (your hostname on the tailnet). Falls back to the first <code>Self.TailscaleIPs</code> if DNS name unavailable.</p>
+<h3 id="sudo-fallback">Sudo Fallback<a class="headerlink" href="#sudo-fallback" title="Permanent link">&para;</a></h3>
+<p>Tailscale sometimes requires elevated permissions. The system:
+1. Tries the command normally
+2. Detects permission errors (EACCES, "permission denied", "requires sudo")
+3. Retries with <code>sudo -n</code> (non-interactive — fails if not configured)</p>
+<hr />
+<h2 id="part-5-cloud-deployments">Part 5: Cloud Deployments<a class="headerlink" href="#part-5-cloud-deployments" title="Permanent link">&para;</a></h2>
+<h3 id="flyio">Fly.io<a class="headerlink" href="#flyio" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>fly.toml</code> (35 lines)</p>
+<div class="language-toml highlight"><pre><span></span><code><span class="k">[env]</span>
+<span class="w">  </span><span class="n">NODE_ENV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;production&quot;</span>
+<span class="w">  </span><span class="n">OPENCLAW_STATE_DIR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/data&quot;</span>
+<span class="w">  </span><span class="n">NODE_OPTIONS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;--max-old-space-size=1536&quot;</span>
+
+<span class="k">[[vm]]</span>
+<span class="w">  </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;shared-cpu-2x&quot;</span>
+<span class="w">  </span><span class="n">memory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2048mb&quot;</span>
+
+<span class="k">[[mounts]]</span>
+<span class="w">  </span><span class="n">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;openclaw_data&quot;</span>
+<span class="w">  </span><span class="n">destination</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/data&quot;</span>
+</code></pre></div>
+<p>Command: <code>node dist/index.js gateway --allow-unconfigured --port 3000 --bind lan</code></p>
+<p>HTTPS forced, auto-start enabled, minimum 1 machine always running (persistent for WebSocket connections).</p>
+<h3 id="render">Render<a class="headerlink" href="#render" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>render.yaml</code> (21 lines)</p>
+<div class="language-yaml highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openclaw</span>
+<span class="w">    </span><span class="nt">runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker</span>
+<span class="w">    </span><span class="nt">plan</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">starter</span>
+<span class="w">    </span><span class="nt">healthCheckPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/health</span>
+<span class="w">    </span><span class="nt">disk</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openclaw-data</span>
+<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/data</span>
+<span class="w">      </span><span class="nt">sizeGB</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</code></pre></div>
+<p>Auto-generates <code>OPENCLAW_GATEWAY_TOKEN</code>, 1GB persistent disk.</p>
+<h3 id="kubernetes">Kubernetes<a class="headerlink" href="#kubernetes" title="Permanent link">&para;</a></h3>
+<p>Added in March 2026 with full manifests, Kind scripts, and setup guide (852 lines of documentation and configuration).</p>
+<hr />
+<h2 id="part-6-cicd-docker-release-workflow">Part 6: CI/CD — Docker Release Workflow<a class="headerlink" href="#part-6-cicd-docker-release-workflow" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>.github/workflows/docker-release.yml</code></p>
+<ul>
+<li><strong>Triggers:</strong> Main branch pushes, version tags (<code>v*</code>)</li>
+<li><strong>Ignores:</strong> docs, markdown, skills, .agents directories</li>
+<li><strong>Builds:</strong> Multi-arch images (amd64 + arm64) with BuildKit</li>
+<li><strong>Tags:</strong> <code>main-{arch}</code>, <code>{version}-{arch}</code>, <code>latest</code> (for latest tag)</li>
+<li><strong>Slim variants:</strong> Built alongside default</li>
+<li><strong>Registry:</strong> <code>ghcr.io/openclaw/openclaw</code></li>
+<li><strong>Manifest merging:</strong> Creates multi-arch manifests for seamless <code>docker pull</code></li>
+<li><strong>OCI metadata:</strong> Git SHA revision, version, creation timestamp</li>
+</ul>
+<hr />
+<h2 id="git-history-evolution">Git History Evolution<a class="headerlink" href="#git-history-evolution" title="Permanent link">&para;</a></h2>
+<h3 id="phase-1-cloud-deployment-foundation-jan-2430-2026">Phase 1: Cloud Deployment Foundation (Jan 24–30, 2026)<a class="headerlink" href="#phase-1-cloud-deployment-foundation-jan-2430-2026" title="Permanent link">&para;</a></h3>
+<p>On <strong>January 24</strong>, Peter Steinberger added <strong>Fly.io deployment</strong> — <code>fly.toml</code> with 102 lines of configuration. The same day, he hardened Tailscale integration with sudo fallback guards.</p>
+<p><strong>January 25</strong>: <strong>Shadow</strong> contributed the <strong>Render deployment</strong> guide with <code>render.yaml</code>. On <strong>January 26</strong>, Peter Steinberger further hardened Tailscale serve authentication.</p>
+<p>The rest of January was dominated by the two project renames (Clawdbot → Moltbot → OpenClaw), which touched every infrastructure file.</p>
+<h3 id="phase-2-docker-foundations-feb-2026">Phase 2: Docker Foundations (Feb 2026)<a class="headerlink" href="#phase-2-docker-foundations-feb-2026" title="Permanent link">&para;</a></h3>
+<p>February established the Docker infrastructure:</p>
+<ul>
+<li><strong>Feb 9</strong>: <strong>quotentiroler</strong> added CI registry cache for persistent Docker layer storage</li>
+<li><strong>Feb 16</strong>: <strong>JayMishra-github</strong> added optional Chromium + Xvfb in the Docker image</li>
+<li><strong>Feb 19</strong>: <strong>Coy Geek</strong> pinned all base images to SHA256 digests (#7734) — a critical security improvement ensuring reproducible builds. Added Dependabot config for automatic digest updates.</li>
+<li><strong>Feb 20</strong>: <strong>Harold Hunt</strong> reduced the Docker image size by ~50% (~900MB saved), described as "AI assisted"</li>
+<li><strong>Feb 24</strong>: Peter Steinberger centralized sandbox network mode policy and blocked container namespace joins by default — a critical security feature</li>
+</ul>
+<h3 id="phase-3-daemon-sandbox-and-gateway-hardening-mar-17-2026">Phase 3: Daemon, Sandbox, and Gateway Hardening (Mar 1–7, 2026)<a class="headerlink" href="#phase-3-daemon-sandbox-and-gateway-hardening-mar-17-2026" title="Permanent link">&para;</a></h3>
+<p>March was the hardening month:</p>
+<ul>
+<li><strong>Mar 1</strong>: <strong>Vincent Koc</strong> added Kubernetes-style health probes (<code>/healthz</code>, <code>/readyz</code>) to the gateway</li>
+<li><strong>Mar 2</strong>: Multiple contributors delivered major features:</li>
+<li><strong>Umut CAN</strong> added native Dockerfile <code>HEALTHCHECK</code></li>
+<li><strong>jamtujest</strong> added sandbox support for Docker deployments via <code>docker-setup.sh</code></li>
+<li><strong>Vincent Koc</strong> hardened the browser container's Chromium flags</li>
+<li><strong>Mar 3</strong>: <strong>Tak Hoffman</strong> overhauled gateway lifecycle for restart and startup probe robustness (810+ new test lines)</li>
+<li><strong>Mar 4</strong>: Vincent Koc fixed systemd restart false timeouts on Debian and Linux daemon install checks for WSL2/headless environments</li>
+<li><strong>Mar 6</strong>: <strong>Sally O'Malley</strong> added opt-in extension pre-installation via <code>OPENCLAW_EXTENSIONS</code> build arg</li>
+<li><strong>Mar 7</strong>: Multiple fixes:</li>
+<li>Vincent Koc hardened WSL2 systemctl detection and handled degraded systemd states</li>
+<li>Peter Steinberger fixed Windows PATH freezing in task scripts and normalized schtasks runtime parsing</li>
+<li>Sally O'Malley created the <strong>slim Docker image variant</strong> (300MB vs 900MB)</li>
+</ul>
+<h3 id="phase-4-platform-polish-mar-814-2026">Phase 4: Platform Polish (Mar 8–14, 2026)<a class="headerlink" href="#phase-4-platform-polish-mar-814-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Mar 8</strong>: Vincent Koc trimmed the runtime image payload further</li>
+<li><strong>Mar 9</strong>: Peter Steinberger hardened macOS LaunchAgent permissions and added XPC-based launchd detection</li>
+<li><strong>Mar 12</strong>: Three major additions:</li>
+<li><strong>Robin Waslander</strong> rewrote macOS launchd restart to use <code>kickstart -k</code> instead of <code>bootout</code> (303 new lines) — more reliable restarts</li>
+<li><strong>Sally O'Malley</strong> added full <strong>Kubernetes deployment</strong> with Kind scripts and manifests (852 lines)</li>
+<li><strong>Altay</strong> defaulted to Node 24 across all Dockerfiles</li>
+<li><strong>Mar 13</strong>: Peter Steinberger added Windows Startup folder fallback for daemon installation. <strong>Jealous</strong> added timezone support. <strong>Jacob Tomlinson</strong> added <code>apt-get upgrade</code> to all Dockerfiles for security.</li>
+</ul>
+<h3 id="the-evolution-in-four-sentences">The Evolution in Four Sentences<a class="headerlink" href="#the-evolution-in-four-sentences" title="Permanent link">&para;</a></h3>
+<p>Infrastructure started with Fly.io and Render cloud deployments in late January 2026, followed by Docker image creation and CI pipeline in February. The sandbox system (Docker-based isolated code execution) was built alongside, with Peter Steinberger establishing security policies for network isolation, blocked host paths, and environment sanitization. March brought a rapid hardening phase: health probes, systemd/launchd/schtasks reliability fixes, WSL2 support, slim image variants, and Kubernetes manifests. Throughout, community contributors drove image optimization (50% reduction), SHA256 digest pinning, browser sandbox hardening, and cross-platform daemon robustness.</p>
+<hr />
+<h2 id="architecture-diagram">Architecture Diagram<a class="headerlink" href="#architecture-diagram" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────────┐
+│                      Infrastructure Layer                            │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │                        Docker                                   │  │
+│  │                                                                 │  │
+│  │  Dockerfile (multi-stage)                                       │  │
+│  │  ┌──────────┐ ┌──────────┐ ┌─────────────┐ ┌──────────────┐  │  │
+│  │  │ ext-deps │→│  build   │→│runtime-assets│→│ final runtime│  │  │
+│  │  │(pkg.json)│ │(bun,pnpm │ │(prune devs) │ │(node user,   │  │  │
+│  │  │          │ │ tsc,a2ui)│ │              │ │ healthcheck) │  │  │
+│  │  └──────────┘ └──────────┘ └─────────────┘ └──────────────┘  │  │
+│  │                                                                 │  │
+│  │  Variants: default (~900MB) │ slim (~300MB)                    │  │
+│  │  Optional: +browser (~300MB) │ +docker-cli (~50MB)             │  │
+│  │  Base: SHA256-pinned Node 24 bookworm                          │  │
+│  │                                                                 │  │
+│  │  docker-compose.yml:                                            │  │
+│  │  ┌─────────────────┐  ┌────────────────┐                      │  │
+│  │  │ openclaw-gateway │  │  openclaw-cli  │                      │  │
+│  │  │ port 18789/18790│  │  shared network │                      │  │
+│  │  │ healthcheck 30s │  │  cap_drop: NET  │                      │  │
+│  │  │ init: true      │  │  no-new-privs   │                      │  │
+│  │  └─────────────────┘  └────────────────┘                      │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │                    Daemon System                                │  │
+│  │                                                                 │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │  │
+│  │  │ macOS        │  │ Linux        │  │ Windows              │ │  │
+│  │  │ LaunchAgent  │  │ systemd user │  │ Task Scheduler       │ │  │
+│  │  │              │  │              │  │                       │ │  │
+│  │  │ RunAtLoad    │  │ Restart=     │  │ On-login trigger     │ │  │
+│  │  │ KeepAlive    │  │ always       │  │ Startup folder       │ │  │
+│  │  │ Umask 077    │  │ RestartSec=5 │  │ fallback             │ │  │
+│  │  │ kickstart -k │  │ linger mode  │  │                       │ │  │
+│  │  │ for restart  │  │ WSL2 detect  │  │ Inherited PATH       │ │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────────────┘ │  │
+│  │                                                                 │  │
+│  │  Service Audit: token drift, PATH validation, runtime check    │  │
+│  │  Legacy migration: clawdbot → moltbot → openclaw               │  │
+│  │  Profile support: multiple gateway instances                    │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │                     Sandbox System                              │  │
+│  │                                                                 │  │
+│  │  Mode: off │ non-main │ all                                    │  │
+│  │  Scope: session │ agent │ shared                               │  │
+│  │                                                                 │  │
+│  │  Container Defaults:                                            │  │
+│  │  • readOnlyRoot, capDrop: ALL, network: none                   │  │
+│  │  • pidsLimit: 256, memory: 1GB, cpus: 1                       │  │
+│  │  • tmpfs: /tmp, /var/tmp, /run                                 │  │
+│  │                                                                 │  │
+│  │  ┌──────────────┐  ┌─────────────┐  ┌──────────────────────┐ │  │
+│  │  │ Basic sandbox│  │Browser sand.│  │ Common sandbox       │ │  │
+│  │  │ bash,git,    │  │ Chromium,   │  │ Node,Python,Go,      │ │  │
+│  │  │ python,curl  │  │ noVNC,Xvfb  │  │ Rust,Bun,Brew       │ │  │
+│  │  │ ~150MB       │  │ ~1.2GB      │  │ ~800MB              │ │  │
+│  │  └──────────────┘  └─────────────┘  └──────────────────────┘ │  │
+│  │                                                                 │  │
+│  │  Security:                                                      │  │
+│  │  • Blocked paths: /etc, /proc, /sys, /dev, docker.sock        │  │
+│  │  • Blocked network: host mode, container namespace joins       │  │
+│  │  • Env sanitization: API keys, tokens, passwords stripped      │  │
+│  │  • Tool policy: deny &gt; allow, glob patterns                    │  │
+│  │  • FS bridge: path-safe file operations via docker exec        │  │
+│  │  • Registry: atomic JSON with write locks                      │  │
+│  │  • Pruning: 24h idle, 7d max age, 5min check interval         │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │                   Tailscale Integration                         │  │
+│  │                                                                 │  │
+│  │  Binary discovery: which → macOS app → find → locate           │  │
+│  │  Tailnet hostname: DNSName from `tailscale status --json`      │  │
+│  │  Sudo fallback: detect permission error → retry with sudo -n   │  │
+│  │  Whois cache: identity lookups with TTL                        │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │                    Cloud Deployments                            │  │
+│  │                                                                 │  │
+│  │  ┌─────────┐  ┌─────────┐  ┌────────────┐  ┌──────────────┐  │  │
+│  │  │ Fly.io  │  │ Render  │  │ Kubernetes │  │ Podman       │  │  │
+│  │  │ fly.toml│  │render.yml│ │ manifests  │  │ Quadlet      │  │  │
+│  │  │ 2x CPU  │  │ starter │  │ Kind setup │  │              │  │  │
+│  │  │ 2GB RAM │  │ 1GB disk│  │ full guide │  │              │  │  │
+│  │  └─────────┘  └─────────┘  └────────────┘  └──────────────┘  │  │
+│  │                                                                 │  │
+│  │  CI/CD: Multi-arch (amd64+arm64), GHCR, manifest merging      │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="key-files-reference">Key Files Reference<a class="headerlink" href="#key-files-reference" title="Permanent link">&para;</a></h2>
+<h3 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Dockerfile</code></td>
+<td>249</td>
+<td>Main multi-stage build</td>
+</tr>
+<tr>
+<td><code>Dockerfile.sandbox</code></td>
+<td>24</td>
+<td>Basic sandbox container</td>
+</tr>
+<tr>
+<td><code>Dockerfile.sandbox-browser</code></td>
+<td>35</td>
+<td>Browser sandbox (Chromium + noVNC)</td>
+</tr>
+<tr>
+<td><code>Dockerfile.sandbox-common</code></td>
+<td>49</td>
+<td>Full dev environment sandbox</td>
+</tr>
+<tr>
+<td><code>docker-compose.yml</code></td>
+<td>79</td>
+<td>Two-service compose (gateway + CLI)</td>
+</tr>
+<tr>
+<td><code>docker-setup.sh</code></td>
+<td>617</td>
+<td>Interactive setup wizard</td>
+</tr>
+<tr>
+<td><code>fly.toml</code></td>
+<td>35</td>
+<td>Fly.io deployment</td>
+</tr>
+<tr>
+<td><code>render.yaml</code></td>
+<td>21</td>
+<td>Render deployment</td>
+</tr>
+<tr>
+<td><code>.github/workflows/docker-release.yml</code></td>
+<td>—</td>
+<td>Multi-arch CI/CD pipeline</td>
+</tr>
+<tr>
+<td><code>docs/install/docker.md</code></td>
+<td>844</td>
+<td>Comprehensive Docker guide</td>
+</tr>
+</tbody>
+</table>
+<h3 id="daemon-system">Daemon System<a class="headerlink" href="#daemon-system" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/daemon/service.ts</code></td>
+<td>147</td>
+<td>Platform registry and service interface</td>
+</tr>
+<tr>
+<td><code>src/daemon/service-types.ts</code></td>
+<td>42</td>
+<td>Service type hierarchy</td>
+</tr>
+<tr>
+<td><code>src/daemon/service-env.ts</code></td>
+<td>340</td>
+<td>Environment and PATH resolution</td>
+</tr>
+<tr>
+<td><code>src/daemon/service-audit.ts</code></td>
+<td>424</td>
+<td>Configuration auditing</td>
+</tr>
+<tr>
+<td><code>src/daemon/constants.ts</code></td>
+<td>114</td>
+<td>Labels, names, legacy support</td>
+</tr>
+<tr>
+<td><code>src/daemon/launchd.ts</code></td>
+<td>542</td>
+<td>macOS LaunchAgent management</td>
+</tr>
+<tr>
+<td><code>src/daemon/launchd-plist.ts</code></td>
+<td>117</td>
+<td>Plist XML generation</td>
+</tr>
+<tr>
+<td><code>src/daemon/launchd-restart-handoff.ts</code></td>
+<td>139</td>
+<td>Detached restart mechanism</td>
+</tr>
+<tr>
+<td><code>src/daemon/systemd.ts</code></td>
+<td>300+</td>
+<td>Linux systemd service management</td>
+</tr>
+<tr>
+<td><code>src/daemon/systemd-unit.ts</code></td>
+<td>121</td>
+<td>Unit file generation</td>
+</tr>
+<tr>
+<td><code>src/daemon/systemd-linger.ts</code></td>
+<td>74</td>
+<td>User session persistence</td>
+</tr>
+<tr>
+<td><code>src/daemon/systemd-hints.ts</code></td>
+<td>30</td>
+<td>WSL2/container detection hints</td>
+</tr>
+<tr>
+<td><code>src/daemon/schtasks.ts</code></td>
+<td>400+</td>
+<td>Windows Task Scheduler</td>
+</tr>
+<tr>
+<td><code>src/daemon/schtasks-exec.ts</code></td>
+<td>24</td>
+<td>Windows command execution</td>
+</tr>
+<tr>
+<td><code>src/daemon/runtime-binary.ts</code></td>
+<td>24</td>
+<td>Node/Bun detection</td>
+</tr>
+<tr>
+<td><code>src/daemon/runtime-paths.ts</code></td>
+<td>188</td>
+<td>System Node resolution</td>
+</tr>
+<tr>
+<td><code>src/daemon/runtime-hints.ts</code></td>
+<td>53</td>
+<td>Platform log/start hints</td>
+</tr>
+<tr>
+<td><code>src/daemon/program-args.ts</code></td>
+<td>281</td>
+<td>CLI entrypoint resolution</td>
+</tr>
+<tr>
+<td><code>src/daemon/diagnostics.ts</code></td>
+<td>44</td>
+<td>Error log diagnostics</td>
+</tr>
+<tr>
+<td><code>src/daemon/inspect.ts</code></td>
+<td>400+</td>
+<td>Service inspection and cleanup</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sandbox-system">Sandbox System<a class="headerlink" href="#sandbox-system" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/agents/sandbox/types.ts</code></td>
+<td>91</td>
+<td>Sandbox type hierarchy</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/config.ts</code></td>
+<td>217</td>
+<td>Configuration resolution</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/constants.ts</code></td>
+<td>56</td>
+<td>Defaults (images, limits, policies)</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/context.ts</code></td>
+<td>200+</td>
+<td>Sandbox context and workspace setup</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/docker.ts</code></td>
+<td>250+</td>
+<td>Docker integration and container management</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/manage.ts</code></td>
+<td>107</td>
+<td>Container lifecycle (list, remove)</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/workspace.ts</code></td>
+<td>65</td>
+<td>Workspace directory setup</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/workspace-mounts.ts</code></td>
+<td>28</td>
+<td>Mount configuration (none/ro/rw)</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/fs-bridge.ts</code></td>
+<td>200+</td>
+<td>Filesystem bridge for sandboxed I/O</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/browser.ts</code></td>
+<td>250+</td>
+<td>Browser sandbox (Chromium, CDP, noVNC)</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/network-mode.ts</code></td>
+<td>29</td>
+<td>Network mode validation</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/registry.ts</code></td>
+<td>187</td>
+<td>Container registry (atomic JSON)</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/validate-sandbox-security.ts</code></td>
+<td>200+</td>
+<td>Security validation (blocked paths, targets)</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/sanitize-env-vars.ts</code></td>
+<td>111</td>
+<td>Credential stripping</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/tool-policy.ts</code></td>
+<td>110</td>
+<td>Tool allow/deny resolution</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/bind-spec.ts</code></td>
+<td>34</td>
+<td>Bind mount spec parsing</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/prune.ts</code></td>
+<td>112</td>
+<td>Container cleanup (idle/age)</td>
+</tr>
+<tr>
+<td><code>src/agents/sandbox/host-paths.ts</code></td>
+<td>43</td>
+<td>Host path normalization</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tailscale">Tailscale<a class="headerlink" href="#tailscale" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/infra/tailscale.ts</code></td>
+<td>300+</td>
+<td>Binary discovery, hostname, sudo fallback</td>
+</tr>
+<tr>
+<td><code>src/shared/tailscale-status.ts</code></td>
+<td>71</td>
+<td>Status command runner</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

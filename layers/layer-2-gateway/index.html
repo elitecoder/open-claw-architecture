@@ -1,0 +1,3819 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-1-core-runtime/">
+      
+      
+        <link rel="next" href="../layer-3-plugin-system/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 2: Gateway - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-2-gateway-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 2: Gateway
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 2?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-10-phase-startup-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The 10-Phase Startup Sequence
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The 10-Phase Startup Sequence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-environment-setup-lines-271-283" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Environment Setup (Lines 271-283)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-config-validation-migration-lines-285-332" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Config Validation &amp; Migration (Lines 285-332)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-secrets-runtime-activation-lines-333-360" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Secrets Runtime Activation (Lines 333-360)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-auth-bootstrap-lines-361-420" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Auth Bootstrap (Lines 361-420)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-load-plugins-channel-plugins-lines-421-490" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Load Plugins + Channel Plugins (Lines 421-490)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-create-httphttps-websocket-servers-lines-491-580" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Create HTTP/HTTPS + WebSocket Servers (Lines 491-580)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-start-channel-manager-lines-581-660" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: Start Channel Manager (Lines 581-660)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-8-start-discovery-lines-661-730" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 8: Start Discovery (Lines 661-730)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-9-start-timers-monitors-lines-731-850" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 9: Start Timers &amp; Monitors (Lines 731-850)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-10-attach-websocket-handlers-config-watcher-lines-851-1070" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 10: Attach WebSocket Handlers &amp; Config Watcher (Lines 851-1070)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-the-protocol-how-devices-talk-to-the-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: The Protocol (How Devices Talk to the Gateway)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: The Protocol (How Devices Talk to the Gateway)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frame-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frame Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-connect-handshake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Connect Handshake
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-validation-with-ajv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Validation with AJV
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-authentication-who-are-you" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Authentication (Who Are You?)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Authentication (Who Are You?)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#method-1-token-authentication-most-common" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 1: Token Authentication (Most Common)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-2-password-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 2: Password Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-3-device-pairing-mobiledesktop-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 3: Device Pairing (Mobile/Desktop Apps)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-4-bootstrap-token-first-time-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 4: Bootstrap Token (First-Time Setup)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-5-trusted-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 5: Trusted Proxy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-6-tailscale-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 6: Tailscale Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-7-no-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 7: No Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting-brute-force-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting (Brute-Force Protection)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#role-based-access-control-rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Role-Based Access Control (RBAC)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-http-endpoints-the-web-facing-side" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: HTTP Endpoints (The Web-Facing Side)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: HTTP Endpoints (The Web-Facing Side)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#health-probes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Probes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openai-compatible-chat-completions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenAI-Compatible Chat Completions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openresponses-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenResponses Endpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webhook Hooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-the-chat-flow-the-heart-of-everything" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Chat Flow (The Heart of Everything)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Chat Flow (The Heart of Everything)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-validation-gauntlet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Validation Gauntlet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-abort-controller-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Abort Controller Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-immediate-acknowledgment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Immediate Acknowledgment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-message-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Message Construction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-fire-and-forget-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Fire-and-Forget Dispatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-streaming-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Streaming Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-transcript-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Transcript Persistence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chat-abort-cancellation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chat Abort (Cancellation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chat-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chat History
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-runtime-state-the-servers-working-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Runtime State (The Server's Working Memory)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-broadcasting-the-pa-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Broadcasting (The PA System)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Broadcasting (The PA System)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#event-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Event Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#broadcast-mechanics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Broadcast Mechanics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-channel-manager-keeping-the-lines-open" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: Channel Manager (Keeping the Lines Open)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 8: Channel Manager (Keeping the Lines Open)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lifecycle-for-each-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lifecycle for Each Channel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exponential-backoff-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exponential Backoff Restart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-9-discovery-finding-the-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 9: Discovery (Finding the Gateway)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 9: Discovery (Finding the Gateway)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mdns-bonjour-local-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mDNS / Bonjour (Local Network)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tailscale-discovery-vpnremote" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tailscale Discovery (VPN/Remote)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wide-area-dns-sd-global" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wide-Area DNS-SD (Global)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-10-nodes-remote-workers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 10: Nodes (Remote Workers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 10: Nodes (Remote Workers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#node-pairing-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Node Pairing Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-invocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Node Invocation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-background-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iOS Background Challenges
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-11-the-gateway-client-connecting-to-the-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 11: The Gateway Client (Connecting TO the Gateway)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 11: The Gateway Client (Connecting TO the Gateway)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reconnection-with-backoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reconnection with Backoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tick-watchdog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tick Watchdog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-response-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request-Response Pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-12-server-methods-the-complete-menu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 12: Server Methods (The Complete Menu)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 12: Server Methods (The Complete Menu)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#method-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method Dispatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-2-evolved-the-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 2 Evolved: The Git History
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 2 Evolved: The Git History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-0-the-predecessor-control-channel-december-8-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 0: The Predecessor — Control Channel (December 8, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-the-big-bang-december-9-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: The Big Bang (December 9, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-protocol-v2-and-early-features-december-10-23-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Protocol v2 and Early Features (December 10-23, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-the-great-decomposition-january-3-4-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: The Great Decomposition (January 3-4, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-openai-compatible-api-january-10-19-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: OpenAI-Compatible API (January 10-19, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-plugin-architecture-channels-rename-january-11-15-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Plugin Architecture + Channels Rename (January 11-15, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-second-great-decomposition-january-14-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Second Great Decomposition (January 14, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-device-auth-tls-january-19-20-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: Device Auth + TLS (January 19-20, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-8-project-renames-january-27-30-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 8: Project Renames (January 27-30, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-9-security-hardening-february-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 9: Security Hardening (February 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-10-container-native-polish-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 10: Container-Native + Polish (March 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evolution-timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evolution Timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 2?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-10-phase-startup-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The 10-Phase Startup Sequence
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The 10-Phase Startup Sequence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-environment-setup-lines-271-283" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Environment Setup (Lines 271-283)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-config-validation-migration-lines-285-332" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Config Validation &amp; Migration (Lines 285-332)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-secrets-runtime-activation-lines-333-360" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Secrets Runtime Activation (Lines 333-360)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-auth-bootstrap-lines-361-420" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Auth Bootstrap (Lines 361-420)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-load-plugins-channel-plugins-lines-421-490" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Load Plugins + Channel Plugins (Lines 421-490)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-create-httphttps-websocket-servers-lines-491-580" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Create HTTP/HTTPS + WebSocket Servers (Lines 491-580)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-start-channel-manager-lines-581-660" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: Start Channel Manager (Lines 581-660)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-8-start-discovery-lines-661-730" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 8: Start Discovery (Lines 661-730)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-9-start-timers-monitors-lines-731-850" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 9: Start Timers &amp; Monitors (Lines 731-850)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-10-attach-websocket-handlers-config-watcher-lines-851-1070" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 10: Attach WebSocket Handlers &amp; Config Watcher (Lines 851-1070)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-the-protocol-how-devices-talk-to-the-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: The Protocol (How Devices Talk to the Gateway)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: The Protocol (How Devices Talk to the Gateway)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frame-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frame Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-connect-handshake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Connect Handshake
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-validation-with-ajv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Validation with AJV
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-authentication-who-are-you" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Authentication (Who Are You?)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Authentication (Who Are You?)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#method-1-token-authentication-most-common" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 1: Token Authentication (Most Common)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-2-password-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 2: Password Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-3-device-pairing-mobiledesktop-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 3: Device Pairing (Mobile/Desktop Apps)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-4-bootstrap-token-first-time-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 4: Bootstrap Token (First-Time Setup)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-5-trusted-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 5: Trusted Proxy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-6-tailscale-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 6: Tailscale Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-7-no-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 7: No Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting-brute-force-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting (Brute-Force Protection)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#role-based-access-control-rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Role-Based Access Control (RBAC)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-http-endpoints-the-web-facing-side" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: HTTP Endpoints (The Web-Facing Side)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: HTTP Endpoints (The Web-Facing Side)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#health-probes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Probes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openai-compatible-chat-completions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenAI-Compatible Chat Completions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openresponses-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenResponses Endpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webhook Hooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-the-chat-flow-the-heart-of-everything" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Chat Flow (The Heart of Everything)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Chat Flow (The Heart of Everything)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-validation-gauntlet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Validation Gauntlet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-abort-controller-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Abort Controller Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-immediate-acknowledgment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Immediate Acknowledgment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-message-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Message Construction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-fire-and-forget-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Fire-and-Forget Dispatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-streaming-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Streaming Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-transcript-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Transcript Persistence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chat-abort-cancellation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chat Abort (Cancellation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chat-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chat History
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-runtime-state-the-servers-working-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Runtime State (The Server's Working Memory)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-broadcasting-the-pa-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Broadcasting (The PA System)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Broadcasting (The PA System)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#event-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Event Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#broadcast-mechanics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Broadcast Mechanics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-channel-manager-keeping-the-lines-open" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: Channel Manager (Keeping the Lines Open)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 8: Channel Manager (Keeping the Lines Open)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lifecycle-for-each-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lifecycle for Each Channel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exponential-backoff-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exponential Backoff Restart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-9-discovery-finding-the-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 9: Discovery (Finding the Gateway)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 9: Discovery (Finding the Gateway)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mdns-bonjour-local-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mDNS / Bonjour (Local Network)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tailscale-discovery-vpnremote" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tailscale Discovery (VPN/Remote)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wide-area-dns-sd-global" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wide-Area DNS-SD (Global)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-10-nodes-remote-workers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 10: Nodes (Remote Workers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 10: Nodes (Remote Workers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#node-pairing-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Node Pairing Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-invocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Node Invocation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-background-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iOS Background Challenges
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-11-the-gateway-client-connecting-to-the-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 11: The Gateway Client (Connecting TO the Gateway)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 11: The Gateway Client (Connecting TO the Gateway)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reconnection-with-backoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reconnection with Backoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tick-watchdog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tick Watchdog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-response-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request-Response Pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-12-server-methods-the-complete-menu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 12: Server Methods (The Complete Menu)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 12: Server Methods (The Complete Menu)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#method-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method Dispatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-2-evolved-the-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 2 Evolved: The Git History
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 2 Evolved: The Git History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-0-the-predecessor-control-channel-december-8-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 0: The Predecessor — Control Channel (December 8, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-the-big-bang-december-9-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: The Big Bang (December 9, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-protocol-v2-and-early-features-december-10-23-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Protocol v2 and Early Features (December 10-23, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-the-great-decomposition-january-3-4-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: The Great Decomposition (January 3-4, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-openai-compatible-api-january-10-19-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: OpenAI-Compatible API (January 10-19, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-plugin-architecture-channels-rename-january-11-15-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Plugin Architecture + Channels Rename (January 11-15, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-second-great-decomposition-january-14-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Second Great Decomposition (January 14, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-device-auth-tls-january-19-20-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: Device Auth + TLS (January 19-20, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-8-project-renames-january-27-30-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 8: Project Renames (January 27-30, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-9-security-hardening-february-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 9: Security Hardening (February 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-10-container-native-polish-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 10: Container-Native + Polish (March 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evolution-timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evolution Timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-2-gateway-deep-dive">Layer 2: Gateway — Deep Dive<a class="headerlink" href="#layer-2-gateway-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-layer-2">What Is Layer 2?<a class="headerlink" href="#what-is-layer-2" title="Permanent link">&para;</a></h2>
+<p>If Layer 1 (Core Runtime) is the robot's brain stem, Layer 2 (Gateway) is its <strong>entire nervous system</strong>. It's the central switchboard that connects everything together — your phone, your Discord, your web browser, your AI models, and any other devices.</p>
+<p>The gateway is a <strong>server</strong> that runs on your machine. Everything talks to it:
+- Your iPhone app connects to it over WebSocket
+- Discord messages arrive through it
+- AI responses flow back through it
+- Your web browser talks to it via HTTP</p>
+<p>Think of it as a phone exchange operator from the 1950s — every call (message) goes through them, and they plug the right cables together.</p>
+<p><strong>By the numbers:</strong> <code>src/gateway/</code> contains 247 files and ~4.8MB of code. It has received <strong>1,720 commits</strong> in just 3 months — about 19 commits per day.</p>
+<hr />
+<h2 id="part-1-the-10-phase-startup-sequence">Part 1: The 10-Phase Startup Sequence<a class="headerlink" href="#part-1-the-10-phase-startup-sequence" title="Permanent link">&para;</a></h2>
+<p>When you run <code>openclaw gateway</code>, the server boots up in 10 carefully ordered phases. Each phase depends on the ones before it. If any critical phase fails, the whole startup stops.</p>
+<h3 id="phase-1-environment-setup-lines-271-283">Phase 1: Environment Setup (Lines 271-283)<a class="headerlink" href="#phase-1-environment-setup-lines-271-283" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">OPENCLAW_GATEWAY_PORT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
+</code></pre></div>
+<ul>
+<li>Detects if we're running in test mode (minimal startup for unit tests)</li>
+<li>Stores the gateway port in the environment so child processes (browser, canvas) know where to connect</li>
+<li>Logs which environment options are active</li>
+</ul>
+<p><strong>Like:</strong> Writing your address on a sticky note so everyone in the house knows where to send mail.</p>
+<h3 id="phase-2-config-validation-migration-lines-285-332">Phase 2: Config Validation &amp; Migration (Lines 285-332)<a class="headerlink" href="#phase-2-config-validation-migration-lines-285-332" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">configSnapshot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">readConfigFileSnapshot</span><span class="p">();</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">configSnapshot</span><span class="p">.</span><span class="nx">legacyIssues</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">migrated</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">migrateLegacyConfig</span><span class="p">(</span><span class="nx">configSnapshot</span><span class="p">.</span><span class="nx">parsed</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">migrated</span><span class="p">)</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">writeConfigFile</span><span class="p">(</span><span class="nx">migrated</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>Reads <code>config.json5</code> and takes a snapshot</li>
+<li>Checks for legacy (outdated) config patterns</li>
+<li>Auto-migrates old config formats to new ones</li>
+<li>Re-reads config to ensure a fresh, validated snapshot</li>
+<li>Sets the runtime config snapshot so all other code uses this version</li>
+</ul>
+<p><strong>Like:</strong> Opening your instruction manual and checking if it's from an old version. If so, translate it to the current format before continuing.</p>
+<h3 id="phase-3-secrets-runtime-activation-lines-333-360">Phase 3: Secrets Runtime Activation (Lines 333-360)<a class="headerlink" href="#phase-3-secrets-runtime-activation-lines-333-360" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Boots the secrets manager (API keys, tokens, passwords)</li>
+<li>Resolves secret references in the config (e.g., <code>${OPENAI_API_KEY}</code>)</li>
+<li>Makes secrets available to all downstream systems</li>
+</ul>
+<p><strong>Like:</strong> Unlocking your safe and laying out all the keys you'll need for the day.</p>
+<h3 id="phase-4-auth-bootstrap-lines-361-420">Phase 4: Auth Bootstrap (Lines 361-420)<a class="headerlink" href="#phase-4-auth-bootstrap-lines-361-420" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Generates gateway tokens if none exist (first-run scenario)</li>
+<li>Loads TLS certificates if HTTPS is configured</li>
+<li>Sets up the auth resolver (determines which auth method to use)</li>
+<li>Configures rate limiters for brute-force protection</li>
+</ul>
+<p><strong>Like:</strong> Setting up the front door lock and making spare keys for family members.</p>
+<h3 id="phase-5-load-plugins-channel-plugins-lines-421-490">Phase 5: Load Plugins + Channel Plugins (Lines 421-490)<a class="headerlink" href="#phase-5-load-plugins-channel-plugins-lines-421-490" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Scans for plugins in <code>~/.openclaw/extensions/</code>, bundled <code>extensions/</code>, and workspace paths</li>
+<li>Loads each plugin module using <code>jiti</code> (dynamic TypeScript loader)</li>
+<li>Registers channels (Discord, Telegram, etc.), providers, tools, hooks, and HTTP routes</li>
+<li>Channel plugins get their own registration lifecycle</li>
+</ul>
+<p><strong>Like:</strong> Installing all your apps — Discord, Telegram, Slack — so you can receive messages on each platform.</p>
+<h3 id="phase-6-create-httphttps-websocket-servers-lines-491-580">Phase 6: Create HTTP/HTTPS + WebSocket Servers (Lines 491-580)<a class="headerlink" href="#phase-6-create-httphttps-websocket-servers-lines-491-580" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">httpServer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">createHttpServer</span><span class="p">(</span><span class="nx">tlsOptions</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">wss</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">WebSocketServer</span><span class="p">({</span><span class="w"> </span><span class="nx">noServer</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<ul>
+<li>Creates the HTTP server (or HTTPS if TLS is configured)</li>
+<li>Creates a WebSocket server attached to the HTTP server</li>
+<li>Binds to the configured port and address</li>
+<li>Sets up the request pipeline for HTTP endpoints</li>
+</ul>
+<p><strong>Like:</strong> Opening your shop — putting up the sign, unlocking the doors, and setting up the counter.</p>
+<h3 id="phase-7-start-channel-manager-lines-581-660">Phase 7: Start Channel Manager (Lines 581-660)<a class="headerlink" href="#phase-7-start-channel-manager-lines-581-660" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Iterates through all configured channels (Discord, Telegram, WhatsApp, etc.)</li>
+<li>Starts each channel with its account credentials</li>
+<li>Sets up exponential backoff restart for failed channels (5 seconds → 5 minutes max)</li>
+<li>Registers channel health monitors</li>
+</ul>
+<p><strong>Like:</strong> Logging into all your messaging apps one by one.</p>
+<h3 id="phase-8-start-discovery-lines-661-730">Phase 8: Start Discovery (Lines 661-730)<a class="headerlink" href="#phase-8-start-discovery-lines-661-730" title="Permanent link">&para;</a></h3>
+<p>Three discovery mechanisms run in parallel:</p>
+<ol>
+<li><strong>mDNS/Bonjour</strong>: Advertises the gateway on your local network so devices can find it automatically (like AirDrop discovery)</li>
+<li><strong>Tailscale</strong>: If you use Tailscale VPN, advertises via Tailnet DNS so remote devices can find the gateway</li>
+<li><strong>Wide-area DNS-SD</strong>: For discovering the gateway across the internet via DNS</li>
+</ol>
+<p><strong>Like:</strong> Putting up a "we're open" sign that's visible from the street (mDNS), from across town (Tailscale), and from anywhere in the world (wide-area DNS).</p>
+<h3 id="phase-9-start-timers-monitors-lines-731-850">Phase 9: Start Timers &amp; Monitors (Lines 731-850)<a class="headerlink" href="#phase-9-start-timers-monitors-lines-731-850" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cron scheduler</strong>: Runs scheduled tasks (like "check my email every hour")</li>
+<li><strong>Health monitor</strong>: Periodically checks if channels are healthy</li>
+<li><strong>Heartbeat timer</strong>: Sends <code>tick</code> events to all connected clients so they know the server is alive</li>
+<li><strong>Maintenance timer</strong>: Cleans up stale connections, expired sessions, etc.</li>
+</ul>
+<p><strong>Like:</strong> Setting alarms for regular chores — take out the trash, check the mailbox, make sure the lights are on.</p>
+<h3 id="phase-10-attach-websocket-handlers-config-watcher-lines-851-1070">Phase 10: Attach WebSocket Handlers &amp; Config Watcher (Lines 851-1070)<a class="headerlink" href="#phase-10-attach-websocket-handlers-config-watcher-lines-851-1070" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Attaches the WebSocket message handler (processes incoming client messages)</li>
+<li>Registers plugin lifecycle hooks</li>
+<li>Sets up the config file watcher for hot-reload (change config → gateway auto-updates without restart)</li>
+<li>Logs the startup complete message with URLs</li>
+</ul>
+<p><strong>Like:</strong> The final check — making sure the phone is plugged in, the intercom works, and writing down the phone number for everyone to call.</p>
+<hr />
+<h2 id="part-2-the-protocol-how-devices-talk-to-the-gateway">Part 2: The Protocol (How Devices Talk to the Gateway)<a class="headerlink" href="#part-2-the-protocol-how-devices-talk-to-the-gateway" title="Permanent link">&para;</a></h2>
+<h3 id="frame-types">Frame Types<a class="headerlink" href="#frame-types" title="Permanent link">&para;</a></h3>
+<p>Every message between a client and the gateway is a <strong>frame</strong> — a JSON object with a <code>type</code> field. There are three types:</p>
+<h4 id="request-frame-client-server">Request Frame (Client → Server)<a class="headerlink" href="#request-frame-client-server" title="Permanent link">&para;</a></h4>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;req&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc-123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chat.send&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello!&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sessionKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;agent:main:main&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><code>id</code>: A unique ID so the server can match the response to this request</li>
+<li><code>method</code>: What you want to do (like <code>chat.send</code>, <code>config.get</code>, <code>health</code>)</li>
+<li><code>params</code>: The details (different for each method)</li>
+</ul>
+<p><strong>Like:</strong> Writing a letter with a tracking number, a subject line, and the actual message.</p>
+<h4 id="response-frame-server-client">Response Frame (Server → Client)<a class="headerlink" href="#response-frame-server-client" title="Permanent link">&para;</a></h4>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;res&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc-123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;ok&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;runId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run-456&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;started&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><code>id</code>: Matches the request's <code>id</code> so you know which question this answers</li>
+<li><code>ok</code>: Did it work? <code>true</code> = success, <code>false</code> = error</li>
+<li><code>payload</code>: The result data (only if <code>ok: true</code>)</li>
+<li><code>error</code>: Error details (only if <code>ok: false</code>)</li>
+</ul>
+<p><strong>Like:</strong> Getting a letter back with your tracking number, a checkmark (or X), and the answer.</p>
+<h4 id="event-frame-server-client-unsolicited">Event Frame (Server → Client, unsolicited)<a class="headerlink" href="#event-frame-server-client-unsolicited" title="Permanent link">&para;</a></h4>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;event&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chat.event&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;runId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run-456&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Here&#39;s my response...&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;seq&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>Not a response to a request — the server sends these proactively</li>
+<li><code>event</code>: What happened (like <code>tick</code>, <code>chat.event</code>, <code>node.pair.requested</code>)</li>
+<li><code>seq</code>: Sequence number so clients can detect missed events</li>
+<li>Events can be dropped for slow clients (marked with <code>dropIfSlow</code>)</li>
+</ul>
+<p><strong>Like:</strong> A news ticker — the server announces things as they happen, whether you asked or not.</p>
+<h3 id="the-connect-handshake">The Connect Handshake<a class="headerlink" href="#the-connect-handshake" title="Permanent link">&para;</a></h3>
+<p>When a client first connects via WebSocket, there's a careful dance:</p>
+<div class="language-text highlight"><pre><span></span><code>Client                              Gateway
+  |                                    |
+  |--- WebSocket upgrade request -----&gt;|
+  |                                    |
+  |&lt;--- &quot;connect.challenge&quot; event -----|  (sends a random nonce)
+  |                                    |
+  |--- connect request ---------------&gt;|
+  |    (credentials + device info)     |
+  |                                    |
+  |    [Server validates everything]   |
+  |                                    |
+  |&lt;--- &quot;hello-ok&quot; response ----------|
+  |    (token, role, features,         |
+  |     available methods, snapshot)   |
+  |                                    |
+  |--- normal requests/events --------&gt;|
+</code></pre></div>
+<p>The <code>hello-ok</code> response tells the client everything it needs to know:
+- What methods are available
+- What role/permissions they have
+- A device token for future connections
+- The current state snapshot (so the UI can render immediately)
+- The canvas host URL (for interactive UI)
+- Policy limits (max payload size, heartbeat interval)</p>
+<h3 id="schema-validation-with-ajv">Schema Validation with AJV<a class="headerlink" href="#schema-validation-with-ajv" title="Permanent link">&para;</a></h3>
+<p>Every frame is validated against a strict JSON schema using the AJV library. This means:
+- If you send a request with missing fields → rejected immediately
+- If you send the wrong data type → rejected
+- If you include unknown fields → they're kept but flagged</p>
+<p>There are 100+ compiled validators — one for each method's params. Validation errors are formatted into human-readable messages like: <code>"at .auth: unexpected property 'unknown'"</code>.</p>
+<p><strong>Why?</strong> Because WebSocket messages are just raw text. Without validation, a buggy client could crash the server by sending garbage data. The schema is the bouncer at the door.</p>
+<hr />
+<h2 id="part-3-authentication-who-are-you">Part 3: Authentication (Who Are You?)<a class="headerlink" href="#part-3-authentication-who-are-you" title="Permanent link">&para;</a></h2>
+<p>The gateway supports <strong>7 different ways</strong> to prove your identity. They're tried in priority order — the first one that works wins.</p>
+<h3 id="method-1-token-authentication-most-common">Method 1: Token Authentication (Most Common)<a class="headerlink" href="#method-1-token-authentication-most-common" title="Permanent link">&para;</a></h3>
+<p>The simplest method. You share a secret string (like a password for an API).</p>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">&quot;auth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-secret-token-12345&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>The server compares your token to the configured one using <strong>constant-time comparison</strong> (<code>safeEqualSecret()</code>). This prevents timing attacks — where an attacker measures how long the comparison takes to guess the token character by character.</p>
+<p><strong>Like:</strong> A secret knock on the door. If you knock the right pattern, you're in.</p>
+<h3 id="method-2-password-authentication">Method 2: Password Authentication<a class="headerlink" href="#method-2-password-authentication" title="Permanent link">&para;</a></h3>
+<p>Similar to token, but designed for interactive scenarios (web UI, browser).</p>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">&quot;auth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-password&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Also uses constant-time comparison. Rate-limited per IP address.</p>
+<h3 id="method-3-device-pairing-mobiledesktop-apps">Method 3: Device Pairing (Mobile/Desktop Apps)<a class="headerlink" href="#method-3-device-pairing-mobiledesktop-apps" title="Permanent link">&para;</a></h3>
+<p>For companion apps (iPhone, macOS menu bar), the device proves its identity using cryptography:</p>
+<ol>
+<li>The device has an <strong>Ed25519 key pair</strong> (public + private key)</li>
+<li>The server sends a random challenge (nonce)</li>
+<li>The device signs the challenge with its private key</li>
+<li>The server verifies the signature with the device's public key</li>
+</ol>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;device&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-public-key&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;publicKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;base64url-encoded-key&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;signature&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;base64url-signed-challenge&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;signedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1710000000000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;nonce&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;server-provided-random-string&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The signature includes: device ID, client ID, client mode, role, scopes, timestamp, and nonce. The timestamp must be within 2 minutes of server time (prevents replay attacks).</p>
+<p><strong>Like:</strong> A fingerprint scanner. Only YOUR finger opens the lock, and the scanner changes its challenge every time so nobody can replay a recording.</p>
+<h3 id="method-4-bootstrap-token-first-time-setup">Method 4: Bootstrap Token (First-Time Setup)<a class="headerlink" href="#method-4-bootstrap-token-first-time-setup" title="Permanent link">&para;</a></h3>
+<p>When you pair a new device for the first time, it uses a one-time bootstrap token:</p>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;auth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;bootstrapToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;one-time-setup-code&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;device&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The bootstrap token is typically displayed as a QR code on the server. You scan it with your phone, the phone sends it with its device identity, and the server pairs them permanently.</p>
+<p><strong>Like:</strong> A golden ticket. Use it once to get through the door, then you get a permanent membership card (device token).</p>
+<h3 id="method-5-trusted-proxy">Method 5: Trusted Proxy<a class="headerlink" href="#method-5-trusted-proxy" title="Permanent link">&para;</a></h3>
+<p>For enterprise setups where a reverse proxy (like nginx) handles authentication:</p>
+<ul>
+<li>The proxy authenticates the user (via SSO, OIDC, SAML, etc.)</li>
+<li>The proxy adds a header like <code>X-Forwarded-User: jane@company.com</code></li>
+<li>The gateway trusts the proxy (verified by IP address) and accepts the user</li>
+</ul>
+<p>No client-side credential needed — the proxy vouches for you.</p>
+<p><strong>Like:</strong> A security guard at the office building who checks your badge. Once past the guard, the receptionist trusts you automatically.</p>
+<h3 id="method-6-tailscale-identity">Method 6: Tailscale Identity<a class="headerlink" href="#method-6-tailscale-identity" title="Permanent link">&para;</a></h3>
+<p>If you use Tailscale (a VPN that creates a private network):</p>
+<ul>
+<li>Tailscale's proxy adds <code>Tailscale-User-Login</code> headers</li>
+<li>The gateway detects the Tailscale headers on loopback connections</li>
+<li>Your Tailscale identity IS your auth — no password needed</li>
+</ul>
+<p><strong>Like:</strong> Being on a private family Wi-Fi. Everyone on the network is trusted by definition.</p>
+<h3 id="method-7-no-authentication">Method 7: No Authentication<a class="headerlink" href="#method-7-no-authentication" title="Permanent link">&para;</a></h3>
+<p>For development/testing only. All connections are allowed.</p>
+<h3 id="rate-limiting-brute-force-protection">Rate Limiting (Brute-Force Protection)<a class="headerlink" href="#rate-limiting-brute-force-protection" title="Permanent link">&para;</a></h3>
+<p>Authentication failures are rate-limited per IP address:
+- <strong>Two separate buckets</strong>: one for token/password failures, one for device token failures
+- Browser clients on loopback use a synthetic IP (<code>198.18.0.1</code>) to prevent abuse
+- After too many failures, the server responds with <code>429 Too Many Requests</code> and a <code>retryAfterMs</code> delay
+- Rate counters reset on successful auth</p>
+<h3 id="role-based-access-control-rbac">Role-Based Access Control (RBAC)<a class="headerlink" href="#role-based-access-control-rbac" title="Permanent link">&para;</a></h3>
+<p>After authenticating, you're assigned a <strong>role</strong> that determines what you can do:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Who</th>
+<th>Can Do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Operator</strong></td>
+<td>CLI, Control UI, web apps</td>
+<td>Everything — full admin, read, write, approvals, pairing</td>
+</tr>
+<tr>
+<td><strong>Node</strong></td>
+<td>Backend worker nodes</td>
+<td>Only node-specific operations (invoke, events, pending work)</td>
+</tr>
+<tr>
+<td><strong>Guest</strong></td>
+<td>Web widgets, anonymous users</td>
+<td>Read-only, limited operations</td>
+</tr>
+</tbody>
+</table>
+<p>Within the Operator role, there are <strong>5 permission scopes</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>operator.admin</code></td>
+<td>Logout channels, create agents, install skills, manage secrets, reset sessions</td>
+</tr>
+<tr>
+<td><code>operator.read</code></td>
+<td>Health checks, list sessions, view logs, model catalog, usage stats</td>
+</tr>
+<tr>
+<td><code>operator.write</code></td>
+<td>Send messages, chat, control TTS, invoke nodes, browser requests</td>
+</tr>
+<tr>
+<td><code>operator.approvals</code></td>
+<td>Request/resolve execution approvals</td>
+</tr>
+<tr>
+<td><code>operator.pairing</code></td>
+<td>Pair devices and nodes, manage device tokens</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>admin</code> scope is a <strong>master key</strong> — it bypasses all method-specific checks.</p>
+<hr />
+<h2 id="part-4-http-endpoints-the-web-facing-side">Part 4: HTTP Endpoints (The Web-Facing Side)<a class="headerlink" href="#part-4-http-endpoints-the-web-facing-side" title="Permanent link">&para;</a></h2>
+<p>The gateway isn't just WebSocket — it also serves HTTP endpoints. Requests flow through a <strong>staged pipeline</strong> of 14 handlers, checked in order:</p>
+<div class="language-text highlight"><pre><span></span><code>Request arrives
+  → hooks          (/hooks/*)
+  → tools-invoke   (tool invocation)
+  → slack          (Slack integrations)
+  → openresponses  (/v1/responses)
+  → openai         (/v1/chat/completions)
+  → canvas-auth    (canvas authorization)
+  → a2ui           (canvas A2UI WebSocket)
+  → canvas-http    (canvas HTTP routes)
+  → plugin-auth    (plugin route auth)
+  → plugin-http    (plugin HTTP routes)
+  → control-ui     (web UI avatar + SPA)
+  → gateway-probes (/health, /ready)
+  → 404 fallback
+</code></pre></div>
+<p>First handler that returns <code>true</code> (handled) stops the pipeline.</p>
+<h3 id="health-probes">Health Probes<a class="headerlink" href="#health-probes" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>GET /health   → {&quot;ok&quot;: true, &quot;status&quot;: &quot;live&quot;}
+GET /healthz  → Same (Kubernetes alias)
+GET /ready    → {&quot;ready&quot;: true, &quot;failing&quot;: [], &quot;uptimeMs&quot;: 12345}
+GET /readyz   → Same (Kubernetes alias)
+</code></pre></div>
+<p>Used by Docker, Kubernetes, and monitoring tools to check if the gateway is alive and ready.</p>
+<h3 id="openai-compatible-chat-completions">OpenAI-Compatible Chat Completions<a class="headerlink" href="#openai-compatible-chat-completions" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>POST /v1/chat/completions
+</code></pre></div>
+<p>This makes the gateway act as a <strong>drop-in replacement for the OpenAI API</strong>. Any tool that works with ChatGPT can point to your OpenClaw gateway instead.</p>
+<p><strong>Request format</strong> (same as OpenAI):
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openclaw&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;system&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;You are a helpful assistant.&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What&#39;s the weather?&quot;</span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;stream&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Features:</strong>
+- Supports both streaming (SSE) and non-streaming responses
+- Handles image attachments via <code>image_url</code> parts (base64 or HTTP URLs)
+- Converts OpenAI message format to OpenClaw's internal format
+- Returns responses wrapped in OpenAI's format:</p>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chatcmpl_abc123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;object&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chat.completion&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;choices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">    </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The weather is...&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;finish_reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;stop&quot;</span>
+<span class="w">  </span><span class="p">}]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Streaming</strong> uses Server-Sent Events (SSE):
+<div class="language-text highlight"><pre><span></span><code>data: {&quot;id&quot;:&quot;...&quot;,&quot;choices&quot;:[{&quot;delta&quot;:{&quot;content&quot;:&quot;The&quot;}}]}
+data: {&quot;id&quot;:&quot;...&quot;,&quot;choices&quot;:[{&quot;delta&quot;:{&quot;content&quot;:&quot; weather&quot;}}]}
+data: {&quot;id&quot;:&quot;...&quot;,&quot;choices&quot;:[{&quot;delta&quot;:{&quot;content&quot;:&quot; is...&quot;}}]}
+data: [DONE]
+</code></pre></div></p>
+<h3 id="openresponses-endpoint">OpenResponses Endpoint<a class="headerlink" href="#openresponses-endpoint" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>POST /v1/responses
+</code></pre></div>
+<p>A second OpenAI-compatible endpoint using the newer "Responses" API format.</p>
+<h3 id="webhook-hooks">Webhook Hooks<a class="headerlink" href="#webhook-hooks" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>POST /hooks/wake    → Wake the agent
+POST /hooks/agent   → Send a message to a specific agent
+POST /hooks/{mapped} → Custom mapped hooks
+</code></pre></div>
+<p>Webhooks let external services (GitHub, Zapier, etc.) trigger actions. Features include:
+- Bearer token authentication
+- Rate limiting (20 attempts/60 seconds)
+- Idempotency keys (prevent duplicate execution)
+- Max body size: 20MB
+- Deduplication via SHA256 fingerprinting</p>
+<hr />
+<h2 id="part-5-the-chat-flow-the-heart-of-everything">Part 5: The Chat Flow (The Heart of Everything)<a class="headerlink" href="#part-5-the-chat-flow-the-heart-of-everything" title="Permanent link">&para;</a></h2>
+<p>The <code>chat.send</code> handler in <code>src/gateway/server-methods/chat.ts</code> (1,500+ lines) is the most complex and important handler. Here's what happens when you send a message:</p>
+<h3 id="step-1-validation-gauntlet">Step 1: Validation Gauntlet<a class="headerlink" href="#step-1-validation-gauntlet" title="Permanent link">&para;</a></h3>
+<p>Your message goes through <strong>12 validation checks</strong>:</p>
+<ol>
+<li>Schema validation (correct field types)</li>
+<li>System provenance check (only authorized bridge clients)</li>
+<li>Message sanitization (Unicode NFC normalization, control character stripping)</li>
+<li>System receipt validation</li>
+<li>Stop command detection (messages starting with <code>/</code> may be commands)</li>
+<li>Attachment normalization</li>
+<li>Empty message check</li>
+<li>Attachment parsing with image extraction</li>
+<li>Session key resolution and canonicalization</li>
+<li>Timeout resolution</li>
+<li>Send policy check (is this session allowed to receive messages?)</li>
+<li>Idempotency check (already processed this exact request? Return cached response)</li>
+</ol>
+<h3 id="step-2-abort-controller-setup">Step 2: Abort Controller Setup<a class="headerlink" href="#step-2-abort-controller-setup" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">context</span><span class="p">.</span><span class="nx">chatAbortControllers</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">clientRunId</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">controller</span><span class="o">:</span><span class="w"> </span><span class="kt">new</span><span class="w"> </span><span class="nx">AbortController</span><span class="p">(),</span>
+<span class="w">  </span><span class="nx">sessionId</span><span class="o">:</span><span class="w"> </span><span class="kt">entry?.sessionId</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="nx">clientRunId</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">sessionKey</span><span class="o">:</span><span class="w"> </span><span class="kt">rawSessionKey</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">startedAtMs</span><span class="o">:</span><span class="w"> </span><span class="kt">now</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">expiresAtMs</span><span class="o">:</span><span class="w"> </span><span class="kt">resolveChatRunExpiresAtMs</span><span class="p">({</span><span class="nx">now</span><span class="p">,</span><span class="w"> </span><span class="nx">timeoutMs</span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">ownerConnId</span><span class="p">,</span><span class="w"> </span><span class="nx">ownerDeviceId</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>Every chat run gets an <code>AbortController</code>. This is like a "cancel button" — if you want to stop the AI mid-response, the abort controller signals all downstream operations to stop.</p>
+<h3 id="step-3-immediate-acknowledgment">Step 3: Immediate Acknowledgment<a class="headerlink" href="#step-3-immediate-acknowledgment" title="Permanent link">&para;</a></h3>
+<p>The server immediately responds:
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;runId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run-456&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;started&quot;</span><span class="p">}</span>
+</code></pre></div></p>
+<p>This happens BEFORE the AI starts thinking. The client knows its message was received and can show a "thinking..." indicator.</p>
+<h3 id="step-4-message-construction">Step 4: Message Construction<a class="headerlink" href="#step-4-message-construction" title="Permanent link">&para;</a></h3>
+<p>The raw message is enriched into multiple formats:
+- <strong>Body</strong>: The raw user message (for UI display)
+- <strong>BodyForAgent</strong>: Timestamped version (so the AI knows when you sent it)
+- <strong>BodyForCommands</strong>: May include <code>/think &lt;thinking&gt;</code> prefix if thinking mode is requested
+- <strong>Delivery context</strong>: Which channel, which account, which thread</p>
+<h3 id="step-5-fire-and-forget-dispatch">Step 5: Fire-and-Forget Dispatch<a class="headerlink" href="#step-5-fire-and-forget-dispatch" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="ow">void</span><span class="w"> </span><span class="nx">dispatchInboundMessage</span><span class="p">({</span><span class="w"> </span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cfg</span><span class="p">,</span><span class="w"> </span><span class="nx">dispatcher</span><span class="p">,</span><span class="w"> </span><span class="nx">replyOptions</span><span class="w"> </span><span class="p">})</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* success handling */</span><span class="w"> </span><span class="p">})</span>
+<span class="w">  </span><span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* error broadcast */</span><span class="w"> </span><span class="p">})</span>
+<span class="w">  </span><span class="p">.</span><span class="k">finally</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">chatAbortControllers</span><span class="p">.</span><span class="ow">delete</span><span class="p">(</span><span class="nx">clientRunId</span><span class="p">);</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<p>The message is dispatched <strong>asynchronously</strong> — the server doesn't wait for the AI to finish. Instead, it:
+1. Fires the message into the agent pipeline
+2. The agent streams responses back via <strong>broadcast events</strong>
+3. Each text chunk becomes a <code>chat.event</code> sent to all connected clients</p>
+<h3 id="step-6-streaming-response">Step 6: Streaming Response<a class="headerlink" href="#step-6-streaming-response" title="Permanent link">&para;</a></h3>
+<p>As the AI generates text, the gateway broadcasts events:
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;event&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chat.event&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;runId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run-456&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;sessionKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;agent:main:main&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;seq&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;delta&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Here&#39;s what I found...&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>When the AI finishes:
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;final&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Here&#39;s what I found...&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="step-7-transcript-persistence">Step 7: Transcript Persistence<a class="headerlink" href="#step-7-transcript-persistence" title="Permanent link">&para;</a></h3>
+<p>The complete exchange is appended to the session's JSONL transcript file:
+<div class="language-text highlight"><pre><span></span><code>~/.openclaw/agents/main/sessions/agent-main-main.jsonl
+</code></pre></div></p>
+<p>Each line is a JSON object representing one message.</p>
+<h3 id="chat-abort-cancellation">Chat Abort (Cancellation)<a class="headerlink" href="#chat-abort-cancellation" title="Permanent link">&para;</a></h3>
+<p>Two abort modes:</p>
+<ol>
+<li><strong>Abort single run</strong>: Cancel a specific AI response by <code>runId</code></li>
+<li><strong>Abort all runs for session</strong>: Cancel everything in a session (the "stop" button)</li>
+</ol>
+<p>Abort authorization:
+- <strong>Admin scope</strong>: Can abort anything
+- <strong>Device ID match</strong>: Can abort your own device's runs
+- <strong>Connection ID match</strong>: Can abort your own connection's runs</p>
+<p>Partial text is preserved — if the AI wrote half an answer before you cancelled, that partial response is saved to the transcript.</p>
+<h3 id="chat-history">Chat History<a class="headerlink" href="#chat-history" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>Method: chat.history
+Returns: Last N messages (default 200, max 1000)
+</code></pre></div>
+<p>Messages are sanitized for display:
+- Text truncated to 12K characters
+- Image data replaced with placeholders
+- Messages over 128KB replaced with "[message too large]"
+- Internal metadata stripped
+- Silent-only replies filtered out
+- Total response size capped</p>
+<hr />
+<h2 id="part-6-runtime-state-the-servers-working-memory">Part 6: Runtime State (The Server's Working Memory)<a class="headerlink" href="#part-6-runtime-state-the-servers-working-memory" title="Permanent link">&para;</a></h2>
+<p>The gateway keeps all its live state in a single <code>RuntimeState</code> object:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">canvasHost</span><span class="o">:</span><span class="w"> </span><span class="kt">CanvasHostHandler</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="w">   </span><span class="c1">// The embedded browser canvas server</span>
+<span class="w">  </span><span class="nx">httpServer</span><span class="o">:</span><span class="w"> </span><span class="kt">HttpServer</span><span class="w">                 </span><span class="c1">// Main HTTP/HTTPS server</span>
+<span class="w">  </span><span class="nx">wss</span><span class="o">:</span><span class="w"> </span><span class="kt">WebSocketServer</span><span class="w">                   </span><span class="c1">// WebSocket server</span>
+<span class="w">  </span><span class="nx">clients</span><span class="o">:</span><span class="w"> </span><span class="kt">Set</span><span class="o">&lt;</span><span class="nx">GatewayWsClient</span><span class="o">&gt;</span><span class="w">         </span><span class="c1">// All connected WebSocket clients</span>
+<span class="w">  </span><span class="nx">broadcast</span><span class="o">:</span><span class="w"> </span><span class="kt">GatewayBroadcastFn</span><span class="w">          </span><span class="c1">// Function to send events to all clients</span>
+<span class="w">  </span><span class="nx">agentRunSeq</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">number</span><span class="o">&gt;</span><span class="w">       </span><span class="c1">// Sequence numbers per agent run (for ordering)</span>
+<span class="w">  </span><span class="nx">dedupe</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">DedupeEntry</span><span class="o">&gt;</span><span class="w">       </span><span class="c1">// Request deduplication cache</span>
+<span class="w">  </span><span class="nx">chatRunState</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">chatAbortControllers</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="w">            </span><span class="c1">// AbortControllers for active chat runs</span>
+<span class="w">    </span><span class="nx">chatRunBuffers</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="w">                  </span><span class="c1">// Partial text buffers for streaming</span>
+<span class="w">    </span><span class="nx">chatDeltaSentAt</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="w">                 </span><span class="c1">// Timestamps of last streamed chunk</span>
+<span class="w">    </span><span class="nx">chatAbortedRuns</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="w">                 </span><span class="c1">// Recently aborted run IDs</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nx">chatAbortControllers</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="w">              </span><span class="c1">// Direct access to abort controllers</span>
+<span class="w">  </span><span class="nx">nodeRegistry</span><span class="o">:</span><span class="w"> </span><span class="kt">NodeRegistry</span><span class="w">             </span><span class="c1">// All paired/connected nodes</span>
+<span class="w">  </span><span class="nx">channelManager</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelManager</span><span class="w">         </span><span class="c1">// All active channel connections</span>
+<span class="w">  </span><span class="nx">cronService</span><span class="o">:</span><span class="w"> </span><span class="kt">CronService</span><span class="w">               </span><span class="c1">// Scheduled task runner</span>
+<span class="w">  </span><span class="nx">healthMonitor</span><span class="o">:</span><span class="w"> </span><span class="kt">HealthMonitor</span><span class="w">           </span><span class="c1">// Periodic health checker</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Like:</strong> The operator's desk — with a list of everyone who's connected, a notepad of ongoing conversations, a switchboard of active channels, and a schedule of upcoming tasks.</p>
+<hr />
+<h2 id="part-7-broadcasting-the-pa-system">Part 7: Broadcasting (The PA System)<a class="headerlink" href="#part-7-broadcasting-the-pa-system" title="Permanent link">&para;</a></h2>
+<p>Broadcasting is how the gateway pushes events to all connected clients simultaneously. Think of it as a PA system — when something happens, everyone hears about it.</p>
+<h3 id="event-types">Event Types<a class="headerlink" href="#event-types" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chat.event</code></td>
+<td>AI generates text, completes, or errors</td>
+</tr>
+<tr>
+<td><code>agent</code></td>
+<td>Agent starts/stops/changes state</td>
+</tr>
+<tr>
+<td><code>presence</code></td>
+<td>Client connects/disconnects</td>
+</tr>
+<tr>
+<td><code>health</code></td>
+<td>Channel health changes</td>
+</tr>
+<tr>
+<td><code>tick</code></td>
+<td>Periodic heartbeat (every ~30 seconds)</td>
+</tr>
+<tr>
+<td><code>node.pair.requested</code></td>
+<td>A new device wants to pair</td>
+</tr>
+<tr>
+<td><code>exec.approval.requested</code></td>
+<td>Agent needs human approval</td>
+</tr>
+<tr>
+<td><code>shutdown</code></td>
+<td>Server is shutting down</td>
+</tr>
+</tbody>
+</table>
+<h3 id="broadcast-mechanics">Broadcast Mechanics<a class="headerlink" href="#broadcast-mechanics" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">broadcast</span><span class="p">(</span><span class="nx">event</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="p">,</span><span class="w"> </span><span class="nx">options</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">dropIfSlow?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="w">      </span><span class="c1">// Skip slow clients</span>
+<span class="w">  </span><span class="nx">stateVersion?</span><span class="o">:</span><span class="w"> </span><span class="kt">object</span><span class="w">     </span><span class="c1">// Include state version hints</span>
+<span class="p">})</span>
+</code></pre></div>
+<p>Each event is serialized once and sent to every client in the <code>clients</code> Set. For slow clients (whose WebSocket buffer is backing up), events marked <code>dropIfSlow: true</code> are skipped to prevent memory exhaustion.</p>
+<p>State version hints let clients detect when they've missed events and need to resync.</p>
+<hr />
+<h2 id="part-8-channel-manager-keeping-the-lines-open">Part 8: Channel Manager (Keeping the Lines Open)<a class="headerlink" href="#part-8-channel-manager-keeping-the-lines-open" title="Permanent link">&para;</a></h2>
+<p>The Channel Manager (<code>src/gateway/server-channels.ts</code>) handles the lifecycle of all messaging channels — starting them, monitoring them, and restarting them when they fail.</p>
+<h3 id="lifecycle-for-each-channel">Lifecycle for Each Channel<a class="headerlink" href="#lifecycle-for-each-channel" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>Configure → Start → Monitor → (Failure?) → Backoff → Restart
+                      ↑                                  |
+                      +----------------------------------+
+</code></pre></div>
+<h3 id="exponential-backoff-restart">Exponential Backoff Restart<a class="headerlink" href="#exponential-backoff-restart" title="Permanent link">&para;</a></h3>
+<p>When a channel crashes (Discord disconnects, WhatsApp session expires, etc.):</p>
+<div class="language-text highlight"><pre><span></span><code>Attempt 1: Wait 5 seconds  → Restart
+Attempt 2: Wait 10 seconds → Restart
+Attempt 3: Wait 20 seconds → Restart
+Attempt 4: Wait 40 seconds → Restart
+...
+Max wait: 5 minutes → Restart
+</code></pre></div>
+<p>The wait time doubles each attempt (exponential backoff) up to a maximum of 5 minutes. This prevents hammering a broken service while still recovering automatically.</p>
+<h3 id="health-monitoring">Health Monitoring<a class="headerlink" href="#health-monitoring" title="Permanent link">&para;</a></h3>
+<p>Each channel reports its health via <code>probeAccount()</code>:
+- <strong>connected</strong>: Everything working
+- <strong>disconnected</strong>: Not connected but configured
+- <strong>error</strong>: Something is wrong
+- <strong>not_configured</strong>: Channel not set up</p>
+<p>Health changes are broadcast to all clients as <code>health</code> events, so the UI can show red/green indicators.</p>
+<hr />
+<h2 id="part-9-discovery-finding-the-gateway">Part 9: Discovery (Finding the Gateway)<a class="headerlink" href="#part-9-discovery-finding-the-gateway" title="Permanent link">&para;</a></h2>
+<p>How do your devices find the gateway on the network?</p>
+<h3 id="mdns-bonjour-local-network">mDNS / Bonjour (Local Network)<a class="headerlink" href="#mdns-bonjour-local-network" title="Permanent link">&para;</a></h3>
+<p>The gateway advertises itself on your local network using Bonjour (Apple's zero-config networking):</p>
+<p><strong>Service name:</strong> <code>_openclaw-gw._tcp.local</code></p>
+<p><strong>TXT records advertised:</strong>
+<div class="language-text highlight"><pre><span></span><code>role=gateway
+gatewayPort=18789
+lanHost=openclaw.local
+displayName=My MacBook
+canvasPort=18793
+</code></pre></div></p>
+<p><strong>On macOS:</strong> Uses <code>dns-sd -B _openclaw-gw._tcp local</code> to browse for instances
+<strong>On Linux:</strong> Uses <code>avahi-browse -rt _openclaw-gw._tcp</code> to discover</p>
+<p><strong>Modes:</strong>
+- <strong>minimal</strong> (default): Advertises basic info only (security-conscious)
+- <strong>full</strong>: Also includes SSH port and CLI path (for troubleshooting)
+- <strong>off</strong>: No mDNS advertising</p>
+<p>A 60-second watchdog checks if the service is still advertised and re-advertises if needed.</p>
+<h3 id="tailscale-discovery-vpnremote">Tailscale Discovery (VPN/Remote)<a class="headerlink" href="#tailscale-discovery-vpnremote" title="Permanent link">&para;</a></h3>
+<p>If you use Tailscale, the gateway advertises via DNS on your Tailnet:</p>
+<ol>
+<li>Resolves your Tailnet hostname (e.g., <code>macbook.tail1234.ts.net</code>)</li>
+<li>Writes a DNS zone file to <code>~/.openclaw/dns/</code></li>
+<li>Other devices query Tailnet DNS for <code>_openclaw-gw._tcp.&lt;domain&gt;</code></li>
+<li>SRV and TXT records point them to the gateway</li>
+</ol>
+<h3 id="wide-area-dns-sd-global">Wide-Area DNS-SD (Global)<a class="headerlink" href="#wide-area-dns-sd-global" title="Permanent link">&para;</a></h3>
+<p>For finding gateways across the internet:</p>
+<div class="language-text highlight"><pre><span></span><code>Zone file format:
+$ORIGIN example.ts.net
+_openclaw-gw._tcp IN PTR my-instance._openclaw-gw._tcp
+my-instance._openclaw-gw._tcp IN SRV 0 0 18789 macbook.example.ts.net
+my-instance._openclaw-gw._tcp IN TXT &quot;displayName=My MacBook&quot; &quot;gatewayPort=18789&quot;
+</code></pre></div>
+<p>The zone file uses a YYYYMMDDNN serial format, and content-hash deduplication skips writes if nothing changed.</p>
+<hr />
+<h2 id="part-10-nodes-remote-workers">Part 10: Nodes (Remote Workers)<a class="headerlink" href="#part-10-nodes-remote-workers" title="Permanent link">&para;</a></h2>
+<p>Nodes are external devices that can execute commands on behalf of the gateway — like your iPhone's camera, a remote server's GPU, or an Android phone's sensors.</p>
+<h3 id="node-pairing-flow">Node Pairing Flow<a class="headerlink" href="#node-pairing-flow" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>1. Node sends: &quot;node.pair.request&quot; (I want to join!)
+2. Gateway broadcasts: &quot;node.pair.requested&quot; (Hey operator, someone wants in)
+3. Operator clicks: &quot;Approve&quot; or &quot;Reject&quot;
+4. Gateway sends: &quot;node.pair.resolved&quot; (Welcome! / Go away.)
+5. Node stores: Authentication token for future connections
+</code></pre></div>
+<h3 id="node-invocation">Node Invocation<a class="headerlink" href="#node-invocation" title="Permanent link">&para;</a></h3>
+<p>Once paired, the gateway can ask nodes to do things:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">nodeRegistry</span><span class="p">.</span><span class="nx">invoke</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">nodeId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;iphone-jane&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">command</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;camera.capture&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">params</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">resolution</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;1080p&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">timeoutMs</span><span class="o">:</span><span class="w"> </span><span class="kt">30000</span>
+<span class="p">})</span>
+</code></pre></div>
+<p>The node receives the command via WebSocket, executes it (takes a photo), and sends back the result.</p>
+<h3 id="ios-background-challenges">iOS Background Challenges<a class="headerlink" href="#ios-background-challenges" title="Permanent link">&para;</a></h3>
+<p>iPhones can't run background tasks easily. When a node command fails with <code>NODE_BACKGROUND_UNAVAILABLE</code>:
+1. The command is queued in a <strong>pending action queue</strong> (max 64 items, 10-minute TTL)
+2. An APNS push notification wakes the iPhone app
+3. The app comes to foreground, pulls pending actions with <code>node.pending.pull</code>
+4. Executes each action and acknowledges with <code>node.pending.ack</code></p>
+<p>Wake notifications are throttled (15 seconds between background wakes, 10 minutes between foreground nudges).</p>
+<hr />
+<h2 id="part-11-the-gateway-client-connecting-to-the-gateway">Part 11: The Gateway Client (Connecting TO the Gateway)<a class="headerlink" href="#part-11-the-gateway-client-connecting-to-the-gateway" title="Permanent link">&para;</a></h2>
+<p>The <code>GatewayClient</code> class (<code>src/gateway/client.ts</code>) is the other side — code that connects TO the gateway.</p>
+<h3 id="connection-flow">Connection Flow<a class="headerlink" href="#connection-flow" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Create WebSocket connection to <code>ws://127.0.0.1:18789</code> (or <code>wss://</code> for TLS)</li>
+<li>Security check: Blocks plaintext <code>ws://</code> to non-loopback addresses (prevents MITM attacks)</li>
+<li>Receive <code>connect.challenge</code> event with nonce</li>
+<li>Sign the challenge with device identity (Ed25519)</li>
+<li>Send <code>connect</code> request with credentials</li>
+<li>Receive <code>hello-ok</code> response with token, role, scopes</li>
+<li>Store device token for future connections</li>
+</ol>
+<h3 id="reconnection-with-backoff">Reconnection with Backoff<a class="headerlink" href="#reconnection-with-backoff" title="Permanent link">&para;</a></h3>
+<p>If the connection drops:
+- Exponential backoff: 1s → 2s → 4s → ... → 30s max
+- Certain auth failures pause reconnection entirely (wrong password, rate limited, pairing required)</p>
+<h3 id="tick-watchdog">Tick Watchdog<a class="headerlink" href="#tick-watchdog" title="Permanent link">&para;</a></h3>
+<p>The server sends <code>tick</code> events at regular intervals (default 30s). The client watches for these:
+- If no tick for 2x the interval → connection is stale → close and reconnect</p>
+<h3 id="request-response-pattern">Request-Response Pattern<a class="headerlink" href="#request-response-pattern" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="s2">&quot;chat.send&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Hello!&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">sessionKey</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;agent:main:main&quot;</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>Each request gets a UUID. The client tracks pending requests in a Map, and resolves/rejects the Promise when the matching response arrives.</p>
+<hr />
+<h2 id="part-12-server-methods-the-complete-menu">Part 12: Server Methods (The Complete Menu)<a class="headerlink" href="#part-12-server-methods-the-complete-menu" title="Permanent link">&para;</a></h2>
+<p>The gateway has <strong>69+ method files</strong> organized into categories:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Methods</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Chat</strong></td>
+<td><code>chat.send</code>, <code>chat.abort</code>, <code>chat.history</code>, <code>chat.inject</code></td>
+<td>Sending/receiving messages</td>
+</tr>
+<tr>
+<td><strong>Config</strong></td>
+<td><code>config.get</code>, <code>config.set</code>, <code>config.patch</code>, <code>config.apply</code></td>
+<td>Reading/writing config</td>
+</tr>
+<tr>
+<td><strong>Channels</strong></td>
+<td><code>channels.status</code>, <code>channels.logout</code></td>
+<td>Channel management</td>
+</tr>
+<tr>
+<td><strong>Sessions</strong></td>
+<td><code>sessions.list</code>, <code>sessions.get</code>, <code>sessions.patch</code>, <code>sessions.reset</code>, <code>sessions.delete</code></td>
+<td>Session management</td>
+</tr>
+<tr>
+<td><strong>Agents</strong></td>
+<td><code>agents.list</code>, <code>agents.create</code>, <code>agents.update</code>, <code>agents.delete</code></td>
+<td>Agent CRUD</td>
+</tr>
+<tr>
+<td><strong>Nodes</strong></td>
+<td><code>node.list</code>, <code>node.pair.*</code>, <code>node.invoke</code>, <code>node.describe</code></td>
+<td>Node management</td>
+</tr>
+<tr>
+<td><strong>Cron</strong></td>
+<td><code>cron.list</code>, <code>cron.add</code>, <code>cron.update</code>, <code>cron.remove</code>, <code>cron.run</code></td>
+<td>Scheduled tasks</td>
+</tr>
+<tr>
+<td><strong>Models</strong></td>
+<td><code>models.list</code></td>
+<td>Available AI models</td>
+</tr>
+<tr>
+<td><strong>Skills</strong></td>
+<td><code>skills.status</code>, <code>skills.install</code>, <code>skills.update</code></td>
+<td>Skill management</td>
+</tr>
+<tr>
+<td><strong>TTS</strong></td>
+<td><code>tts.status</code>, <code>tts.enable</code>, <code>tts.disable</code>, <code>tts.convert</code></td>
+<td>Text-to-speech</td>
+</tr>
+<tr>
+<td><strong>System</strong></td>
+<td><code>health</code>, <code>logs.tail</code>, <code>usage.status</code>, <code>usage.cost</code></td>
+<td>System info</td>
+</tr>
+<tr>
+<td><strong>Devices</strong></td>
+<td><code>device.pair.*</code>, <code>device.token.*</code></td>
+<td>Device management</td>
+</tr>
+<tr>
+<td><strong>Exec</strong></td>
+<td><code>exec.approval.request</code>, <code>exec.approval.resolve</code></td>
+<td>Execution approvals</td>
+</tr>
+<tr>
+<td><strong>Web</strong></td>
+<td><code>web.login.start</code>, <code>web.login.wait</code></td>
+<td>Web auth flows</td>
+</tr>
+<tr>
+<td><strong>Browser</strong></td>
+<td><code>browser.request</code></td>
+<td>Browser automation</td>
+</tr>
+<tr>
+<td><strong>Wizard</strong></td>
+<td><code>wizard.*</code></td>
+<td>Onboarding flows</td>
+</tr>
+</tbody>
+</table>
+<h3 id="method-dispatch">Method Dispatch<a class="headerlink" href="#method-dispatch" title="Permanent link">&para;</a></h3>
+<p>When a request arrives:
+1. <strong>Authorization check</strong>: Does this role + scopes allow this method?
+2. <strong>Rate limiting</strong>: For control-plane writes (<code>config.apply</code>, <code>config.patch</code>, <code>update.run</code>), max 3 requests per 60 seconds per client
+3. <strong>Handler lookup</strong>: Find the handler function for this method
+4. <strong>Invocation</strong>: Call the handler within a plugin scope (so plugins can hook into it)</p>
+<p>Unknown methods → error response. Unauthorized methods → error with missing scope info.</p>
+<hr />
+<h2 id="how-layer-2-evolved-the-git-history">How Layer 2 Evolved: The Git History<a class="headerlink" href="#how-layer-2-evolved-the-git-history" title="Permanent link">&para;</a></h2>
+<h3 id="phase-0-the-predecessor-control-channel-december-8-2025">Phase 0: The Predecessor — Control Channel (December 8, 2025)<a class="headerlink" href="#phase-0-the-predecessor-control-channel-december-8-2025" title="Permanent link">&para;</a></h3>
+<p>Before the gateway existed, there was a simple <strong>control channel</strong> at <code>src/infra/control-channel.ts</code>. It was a basic heartbeat relay — nothing more than a way for the server to announce "I'm alive" to connected clients. It lasted barely a day.</p>
+<h3 id="phase-1-the-big-bang-december-9-2025">Phase 1: The Big Bang (December 9, 2025)<a class="headerlink" href="#phase-1-the-big-bang-december-9-2025" title="Permanent link">&para;</a></h3>
+<p>On a single afternoon, the gateway was created from scratch in commit <code>b2e7fb01a</code>:</p>
+<ul>
+<li>+5,200 lines, -2,486 lines</li>
+<li>Created: <code>server.ts</code>, <code>client.ts</code>, <code>protocol/index.ts</code>, <code>protocol/schema.ts</code></li>
+<li>Deleted: <code>control-channel.ts</code> (the predecessor)</li>
+<li>Added: protocol code generator, server tests, Swift macOS client code, architecture docs</li>
+</ul>
+<p>20 minutes later, commit <code>172ce6c79</code> refined the protocol with discriminated unions and generated a JSON schema (1,162 lines).</p>
+<p>By the end of that day, the gateway had a typed protocol, a client library, test coverage, and provider routing. <strong>The gateway was born fully formed in an afternoon.</strong></p>
+<h3 id="phase-2-protocol-v2-and-early-features-december-10-23-2025">Phase 2: Protocol v2 and Early Features (December 10-23, 2025)<a class="headerlink" href="#phase-2-protocol-v2-and-early-features-december-10-23-2025" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Dec 12</strong>: Protocol v2 — the handshake changed from ad-hoc to a formal <code>req:connect</code> message. Only 3 days after creation.</li>
+<li><strong>Dec 13</strong>: Bonjour/mDNS discovery added for LAN device finding</li>
+<li><strong>Dec 13-14</strong>: Webchat integration</li>
+<li><strong>Dec 21</strong>: Auth module extracted from server.ts (200 lines). Initial auth: Tailscale + PAM</li>
+<li><strong>Dec 23</strong>: PAM dropped after only 2 days. Replaced by password auth for Tailscale Funnel.</li>
+</ul>
+<h3 id="phase-3-the-great-decomposition-january-3-4-2026">Phase 3: The Great Decomposition (January 3-4, 2026)<a class="headerlink" href="#phase-3-the-great-decomposition-january-3-4-2026" title="Permanent link">&para;</a></h3>
+<p>The monolithic <code>server.ts</code> had grown too large:</p>
+<ul>
+<li><strong>Jan 3</strong>: First split — <code>server-http.ts</code> (HTTP endpoints) and <code>server-providers.ts</code> (channel lifecycle) extracted</li>
+<li><strong>Jan 3</strong>: Method dispatcher extracted into <code>server-methods.ts</code> (3,269 lines!)</li>
+<li><strong>Jan 4</strong>: The giant <code>server-methods.ts</code> was decomposed into <strong>19 individual files</strong>: <code>chat.ts</code>, <code>sessions.ts</code>, <code>nodes.ts</code>, <code>agent.ts</code>, <code>cron.ts</code>, <code>config.ts</code>, etc.</li>
+</ul>
+<h3 id="phase-4-openai-compatible-api-january-10-19-2026">Phase 4: OpenAI-Compatible API (January 10-19, 2026)<a class="headerlink" href="#phase-4-openai-compatible-api-january-10-19-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Jan 10</strong>: <code>/v1/chat/completions</code> added — making the gateway an OpenAI-compatible API server</li>
+<li><strong>Jan 10 (30 min later)</strong>: Immediately disabled by default (security concern?)</li>
+<li><strong>Jan 10 (1 hour later)</strong>: Made configurable via config toggle</li>
+<li><strong>Jan 19</strong>: <code>/v1/responses</code> endpoint added (OpenAI Responses API)</li>
+<li><strong>Jan 20</strong>: Community contribution expanded <code>/v1/responses</code> input support</li>
+</ul>
+<h3 id="phase-5-plugin-architecture-channels-rename-january-11-15-2026">Phase 5: Plugin Architecture + Channels Rename (January 11-15, 2026)<a class="headerlink" href="#phase-5-plugin-architecture-channels-rename-january-11-15-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Jan 11</strong>: Providers refactored into plugin architecture</li>
+<li><strong>Jan 13</strong>: <strong>Breaking rename</strong>: "providers" → "channels" throughout the codebase. <code>server-providers.ts</code> → <code>server-channels.ts</code>.</li>
+<li><strong>Jan 15</strong>: Channel plugins and HTTP hooks added</li>
+</ul>
+<h3 id="phase-6-second-great-decomposition-january-14-2026">Phase 6: Second Great Decomposition (January 14, 2026)<a class="headerlink" href="#phase-6-second-great-decomposition-january-14-2026" title="Permanent link">&para;</a></h3>
+<p>Commit <code>d19bc1562</code> created <strong>25 new files</strong> from the server:
+- <code>server-broadcast.ts</code> — event broadcasting
+- <code>server-runtime-state.ts</code> — runtime state
+- <code>server-close.ts</code>, <code>server-cron.ts</code>, <code>server-discovery-runtime.ts</code>, <code>server-lanes.ts</code>, <code>server-maintenance.ts</code>, <code>server-plugins.ts</code>, <code>server-reload-handlers.ts</code>, etc.</p>
+<p>This was when the server truly became modular.</p>
+<h3 id="phase-7-device-auth-tls-january-19-20-2026">Phase 7: Device Auth + TLS (January 19-20, 2026)<a class="headerlink" href="#phase-7-device-auth-tls-january-19-20-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Jan 19</strong>: Unified device authentication + pairing system</li>
+<li><strong>Jan 19</strong>: Native TLS support added</li>
+<li><strong>Jan 19</strong>: Older "bridge" protocol removed</li>
+<li><strong>Jan 20</strong>: Device token auth + CLI management</li>
+</ul>
+<h3 id="phase-8-project-renames-january-27-30-2026">Phase 8: Project Renames (January 27-30, 2026)<a class="headerlink" href="#phase-8-project-renames-january-27-30-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Jan 27</strong>: Renamed to "moltbot"</li>
+<li><strong>Jan 30</strong>: Final rename to "openclaw"</li>
+</ul>
+<h3 id="phase-9-security-hardening-february-2026">Phase 9: Security Hardening (February 2026)<a class="headerlink" href="#phase-9-security-hardening-february-2026" title="Permanent link">&para;</a></h3>
+<p>February was dominated by security:</p>
+<ul>
+<li><strong>Feb 13</strong>: Auth rate-limiting and brute-force protection</li>
+<li><strong>Feb 14</strong>: Trusted-proxy auth mode for reverse proxies</li>
+<li><strong>Feb 16-18</strong>: Mesh/DAG orchestration experiment added... and <strong>reverted 2 days later</strong> (failed experiment)</li>
+<li><strong>Feb 19</strong>: Auth became on-by-default (explicit opt-out required)</li>
+<li><strong>Feb 19</strong>: Plaintext WebSocket blocked for non-loopback connections</li>
+<li><strong>Feb 19</strong>: Security headers added (CORS, CSP)</li>
+<li><strong>Feb 22</strong>: Legacy v1 device-auth handshake removed</li>
+</ul>
+<h3 id="phase-10-container-native-polish-march-2026">Phase 10: Container-Native + Polish (March 2026)<a class="headerlink" href="#phase-10-container-native-polish-march-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Mar 1</strong>: <code>healthz</code>/<code>readyz</code> probe endpoints for Kubernetes</li>
+<li><strong>Mar 6</strong>: Image support in OpenAI chat completions endpoint</li>
+<li><strong>Mar 6</strong>: Channel-backed readiness probes</li>
+<li><strong>Mar 9</strong>: Pending node work primitives</li>
+<li><strong>Mar 12</strong>: Preauth WebSocket handshake limits tightened (latest security hardening)</li>
+</ul>
+<h3 id="evolution-timeline">Evolution Timeline<a class="headerlink" href="#evolution-timeline" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Event</th>
+<th>Commits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dec 8, 2025</td>
+<td>Control channel predecessor</td>
+<td>~3</td>
+</tr>
+<tr>
+<td><strong>Dec 9, 2025</strong></td>
+<td><strong>Gateway created (Big Bang)</strong></td>
+<td><strong>5 commits in one afternoon</strong></td>
+</tr>
+<tr>
+<td>Dec 12</td>
+<td>Protocol v2</td>
+<td>1 breaking change</td>
+</tr>
+<tr>
+<td>Dec 13</td>
+<td>Bonjour discovery</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Dec 21-23</td>
+<td>Auth module created, PAM dropped</td>
+<td>4</td>
+</tr>
+<tr>
+<td><strong>Jan 3-4, 2026</strong></td>
+<td><strong>First decomposition (19 method files)</strong></td>
+<td>~8</td>
+</tr>
+<tr>
+<td>Jan 10</td>
+<td>OpenAI-compatible endpoint</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Jan 11-13</td>
+<td>Plugin architecture + channels rename</td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>Jan 14</strong></td>
+<td><strong>Second decomposition (25 new files)</strong></td>
+<td>2</td>
+</tr>
+<tr>
+<td>Jan 19-20</td>
+<td>Device auth + TLS + bridge removal</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Jan 27-30</td>
+<td>Renames (moltbot → openclaw)</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Feb 13-22</td>
+<td>Security hardening wave</td>
+<td>~15</td>
+</tr>
+<tr>
+<td>Mar 1-12</td>
+<td>Container support + polish</td>
+<td>~10</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-takeaways">Key Takeaways<a class="headerlink" href="#key-takeaways" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Born fully formed</strong>: Unlike Layer 1 (which grew from a monolith), the gateway was created as a deliberate, planned system in a single afternoon. It replaced the control channel wholesale.</p>
+</li>
+<li>
+<p><strong>Two massive decompositions</strong>: Jan 3-4 (monolith → 19 method files) and Jan 14 (server → 25 helper modules). The gateway was growing too fast for a single file.</p>
+</li>
+<li>
+<p><strong>OpenAI compatibility was a turning point</strong>: Adding <code>/v1/chat/completions</code> transformed the gateway from a pure WebSocket RPC server into a dual-protocol (WS + HTTP REST) API server that any OpenAI-compatible tool can use.</p>
+</li>
+<li>
+<p><strong>Security evolved from "trust everything" to "trust nothing"</strong>: Started with no auth → PAM (dropped in 2 days) → token/password → device pairing → TLS → rate limiting → default-on auth → plaintext blocking. Each step was driven by real security concerns.</p>
+</li>
+<li>
+<p><strong>One failed experiment</strong>: Mesh/DAG orchestration was added Feb 16 and reverted Feb 18. Not every feature survives.</p>
+</li>
+<li>
+<p><strong>Extraordinary velocity</strong>: 1,720 commits in 3 months, with 657 in February alone. The gateway was the primary focus of development.</p>
+</li>
+</ol>
+<hr />
+<h2 id="file-reference">File Reference<a class="headerlink" href="#file-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/gateway/server.impl.ts</code></td>
+<td>~1070</td>
+<td>10-phase startup sequence</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-http.ts</code></td>
+<td>~992</td>
+<td>HTTP endpoint pipeline (14 stages)</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-methods.ts</code></td>
+<td>~158</td>
+<td>RPC method dispatcher</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-methods/chat.ts</code></td>
+<td>~1504</td>
+<td>Chat send/abort/history/inject</td>
+</tr>
+<tr>
+<td><code>src/gateway/openai-http.ts</code></td>
+<td>~613</td>
+<td>OpenAI-compatible /v1/chat/completions</td>
+</tr>
+<tr>
+<td><code>src/gateway/auth.ts</code></td>
+<td>~250+</td>
+<td>7 auth methods + resolution</td>
+</tr>
+<tr>
+<td><code>src/gateway/method-scopes.ts</code></td>
+<td>~134</td>
+<td>RBAC scope → method matrix</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-broadcast.ts</code></td>
+<td>~56</td>
+<td>Event broadcasting to all clients</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-runtime-state.ts</code></td>
+<td>~150</td>
+<td>Runtime state structure</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-channels.ts</code></td>
+<td>~300</td>
+<td>Channel lifecycle + backoff restart</td>
+</tr>
+<tr>
+<td><code>src/gateway/client.ts</code></td>
+<td>~724</td>
+<td>WebSocket client + reconnection</td>
+</tr>
+<tr>
+<td><code>src/gateway/protocol/index.ts</code></td>
+<td>~200</td>
+<td>Protocol frame schemas + AJV validators</td>
+</tr>
+<tr>
+<td><code>src/gateway/protocol/schema/frames.ts</code></td>
+<td>varies</td>
+<td>Request/Response/Event frame definitions</td>
+</tr>
+<tr>
+<td><code>src/gateway/server/ws-connection.ts</code></td>
+<td>~200</td>
+<td>WebSocket connection handler</td>
+</tr>
+<tr>
+<td><code>src/gateway/server/ws-connection/message-handler.ts</code></td>
+<td>~700+</td>
+<td>Full handshake flow</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-discovery-runtime.ts</code></td>
+<td>~100</td>
+<td>Discovery startup (mDNS/Tailscale/DNS-SD)</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-cron.ts</code></td>
+<td>~500+</td>
+<td>Cron/scheduled task service</td>
+</tr>
+<tr>
+<td><code>src/gateway/node-registry.ts</code></td>
+<td>~230+</td>
+<td>Node registration and invocation</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-methods/nodes.ts</code></td>
+<td>~1200+</td>
+<td>Node pairing, wake, invocation</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-methods/sessions.ts</code></td>
+<td>~400+</td>
+<td>Session list/preview/patch/reset</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-methods/config.ts</code></td>
+<td>~600+</td>
+<td>Config get/patch/apply/reload</td>
+</tr>
+<tr>
+<td><code>src/infra/bonjour.ts</code></td>
+<td>~282</td>
+<td>mDNS/Bonjour service advertiser</td>
+</tr>
+<tr>
+<td><code>src/infra/bonjour-discovery.ts</code></td>
+<td>~591</td>
+<td>mDNS/Bonjour service discovery</td>
+</tr>
+<tr>
+<td><code>src/infra/widearea-dns.ts</code></td>
+<td>~200</td>
+<td>Wide-area DNS-SD zone generation</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

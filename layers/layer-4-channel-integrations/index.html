@@ -1,0 +1,3167 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-3-plugin-system/">
+      
+      
+        <link rel="next" href="../layer-5-ai-providers/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 4: Channel Integrations - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-4-channel-integrations-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 4: Channel Integrations
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 4?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-channelplugin-contract-the-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The ChannelPlugin Contract (The Rules)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The ChannelPlugin Contract (The Rules)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-every-channel-must-be" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Every Channel Must Be
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-three-generic-type-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Three Generic Type Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#channel-metadata-channelmeta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Channel Metadata (ChannelMeta)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#channel-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Channel Capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-adapters-the-specialized-sub-abilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Adapters (The Specialized Sub-Abilities)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Adapters (The Specialized Sub-Abilities)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-adapter-required-how-do-i-read-my-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Adapter (Required) — "How Do I Read My Settings?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outbound-adapter-how-do-i-send-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outbound Adapter — "How Do I Send Messages?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-adapter-how-do-i-start-and-stop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway Adapter — "How Do I Start and Stop?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-adapter-who-is-allowed-to-talk-to-me" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Adapter — "Who Is Allowed to Talk to Me?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-adapter-am-i-healthy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status Adapter — "Am I Healthy?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#directory-adapter-whos-out-there" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory Adapter — "Who's Out There?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#threading-adapter-how-do-i-handle-conversation-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Threading Adapter — "How Do I Handle Conversation Threads?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#message-action-adapter-what-special-things-can-i-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Message Action Adapter — "What Special Things Can I Do?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-adapters-quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other Adapters (Quick Reference)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-the-channel-registry-the-master-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: The Channel Registry (The Master List)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: The Channel Registry (The Master List)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-core-channel-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Core Channel Order
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aliases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aliases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugin-loading-and-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin Loading and Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-channel-lifecycle-management-starting-stopping-restarting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Channel Lifecycle Management (Starting, Stopping, Restarting)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Channel Lifecycle Management (Starting, Stopping, Restarting)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-channel-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Channel Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-startup-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Startup Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-auto-restart-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Auto-Restart System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internal-runtime-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internal Runtime Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runtime-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Snapshot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-the-inbound-message-flow-how-messages-get-into-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Inbound Message Flow (How Messages Get Into the System)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Inbound Message Flow (How Messages Get Into the System)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-platform-sdk-receives-the-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Platform SDK Receives the Message
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-channel-normalizes-into-msgcontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Channel Normalizes Into MsgContext
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-dispatch-to-the-ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Dispatch to the AI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-response-goes-back-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Response Goes Back Out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-the-built-in-channels-all-22-of-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: The Built-In Channels (All 22 of Them)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: The Built-In Channels (All 22 of Them)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tier-1-core-messaging-the-original-six" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 1: Core Messaging (The Original Six)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-2-enterpriseteam-platforms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 2: Enterprise/Team Platforms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-3-specializedregional-channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 3: Specialized/Regional Channels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-4-the-web-ui-built-in-not-an-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 4: The Web UI (Built-In, Not an Extension)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-the-plugin-channel-runtime-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: The Plugin Channel Runtime SDK
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-4-evolved-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 4 Evolved (Git History)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 4 Evolved (Git History)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#era-1-the-monolith-before-january-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 1: The Monolith (Before January 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-2-the-great-rename-january-13-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 2: The Great Rename — January 13, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-3-the-plugin-architecture-january-11-15-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 3: The Plugin Architecture — January 11-15, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-4-the-mass-migration-january-16-18-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 4: The Mass Migration — January 16-18, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-5-the-cambrian-explosion-january-20-to-february-22-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 5: The Cambrian Explosion — January 20 to February 22, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-6-the-rename-cascade-january-27-30-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 6: The Rename Cascade — January 27-30, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-7-sdk-maturation-february-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 7: SDK Maturation — February-March 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-8-the-great-deduplication-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 8: The Great Deduplication — March 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 4?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-channelplugin-contract-the-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The ChannelPlugin Contract (The Rules)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The ChannelPlugin Contract (The Rules)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-every-channel-must-be" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Every Channel Must Be
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-three-generic-type-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Three Generic Type Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#channel-metadata-channelmeta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Channel Metadata (ChannelMeta)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#channel-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Channel Capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-adapters-the-specialized-sub-abilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Adapters (The Specialized Sub-Abilities)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Adapters (The Specialized Sub-Abilities)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-adapter-required-how-do-i-read-my-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Adapter (Required) — "How Do I Read My Settings?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outbound-adapter-how-do-i-send-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outbound Adapter — "How Do I Send Messages?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-adapter-how-do-i-start-and-stop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway Adapter — "How Do I Start and Stop?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-adapter-who-is-allowed-to-talk-to-me" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Adapter — "Who Is Allowed to Talk to Me?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-adapter-am-i-healthy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status Adapter — "Am I Healthy?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#directory-adapter-whos-out-there" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory Adapter — "Who's Out There?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#threading-adapter-how-do-i-handle-conversation-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Threading Adapter — "How Do I Handle Conversation Threads?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#message-action-adapter-what-special-things-can-i-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Message Action Adapter — "What Special Things Can I Do?"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-adapters-quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other Adapters (Quick Reference)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-the-channel-registry-the-master-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: The Channel Registry (The Master List)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: The Channel Registry (The Master List)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-core-channel-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Core Channel Order
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aliases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aliases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugin-loading-and-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin Loading and Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-channel-lifecycle-management-starting-stopping-restarting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Channel Lifecycle Management (Starting, Stopping, Restarting)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Channel Lifecycle Management (Starting, Stopping, Restarting)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-channel-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Channel Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-startup-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Startup Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-auto-restart-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Auto-Restart System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internal-runtime-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internal Runtime Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runtime-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Snapshot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-the-inbound-message-flow-how-messages-get-into-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Inbound Message Flow (How Messages Get Into the System)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Inbound Message Flow (How Messages Get Into the System)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-platform-sdk-receives-the-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Platform SDK Receives the Message
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-channel-normalizes-into-msgcontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Channel Normalizes Into MsgContext
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-dispatch-to-the-ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Dispatch to the AI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-response-goes-back-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Response Goes Back Out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-the-built-in-channels-all-22-of-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: The Built-In Channels (All 22 of Them)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: The Built-In Channels (All 22 of Them)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tier-1-core-messaging-the-original-six" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 1: Core Messaging (The Original Six)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-2-enterpriseteam-platforms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 2: Enterprise/Team Platforms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-3-specializedregional-channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 3: Specialized/Regional Channels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-4-the-web-ui-built-in-not-an-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 4: The Web UI (Built-In, Not an Extension)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-the-plugin-channel-runtime-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: The Plugin Channel Runtime SDK
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-4-evolved-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 4 Evolved (Git History)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 4 Evolved (Git History)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#era-1-the-monolith-before-january-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 1: The Monolith (Before January 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-2-the-great-rename-january-13-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 2: The Great Rename — January 13, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-3-the-plugin-architecture-january-11-15-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 3: The Plugin Architecture — January 11-15, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-4-the-mass-migration-january-16-18-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 4: The Mass Migration — January 16-18, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-5-the-cambrian-explosion-january-20-to-february-22-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 5: The Cambrian Explosion — January 20 to February 22, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-6-the-rename-cascade-january-27-30-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 6: The Rename Cascade — January 27-30, 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-7-sdk-maturation-february-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 7: SDK Maturation — February-March 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-8-the-great-deduplication-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 8: The Great Deduplication — March 2026
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-4-channel-integrations-deep-dive">Layer 4: Channel Integrations — Deep Dive<a class="headerlink" href="#layer-4-channel-integrations-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-layer-4">What Is Layer 4?<a class="headerlink" href="#what-is-layer-4" title="Permanent link">&para;</a></h2>
+<p>If Layer 1 is the brain, Layer 2 is the nervous system, and Layer 3 is the organ transplant department, then Layer 4 is <strong>the robot's mouth, ears, and hands</strong> — the parts that actually talk to people on different messaging apps.</p>
+<p>Imagine your robot can understand and speak any language, but it needs translators to talk to people on WhatsApp, Discord, Telegram, and so on. Each "channel" is one of those translators. The Telegram translator knows how to receive Telegram messages, convert them into something the robot understands, and then take the robot's response and send it back as a proper Telegram message.</p>
+<p>Without at least one channel, the robot is like a brilliant person locked in a soundproof room — it can think, but it can't communicate with anyone.</p>
+<p>Layer 4 has <strong>five major parts</strong>:</p>
+<ol>
+<li><strong>The ChannelPlugin Contract</strong> — The rules every translator must follow</li>
+<li><strong>Adapters</strong> — Specialized sub-abilities each translator can have</li>
+<li><strong>The Channel Registry</strong> — The master list of known translators</li>
+<li><strong>Channel Lifecycle Management</strong> — Starting, stopping, and restarting translators</li>
+<li><strong>The Built-in Channels</strong> — All 22 translators that come pre-installed</li>
+</ol>
+<hr />
+<h2 id="part-1-the-channelplugin-contract-the-rules">Part 1: The ChannelPlugin Contract (The Rules)<a class="headerlink" href="#part-1-the-channelplugin-contract-the-rules" title="Permanent link">&para;</a></h2>
+<h3 id="what-every-channel-must-be">What Every Channel Must Be<a class="headerlink" href="#what-every-channel-must-be" title="Permanent link">&para;</a></h3>
+<p>Every channel plugin is a TypeScript object that follows a specific shape. Think of it like a job application form — there are required fields and optional fields.</p>
+<p><strong>File: <code>src/channels/plugins/types.plugin.ts</code></strong></p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelPlugin</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">any</span><span class="p">,</span><span class="w"> </span><span class="nx">Probe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">unknown</span><span class="p">,</span><span class="w"> </span><span class="nx">Audit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">unknown</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// === REQUIRED (every channel MUST have these) ===</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelId</span><span class="p">;</span><span class="w">                    </span><span class="c1">// e.g., &quot;telegram&quot;, &quot;discord&quot;</span>
+<span class="w">  </span><span class="nx">meta</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelMeta</span><span class="p">;</span><span class="w">                </span><span class="c1">// Human-readable name, docs link, etc.</span>
+<span class="w">  </span><span class="nx">capabilities</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelCapabilities</span><span class="p">;</span><span class="w"> </span><span class="c1">// What can this channel do?</span>
+<span class="w">  </span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelConfigAdapter</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// How to read/write config</span>
+
+<span class="w">  </span><span class="c1">// === OPTIONAL (extra powers) ===</span>
+<span class="w">  </span><span class="nx">defaults</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">queue</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">debounceMs?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<span class="w">  </span><span class="nx">reload</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">configPrefixes</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w"> </span><span class="nx">noopPrefixes?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[]</span><span class="w"> </span><span class="p">};</span>
+<span class="w">  </span><span class="nx">onboarding?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelOnboardingAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">configSchema?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelConfigSchema</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">setup?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelSetupAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">pairing?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelPairingAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">security?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelSecurityAdapter</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">groups?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelGroupAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">mentions?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelMentionAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">outbound?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelOutboundAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">status?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelStatusAdapter</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="p">,</span><span class="w"> </span><span class="nx">Probe</span><span class="p">,</span><span class="w"> </span><span class="nx">Audit</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">gateway?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelGatewayAdapter</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">gatewayMethods?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span>
+<span class="w">  </span><span class="nx">auth?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelAuthAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">elevated?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelElevatedAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">commands?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelCommandAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">streaming?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelStreamingAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">threading?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelThreadingAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">messaging?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelMessagingAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">agentPrompt?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelAgentPromptAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">directory?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelDirectoryAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">resolver?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelResolverAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">actions?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelMessageActionAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">heartbeat?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelHeartbeatAdapter</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">agentTools?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelAgentToolFactory</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">ChannelAgentTool</span><span class="p">[];</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>That's about <strong>20 optional adapters</strong>. No channel uses all of them. A simple channel like IRC might use 5-6, while a complex one like Feishu uses 15+.</p>
+<h3 id="the-three-generic-type-parameters">The Three Generic Type Parameters<a class="headerlink" href="#the-three-generic-type-parameters" title="Permanent link">&para;</a></h3>
+<p>Notice <code>&lt;ResolvedAccount, Probe, Audit&gt;</code> at the top. These are like "fill-in-the-blank" types:</p>
+<ul>
+<li><strong>ResolvedAccount</strong>: What does a "configured account" look like for this channel? For Telegram, it's an object with a <code>botToken</code>. For WhatsApp, it's an object with a <code>sessionId</code>. Each channel defines its own shape.</li>
+<li><strong>Probe</strong>: What does a "health check" return? For Telegram, it might be the bot's username and rate limit status.</li>
+<li><strong>Audit</strong>: What does a "deep audit" return? For Telegram, it's a list of groups the bot is in and its permissions.</li>
+</ul>
+<p>This means the TypeScript compiler can check that when Telegram says "here's my account config," it actually matches Telegram's account shape — not Discord's.</p>
+<h3 id="channel-metadata-channelmeta">Channel Metadata (<code>ChannelMeta</code>)<a class="headerlink" href="#channel-metadata-channelmeta" title="Permanent link">&para;</a></h3>
+<p>Every channel describes itself with metadata:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelMeta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelId</span><span class="p">;</span><span class="w">              </span><span class="c1">// &quot;telegram&quot;</span>
+<span class="w">  </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">              </span><span class="c1">// &quot;Telegram&quot;</span>
+<span class="w">  </span><span class="nx">selectionLabel</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">     </span><span class="c1">// What shows in the setup wizard</span>
+<span class="w">  </span><span class="nx">docsPath</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">           </span><span class="c1">// &quot;/channels/telegram&quot;</span>
+<span class="w">  </span><span class="nx">blurb</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">              </span><span class="c1">// One-line description</span>
+<span class="w">  </span><span class="nx">order?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">             </span><span class="c1">// Display priority (lower = first)</span>
+<span class="w">  </span><span class="nx">aliases?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">         </span><span class="c1">// [&quot;tg&quot;] so users can type &quot;tg&quot; instead</span>
+<span class="w">  </span><span class="nx">systemImage?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">       </span><span class="c1">// Icon name</span>
+<span class="w">  </span><span class="nx">forceAccountBinding?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"> </span><span class="c1">// WhatsApp forces this (QR login)</span>
+<span class="w">  </span><span class="nx">preferOver?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">      </span><span class="c1">// BlueBubbles prefers over native iMessage</span>
+<span class="w">  </span><span class="c1">// ... more display/UX hints</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>The <code>order</code> field controls the display order in the setup wizard. Telegram is first (order ~1), then WhatsApp, Discord, etc.</p>
+<h3 id="channel-capabilities">Channel Capabilities<a class="headerlink" href="#channel-capabilities" title="Permanent link">&para;</a></h3>
+<p>This is the channel's "feature checklist" — what can it actually do?</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelCapabilities</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">chatTypes</span><span class="o">:</span><span class="w"> </span><span class="kt">Array</span><span class="o">&lt;</span><span class="s2">&quot;direct&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;group&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;channel&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;thread&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">polls?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">        </span><span class="c1">// Can it send polls?</span>
+<span class="w">  </span><span class="nx">reactions?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">    </span><span class="c1">// Can it add emoji reactions?</span>
+<span class="w">  </span><span class="nx">edit?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">         </span><span class="c1">// Can it edit sent messages?</span>
+<span class="w">  </span><span class="nx">unsend?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">       </span><span class="c1">// Can it delete sent messages?</span>
+<span class="w">  </span><span class="nx">reply?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">        </span><span class="c1">// Can it reply to specific messages?</span>
+<span class="w">  </span><span class="nx">effects?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">      </span><span class="c1">// Can it send message effects (like iMessage)?</span>
+<span class="w">  </span><span class="nx">groupManagement?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"> </span><span class="c1">// Can it add/remove group members?</span>
+<span class="w">  </span><span class="nx">threads?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">      </span><span class="c1">// Does it support threaded conversations?</span>
+<span class="w">  </span><span class="nx">media?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">        </span><span class="c1">// Can it send images/files?</span>
+<span class="w">  </span><span class="nx">nativeCommands?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"> </span><span class="c1">// Does it have slash commands?</span>
+<span class="w">  </span><span class="nx">blockStreaming?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"> </span><span class="c1">// Should it wait for full response before sending?</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>Here's a comparison of what different channels can do:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Telegram</th>
+<th>WhatsApp</th>
+<th>Discord</th>
+<th>Slack</th>
+<th>Signal</th>
+<th>iMessage</th>
+<th>IRC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chat types</td>
+<td>DM, group, channel, thread</td>
+<td>DM, group</td>
+<td>DM, channel, thread</td>
+<td>DM, channel, thread</td>
+<td>DM, group</td>
+<td>DM, group</td>
+<td>DM, group</td>
+</tr>
+<tr>
+<td>Polls</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Reactions</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Edit</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Threads</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Media</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Effects</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Native commands</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>The robot checks these capabilities before trying to do something. If you ask it to create a poll on IRC, it knows that's impossible and will tell you.</p>
+<hr />
+<h2 id="part-2-adapters-the-specialized-sub-abilities">Part 2: Adapters (The Specialized Sub-Abilities)<a class="headerlink" href="#part-2-adapters-the-specialized-sub-abilities" title="Permanent link">&para;</a></h2>
+<p>Adapters are the real workhorses. Each adapter handles one aspect of channel functionality. Think of them like attachments for a power tool — the drill (channel) is the base, and you snap on different bits (adapters) for different jobs.</p>
+<h3 id="config-adapter-required-how-do-i-read-my-settings">Config Adapter (Required) — "How Do I Read My Settings?"<a class="headerlink" href="#config-adapter-required-how-do-i-read-my-settings" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/channels/plugins/types.adapters.ts</code></strong></p>
+<p>Every channel MUST have a config adapter. It tells the system how to find and manage accounts for this channel.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelConfigAdapter</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// List all account IDs from config (e.g., [&quot;default&quot;, &quot;work-bot&quot;])</span>
+<span class="w">  </span><span class="nx">listAccountIds</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">cfg</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawConfig</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span>
+
+<span class="w">  </span><span class="c1">// Turn an account ID into a full account object</span>
+<span class="w">  </span><span class="nx">resolveAccount</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">cfg</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawConfig</span><span class="p">,</span><span class="w"> </span><span class="nx">accountId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ResolvedAccount</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Which account to use when none is specified</span>
+<span class="w">  </span><span class="nx">defaultAccountId</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">cfg</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawConfig</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Is this account turned on?</span>
+<span class="w">  </span><span class="nx">isEnabled</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">account</span><span class="o">:</span><span class="w"> </span><span class="kt">ResolvedAccount</span><span class="p">,</span><span class="w"> </span><span class="nx">cfg</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawConfig</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Is this account properly set up?</span>
+<span class="w">  </span><span class="nx">isConfigured</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">account</span><span class="o">:</span><span class="w"> </span><span class="kt">ResolvedAccount</span><span class="p">,</span><span class="w"> </span><span class="nx">cfg</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawConfig</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">boolean</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Why isn&#39;t this account working?</span>
+<span class="w">  </span><span class="nx">unconfiguredReason</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">account</span><span class="o">:</span><span class="w"> </span><span class="kt">ResolvedAccount</span><span class="p">,</span><span class="w"> </span><span class="nx">cfg</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawConfig</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">disabledReason</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">account</span><span class="o">:</span><span class="w"> </span><span class="kt">ResolvedAccount</span><span class="p">,</span><span class="w"> </span><span class="nx">cfg</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawConfig</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Enable/disable an account in config</span>
+<span class="w">  </span><span class="nx">setAccountEnabled</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">OpenClawConfig</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">deleteAccount</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">OpenClawConfig</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Security: who is allowed to DM this bot?</span>
+<span class="w">  </span><span class="nx">resolveAllowFrom</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Array</span><span class="o">&lt;</span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">number</span><span class="o">&gt;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">undefined</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">formatAllowFrom</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span>
+<span class="w">  </span><span class="nx">resolveDefaultTo</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">undefined</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><strong>Why multi-account?</strong> Imagine you run two Telegram bots — one for personal use, one for work. Each is an "account" under the same channel. The config adapter lets OpenClaw manage both.</p>
+<h3 id="outbound-adapter-how-do-i-send-messages">Outbound Adapter — "How Do I Send Messages?"<a class="headerlink" href="#outbound-adapter-how-do-i-send-messages" title="Permanent link">&para;</a></h3>
+<p>This is how the robot talks <em>back</em> to users.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelOutboundAdapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// How should messages be routed?</span>
+<span class="w">  </span><span class="nx">deliveryMode</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;direct&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;gateway&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;hybrid&quot;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// How to split long messages (each platform has character limits)</span>
+<span class="w">  </span><span class="nx">chunker</span><span class="o">?:</span><span class="w"> </span><span class="p">((</span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">string</span><span class="p">[])</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">chunkerMode</span><span class="o">?:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;markdown&quot;</span><span class="p">;</span><span class="w">  </span><span class="c1">// Split on words or preserve markdown?</span>
+<span class="w">  </span><span class="nx">textChunkLimit?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">  </span><span class="c1">// Telegram: 4000, Zalo: 2000, etc.</span>
+
+<span class="w">  </span><span class="c1">// Max poll options (Telegram: 10, etc.)</span>
+<span class="w">  </span><span class="nx">pollMaxOptions?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Figure out WHERE to send</span>
+<span class="w">  </span><span class="nx">resolveTarget</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">;</span><span class="w"> </span><span class="nx">to</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">;</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="kt">Error</span><span class="w"> </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// The actual &quot;send&quot; functions</span>
+<span class="w">  </span><span class="nx">sendPayload</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelOutboundPayloadContext</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">OutboundDeliveryResult</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">sendText</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelOutboundContext</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">OutboundDeliveryResult</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">sendMedia</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelOutboundContext</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">OutboundDeliveryResult</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">sendPoll</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelPollContext</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ChannelPollResult</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><strong>Delivery modes explained:</strong>
+- <strong><code>direct</code></strong>: The channel plugin sends the message itself, directly to the platform API (most channels use this)
+- <strong><code>gateway</code></strong>: The message goes through the gateway server, which routes it (used when the channel needs the gateway as a middleman)
+- <strong><code>hybrid</code></strong>: Some messages go direct, some go through the gateway</p>
+<p><strong>Why chunking matters:</strong> Telegram has a 4,000-character limit per message. If the AI writes a 10,000-character response, the chunker splits it into 3 messages — but smartly, at paragraph or sentence boundaries, not mid-word. The <code>chunkerMode: "markdown"</code> option makes sure it doesn't break markdown formatting (like splitting a code block in half).</p>
+<h3 id="gateway-adapter-how-do-i-start-and-stop">Gateway Adapter — "How Do I Start and Stop?"<a class="headerlink" href="#gateway-adapter-how-do-i-start-and-stop" title="Permanent link">&para;</a></h3>
+<p>This controls the channel's runtime lifecycle.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelGatewayAdapter</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">unknown</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Boot up this channel account</span>
+<span class="w">  </span><span class="nx">startAccount</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelGatewayContext</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">unknown</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Shut it down gracefully</span>
+<span class="w">  </span><span class="nx">stopAccount</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelGatewayContext</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// QR code login (WhatsApp-style)</span>
+<span class="w">  </span><span class="nx">loginWithQrStart</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ChannelLoginWithQrStartResult</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">loginWithQrWait</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ChannelLoginWithQrWaitResult</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Full logout (clear credentials)</span>
+<span class="w">  </span><span class="nx">logoutAccount</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ChannelLogoutResult</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>The <code>ChannelGatewayContext</code> is the "backpack" given to a channel when it starts. It contains:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelGatewayContext</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">cfg</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawConfig</span><span class="p">;</span><span class="w">         </span><span class="c1">// Full system config</span>
+<span class="w">  </span><span class="nx">accountId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">           </span><span class="c1">// Which account is starting</span>
+<span class="w">  </span><span class="nx">account</span><span class="o">:</span><span class="w"> </span><span class="kt">ResolvedAccount</span><span class="p">;</span><span class="w">    </span><span class="c1">// The resolved account object</span>
+<span class="w">  </span><span class="nx">runtime</span><span class="o">:</span><span class="w"> </span><span class="kt">RuntimeEnv</span><span class="p">;</span><span class="w">         </span><span class="c1">// System runtime info</span>
+<span class="w">  </span><span class="nx">abortSignal</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">;</span><span class="w">    </span><span class="c1">// &quot;Stop!&quot; signal from the system</span>
+<span class="w">  </span><span class="nx">log?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelLogSink</span><span class="p">;</span><span class="w">        </span><span class="c1">// Where to write logs</span>
+<span class="w">  </span><span class="nx">getStatus</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ChannelAccountSnapshot</span><span class="p">;</span><span class="w">  </span><span class="c1">// Read current status</span>
+<span class="w">  </span><span class="nx">setStatus</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">next</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelAccountSnapshot</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span><span class="w"> </span><span class="c1">// Update status</span>
+<span class="w">  </span><span class="nx">channelRuntime?</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginRuntime</span><span class="p">[</span><span class="s2">&quot;channel&quot;</span><span class="p">];</span><span class="w"> </span><span class="c1">// SDK helpers (since Feb 2026)</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>The <code>abortSignal</code> is particularly important. When the system wants to stop a channel, it triggers this signal, and the channel must clean up and exit. It's like a school bell — when it rings, you stop what you're doing.</p>
+<h3 id="security-adapter-who-is-allowed-to-talk-to-me">Security Adapter — "Who Is Allowed to Talk to Me?"<a class="headerlink" href="#security-adapter-who-is-allowed-to-talk-to-me" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelSecurityAdapter</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// What&#39;s the DM policy for this channel?</span>
+<span class="w">  </span><span class="nx">resolveDmPolicy</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ChannelSecurityDmPolicy</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Any security warnings to show?</span>
+<span class="w">  </span><span class="nx">collectWarnings</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">[]</span><span class="o">&gt;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span>
+<span class="p">};</span>
+
+<span class="kr">type</span><span class="w"> </span><span class="nx">ChannelSecurityDmPolicy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">policy</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                          </span><span class="c1">// &quot;allowlist&quot; or &quot;open&quot;</span>
+<span class="w">  </span><span class="nx">allowFrom?</span><span class="o">:</span><span class="w"> </span><span class="kt">Array</span><span class="o">&lt;</span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">number</span><span class="o">&gt;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"> </span><span class="c1">// Who can DM</span>
+<span class="w">  </span><span class="nx">policyPath?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                     </span><span class="c1">// Config path for the policy</span>
+<span class="w">  </span><span class="nx">allowFromPath</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                   </span><span class="c1">// Config path for the allowlist</span>
+<span class="w">  </span><span class="nx">approveHint</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                     </span><span class="c1">// &quot;Add their phone number to...&quot;</span>
+<span class="w">  </span><span class="nx">normalizeEntry</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">raw</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="c1">// Clean up input</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>This is the robot's bouncer. Without it, anyone in the world could message your bot and use your AI credits. The allowlist says "only these people can talk to me." For Telegram, entries are user IDs. For Signal, they're phone numbers. For Discord, they're user IDs or role names.</p>
+<h3 id="status-adapter-am-i-healthy">Status Adapter — "Am I Healthy?"<a class="headerlink" href="#status-adapter-am-i-healthy" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelStatusAdapter</span><span class="o">&lt;</span><span class="nx">ResolvedAccount</span><span class="p">,</span><span class="w"> </span><span class="nx">Probe</span><span class="p">,</span><span class="w"> </span><span class="nx">Audit</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Default runtime state before the channel starts</span>
+<span class="w">  </span><span class="nx">defaultRuntime?</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelAccountSnapshot</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Quick health check (is the token valid? is the bot online?)</span>
+<span class="w">  </span><span class="nx">probeAccount</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Probe</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Deep audit (what groups am I in? what permissions do I have?)</span>
+<span class="w">  </span><span class="nx">auditAccount</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Audit</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Build the full status snapshot</span>
+<span class="w">  </span><span class="nx">buildAccountSnapshot</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ChannelAccountSnapshot</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Collect warnings/issues</span>
+<span class="w">  </span><span class="nx">collectStatusIssues</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">accounts</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelAccountSnapshot</span><span class="p">[])</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ChannelStatusIssue</span><span class="p">[];</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>The <strong>Account Snapshot</strong> is a detailed health report:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelAccountSnapshot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">accountId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">enabled?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">         </span><span class="c1">// Is it turned on?</span>
+<span class="w">  </span><span class="nx">configured?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">      </span><span class="c1">// Does it have all required settings?</span>
+<span class="w">  </span><span class="nx">linked?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">          </span><span class="c1">// Is it linked to a platform account?</span>
+<span class="w">  </span><span class="nx">running?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">         </span><span class="c1">// Is the process running right now?</span>
+<span class="w">  </span><span class="nx">connected?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">       </span><span class="c1">// Is it connected to the platform?</span>
+<span class="w">  </span><span class="nx">reconnectAttempts?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w"> </span><span class="c1">// How many times has it tried to reconnect?</span>
+<span class="w">  </span><span class="nx">lastConnectedAt?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">  </span><span class="c1">// When did it last connect?</span>
+<span class="w">  </span><span class="nx">lastMessageAt?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">    </span><span class="c1">// When did it last send/receive?</span>
+<span class="w">  </span><span class="nx">lastError?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">        </span><span class="c1">// What went wrong?</span>
+<span class="w">  </span><span class="nx">busy?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">            </span><span class="c1">// Is it processing something?</span>
+<span class="w">  </span><span class="nx">activeRuns?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">       </span><span class="c1">// How many AI runs are active?</span>
+<span class="w">  </span><span class="c1">// ... many more fields</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="directory-adapter-whos-out-there">Directory Adapter — "Who's Out There?"<a class="headerlink" href="#directory-adapter-whos-out-there" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelDirectoryAdapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">self</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ChannelDirectoryEntry</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="o">&gt;</span><span class="p">;</span><span class="w">  </span><span class="c1">// Who am I?</span>
+<span class="w">  </span><span class="nx">listPeers</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ChannelDirectoryEntry</span><span class="p">[]</span><span class="o">&gt;</span><span class="p">;</span><span class="w">  </span><span class="c1">// My contacts</span>
+<span class="w">  </span><span class="nx">listGroups</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ChannelDirectoryEntry</span><span class="p">[]</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// My groups</span>
+<span class="w">  </span><span class="nx">listGroupMembers</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ChannelDirectoryEntry</span><span class="p">[]</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Group members</span>
+<span class="w">  </span><span class="nx">listPeersLive</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ChannelDirectoryEntry</span><span class="p">[]</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Fresh from API</span>
+<span class="w">  </span><span class="nx">listGroupsLive</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ChannelDirectoryEntry</span><span class="p">[]</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Fresh from API</span>
+<span class="p">};</span>
+
+<span class="kr">type</span><span class="w"> </span><span class="nx">ChannelDirectoryEntry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">kind</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;group&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;channel&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">name?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">handle?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">avatarUrl?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>There are "cached" versions (<code>listPeers</code>) and "live" versions (<code>listPeersLive</code>). The cached ones are fast but might be stale. The live ones hit the platform's API directly.</p>
+<h3 id="threading-adapter-how-do-i-handle-conversation-threads">Threading Adapter — "How Do I Handle Conversation Threads?"<a class="headerlink" href="#threading-adapter-how-do-i-handle-conversation-threads" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelThreadingAdapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// When should I reply in threads? &quot;off&quot; = never, &quot;first&quot; = only to first msg, &quot;all&quot; = always</span>
+<span class="w">  </span><span class="nx">resolveReplyToMode</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s2">&quot;off&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;first&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;all&quot;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Allow explicit @reply tags even when threading is off?</span>
+<span class="w">  </span><span class="nx">allowExplicitReplyTagsWhenOff?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Build context about the current thread</span>
+<span class="w">  </span><span class="nx">buildToolContext</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ChannelThreadingToolContext</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">undefined</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>The thread context tells the AI <em>where</em> it is in a conversation:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelThreadingContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">Channel?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">           </span><span class="c1">// &quot;telegram&quot;</span>
+<span class="w">  </span><span class="nx">From?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">              </span><span class="c1">// Who sent this message</span>
+<span class="w">  </span><span class="nx">To?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                </span><span class="c1">// Who received it</span>
+<span class="w">  </span><span class="nx">ChatType?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">          </span><span class="c1">// &quot;direct&quot; | &quot;group&quot; | &quot;channel&quot;</span>
+<span class="w">  </span><span class="nx">CurrentMessageId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">  </span><span class="c1">// This message&#39;s ID</span>
+<span class="w">  </span><span class="nx">ReplyToId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">         </span><span class="c1">// What message is this replying to</span>
+<span class="w">  </span><span class="nx">ThreadLabel?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">       </span><span class="c1">// Thread name (if applicable)</span>
+<span class="w">  </span><span class="nx">MessageThreadId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">   </span><span class="c1">// Platform-specific thread ID</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="message-action-adapter-what-special-things-can-i-do">Message Action Adapter — "What Special Things Can I Do?"<a class="headerlink" href="#message-action-adapter-what-special-things-can-i-do" title="Permanent link">&para;</a></h3>
+<p>This is the richest adapter. It defines <strong>all the actions</strong> a channel supports:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">CHANNEL_MESSAGE_ACTION_NAMES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;send&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;broadcast&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;poll&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;poll-vote&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;react&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;reactions&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;edit&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unsend&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;reply&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;sendWithEffect&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;renameGroup&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;setGroupIcon&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;addParticipant&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;removeParticipant&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;leaveGroup&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;sendAttachment&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;delete&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;pin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unpin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;list-pins&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;permissions&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;thread-create&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;thread-list&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;thread-reply&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;search&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;sticker&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;sticker-search&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;member-info&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;role-info&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;emoji-list&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;emoji-upload&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;sticker-upload&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;role-add&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;role-remove&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;channel-info&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;channel-list&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;channel-create&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;channel-edit&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;channel-delete&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;channel-move&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;category-create&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;category-edit&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;category-delete&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;topic-create&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;voice-status&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;event-list&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;event-create&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;timeout&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;kick&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ban&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;set-presence&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;download-file&quot;</span>
+<span class="p">];</span>
+</code></pre></div>
+<p>That's <strong>50+ possible actions</strong>! No single channel supports all of them. Discord supports the most (channels, roles, threads, kicks, bans). iMessage is simpler (send, react, effects). IRC is the simplest (basically just send).</p>
+<p>The adapter declares which actions it supports:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelMessageActionAdapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">listActions</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ChannelMessageActionName</span><span class="p">[];</span><span class="w">  </span><span class="c1">// What can I do?</span>
+<span class="w">  </span><span class="nx">supportsAction</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">                  </span><span class="c1">// Can I do this specific thing?</span>
+<span class="w">  </span><span class="nx">supportsButtons</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">                 </span><span class="c1">// Interactive buttons?</span>
+<span class="w">  </span><span class="nx">supportsCards</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">                   </span><span class="c1">// Rich cards?</span>
+<span class="w">  </span><span class="nx">handleAction</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">AgentToolResult</span><span class="o">&gt;</span><span class="p">;</span><span class="w">      </span><span class="c1">// Do the thing!</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="other-adapters-quick-reference">Other Adapters (Quick Reference)<a class="headerlink" href="#other-adapters-quick-reference" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Adapter</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>onboarding</code></td>
+<td>CLI setup wizard steps</td>
+</tr>
+<tr>
+<td><code>setup</code></td>
+<td>Apply account configuration</td>
+</tr>
+<tr>
+<td><code>pairing</code></td>
+<td>Device pairing / QR code flows</td>
+</tr>
+<tr>
+<td><code>groups</code></td>
+<td>Group-specific policies (require @mention, tool restrictions)</td>
+</tr>
+<tr>
+<td><code>mentions</code></td>
+<td>Strip/format @mentions from messages</td>
+</tr>
+<tr>
+<td><code>auth</code></td>
+<td>Login flows</td>
+</tr>
+<tr>
+<td><code>elevated</code></td>
+<td>DM fallback policies</td>
+</tr>
+<tr>
+<td><code>commands</code></td>
+<td>Command gating (who can run commands)</td>
+</tr>
+<tr>
+<td><code>streaming</code></td>
+<td>Block streaming behavior (send full response vs. stream)</td>
+</tr>
+<tr>
+<td><code>agentPrompt</code></td>
+<td>Inject hints into the AI prompt</td>
+</tr>
+<tr>
+<td><code>resolver</code></td>
+<td>Bulk target resolution</td>
+</tr>
+<tr>
+<td><code>heartbeat</code></td>
+<td>Health check ping</td>
+</tr>
+<tr>
+<td><code>agentTools</code></td>
+<td>Channel-specific AI tools</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="part-3-the-channel-registry-the-master-list">Part 3: The Channel Registry (The Master List)<a class="headerlink" href="#part-3-the-channel-registry-the-master-list" title="Permanent link">&para;</a></h2>
+<p><strong>File: <code>src/channels/registry.ts</code></strong></p>
+<p>The registry is the official catalog of known channels.</p>
+<h3 id="the-core-channel-order">The Core Channel Order<a class="headerlink" href="#the-core-channel-order" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">CHAT_CHANNEL_ORDER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;telegram&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;whatsapp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;discord&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;irc&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;googlechat&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;slack&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;signal&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;imessage&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;line&quot;</span>
+<span class="p">]</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
+</code></pre></div>
+<p>This array defines the <strong>display order</strong> in the setup wizard and status screens. Telegram is first because it's the easiest to set up (just create a bot and paste a token).</p>
+<h3 id="aliases">Aliases<a class="headerlink" href="#aliases" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">CHAT_CHANNEL_ALIASES</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">ChatChannelId</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">imsg</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;imessage&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;internet-relay-chat&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;irc&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;google-chat&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;googlechat&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">gchat</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;googlechat&quot;</span><span class="p">,</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>These are shortcuts so users can type <code>imsg</code> instead of <code>imessage</code>. The <code>normalizeChatChannelId()</code> function handles the translation.</p>
+<h3 id="plugin-loading-and-caching">Plugin Loading and Caching<a class="headerlink" href="#plugin-loading-and-caching" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/channels/plugins/index.ts</code></strong></p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">CachedChannelPlugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">registryVersion</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">   </span><span class="c1">// Invalidates when plugins reload</span>
+<span class="w">  </span><span class="nx">sorted</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelPlugin</span><span class="p">[];</span><span class="w">   </span><span class="c1">// All plugins, sorted by order</span>
+<span class="w">  </span><span class="nx">byId</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">ChannelPlugin</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Quick lookup by ID</span>
+<span class="p">};</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">listChannelPlugins</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">ChannelPlugin</span><span class="p">[]</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">getChannelPlugin</span><span class="p">(</span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelId</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">ChannelPlugin</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">undefined</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">normalizeChannelId</span><span class="p">(</span><span class="nx">raw?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">ChannelId</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span>
+</code></pre></div>
+<p>The cache is invalidated whenever the plugin registry version changes (which happens when plugins are loaded or hot-reloaded). This means calling <code>listChannelPlugins()</code> a hundred times in quick succession only actually loads plugins once.</p>
+<hr />
+<h2 id="part-4-channel-lifecycle-management-starting-stopping-restarting">Part 4: Channel Lifecycle Management (Starting, Stopping, Restarting)<a class="headerlink" href="#part-4-channel-lifecycle-management-starting-stopping-restarting" title="Permanent link">&para;</a></h2>
+<p><strong>File: <code>src/gateway/server-channels.ts</code></strong></p>
+<p>The Channel Manager is the "operations center" that controls every channel's lifecycle.</p>
+<h3 id="the-channel-manager">The Channel Manager<a class="headerlink" href="#the-channel-manager" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelManager</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">getRuntimeSnapshot</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ChannelRuntimeSnapshot</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">startChannels</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span><span class="w">                              </span><span class="c1">// Start ALL channels</span>
+<span class="w">  </span><span class="nx">startChannel</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">channel</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelId</span><span class="p">,</span><span class="w"> </span><span class="nx">accountId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span><span class="w">  </span><span class="c1">// Start one</span>
+<span class="w">  </span><span class="nx">stopChannel</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">channel</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelId</span><span class="p">,</span><span class="w"> </span><span class="nx">accountId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span><span class="w">   </span><span class="c1">// Stop one</span>
+<span class="w">  </span><span class="nx">markChannelLoggedOut</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">channelId</span><span class="p">,</span><span class="w"> </span><span class="nx">cleared</span><span class="p">,</span><span class="w"> </span><span class="nx">accountId</span><span class="o">?</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">isManuallyStopped</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">channelId</span><span class="p">,</span><span class="w"> </span><span class="nx">accountId</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">resetRestartAttempts</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">channelId</span><span class="p">,</span><span class="w"> </span><span class="nx">accountId</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="the-startup-flow">The Startup Flow<a class="headerlink" href="#the-startup-flow" title="Permanent link">&para;</a></h3>
+<p>When the gateway boots, here's what happens for each channel:</p>
+<div class="language-text highlight"><pre><span></span><code>1. Load config → get list of channel accounts
+         |
+2. For each account:
+         |
+    a. Is it enabled? (config.isEnabled) ─── No ──→ Skip
+         |
+        Yes
+         |
+    b. Is it configured? (config.isConfigured) ─── No ──→ Log warning, skip
+         |
+        Yes
+         |
+    c. Create AbortController (the &quot;stop button&quot;)
+         |
+    d. Create runtime store (status tracking)
+         |
+    e. Call gateway.startAccount(context) ──→ Channel connects to platform
+         |
+    f. Update status: { running: true, connected: true }
+         |
+    g. Channel is live! Listening for messages.
+</code></pre></div>
+<h3 id="the-auto-restart-system">The Auto-Restart System<a class="headerlink" href="#the-auto-restart-system" title="Permanent link">&para;</a></h3>
+<p>Channels can crash. Network drops, API rate limits, expired tokens — lots can go wrong. The Channel Manager handles this with <strong>exponential backoff</strong>:</p>
+<div class="language-text highlight"><pre><span></span><code>Attempt 1: Wait 5 seconds, then restart
+Attempt 2: Wait 10 seconds
+Attempt 3: Wait 20 seconds
+Attempt 4: Wait 40 seconds
+...
+Attempt N: Wait min(5s × 2^N, 5 minutes)  ← caps at 5 minutes
+</code></pre></div>
+<p>After <strong>10 failed attempts</strong>, the system gives up and marks the channel as permanently failed. A human needs to investigate.</p>
+<p>Key rules:
+- If a user <strong>manually stops</strong> a channel, it does NOT auto-restart
+- Each account is tracked independently (your personal Telegram bot crashing doesn't affect your work bot)
+- Successful reconnection resets the attempt counter to zero</p>
+<h3 id="internal-runtime-storage">Internal Runtime Storage<a class="headerlink" href="#internal-runtime-storage" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelRuntimeStore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">aborts</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">AbortController</span><span class="o">&gt;</span><span class="p">;</span><span class="w">    </span><span class="c1">// One &quot;stop button&quot; per account</span>
+<span class="w">  </span><span class="nx">tasks</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">unknown</span><span class="o">&gt;&gt;</span><span class="p">;</span><span class="w">    </span><span class="c1">// Running account tasks</span>
+<span class="w">  </span><span class="nx">runtimes</span><span class="o">:</span><span class="w"> </span><span class="kt">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">ChannelAccountSnapshot</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Per-account status</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="runtime-snapshot">Runtime Snapshot<a class="headerlink" href="#runtime-snapshot" title="Permanent link">&para;</a></h3>
+<p>At any time, you can ask "what's the status of all my channels?" The snapshot gives you:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ChannelRuntimeSnapshot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">channels</span><span class="o">:</span><span class="w"> </span><span class="kt">Partial</span><span class="o">&lt;</span><span class="nx">Record</span><span class="o">&lt;</span><span class="nx">ChannelId</span><span class="p">,</span><span class="w"> </span><span class="nx">ChannelAccountSnapshot</span><span class="o">&gt;&gt;</span><span class="p">;</span><span class="w">          </span><span class="c1">// Default accounts</span>
+<span class="w">  </span><span class="nx">channelAccounts</span><span class="o">:</span><span class="w"> </span><span class="kt">Partial</span><span class="o">&lt;</span><span class="nx">Record</span><span class="o">&lt;</span><span class="nx">ChannelId</span><span class="p">,</span><span class="w"> </span><span class="nx">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">ChannelAccountSnapshot</span><span class="o">&gt;&gt;&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// All accounts</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>This powers the health dashboard that shows green/yellow/red status per channel.</p>
+<hr />
+<h2 id="part-5-the-inbound-message-flow-how-messages-get-into-the-system">Part 5: The Inbound Message Flow (How Messages Get Into the System)<a class="headerlink" href="#part-5-the-inbound-message-flow-how-messages-get-into-the-system" title="Permanent link">&para;</a></h2>
+<p>When someone sends a message on Telegram, here's the full journey:</p>
+<h3 id="step-1-platform-sdk-receives-the-message">Step 1: Platform SDK Receives the Message<a class="headerlink" href="#step-1-platform-sdk-receives-the-message" title="Permanent link">&para;</a></h3>
+<p>Each channel uses its platform's SDK or API. Telegram uses webhook callbacks. Discord uses WebSocket. WhatsApp uses a web session. The channel's <code>startAccount</code> function sets up the listener.</p>
+<h3 id="step-2-channel-normalizes-into-msgcontext">Step 2: Channel Normalizes Into MsgContext<a class="headerlink" href="#step-2-channel-normalizes-into-msgcontext" title="Permanent link">&para;</a></h3>
+<p>The channel converts the platform-specific message into a universal <code>MsgContext</code> — the lingua franca of OpenClaw.</p>
+<p><strong>File: <code>src/auto-reply/templating.ts</code></strong></p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">MsgContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// --- Content ---</span>
+<span class="w">  </span><span class="nx">Body?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">              </span><span class="c1">// &quot;Hey, what&#39;s the weather?&quot;</span>
+<span class="w">  </span><span class="nx">BodyForAgent?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">      </span><span class="c1">// Cleaned version for the AI</span>
+<span class="w">  </span><span class="nx">RawBody?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">           </span><span class="c1">// Original untouched text</span>
+
+<span class="w">  </span><span class="c1">// --- Sender ---</span>
+<span class="w">  </span><span class="nx">From?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">              </span><span class="c1">// &quot;telegram:123456789&quot;</span>
+<span class="w">  </span><span class="nx">SenderId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">          </span><span class="c1">// &quot;123456789&quot;</span>
+<span class="w">  </span><span class="nx">SenderName?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">        </span><span class="c1">// &quot;Alice&quot;</span>
+<span class="w">  </span><span class="nx">SenderUsername?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">    </span><span class="c1">// &quot;alice_wonderland&quot;</span>
+
+<span class="w">  </span><span class="c1">// --- Destination ---</span>
+<span class="w">  </span><span class="nx">To?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                </span><span class="c1">// &quot;telegram:bot-default&quot;</span>
+<span class="w">  </span><span class="nx">Channel?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">           </span><span class="c1">// &quot;telegram&quot;</span>
+<span class="w">  </span><span class="nx">AccountId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">         </span><span class="c1">// &quot;default&quot;</span>
+<span class="w">  </span><span class="nx">ChatType?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">          </span><span class="c1">// &quot;direct&quot; | &quot;group&quot;</span>
+
+<span class="w">  </span><span class="c1">// --- Message Identity ---</span>
+<span class="w">  </span><span class="nx">MessageSid?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">        </span><span class="c1">// Unique message ID</span>
+<span class="w">  </span><span class="nx">MessageThreadId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">   </span><span class="c1">// Thread ID (if in a thread)</span>
+
+<span class="w">  </span><span class="c1">// --- Reply Context ---</span>
+<span class="w">  </span><span class="nx">ReplyToId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">         </span><span class="c1">// ID of the message being replied to</span>
+<span class="w">  </span><span class="nx">ReplyToBody?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">       </span><span class="c1">// Text of that message</span>
+<span class="w">  </span><span class="nx">ReplyToSender?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">     </span><span class="c1">// Who sent the original</span>
+
+<span class="w">  </span><span class="c1">// --- Group Context ---</span>
+<span class="w">  </span><span class="nx">GroupSubject?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">      </span><span class="c1">// &quot;Engineering Team&quot;</span>
+<span class="w">  </span><span class="nx">GroupMembers?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">      </span><span class="c1">// &quot;Alice, Bob, Charlie&quot;</span>
+<span class="w">  </span><span class="nx">WasMentioned?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">     </span><span class="c1">// Was the bot @mentioned?</span>
+
+<span class="w">  </span><span class="c1">// --- Media ---</span>
+<span class="w">  </span><span class="nx">MediaPath?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">         </span><span class="c1">// Local path to downloaded media</span>
+<span class="w">  </span><span class="nx">MediaType?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">         </span><span class="c1">// &quot;image/png&quot;, &quot;audio/ogg&quot;, etc.</span>
+<span class="w">  </span><span class="nx">MediaPaths?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">      </span><span class="c1">// Multiple attachments</span>
+<span class="w">  </span><span class="nx">Transcript?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">        </span><span class="c1">// Audio transcription</span>
+
+<span class="w">  </span><span class="c1">// --- Forwarding ---</span>
+<span class="w">  </span><span class="nx">ForwardedFrom?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">     </span><span class="c1">// If this was forwarded, who from?</span>
+<span class="w">  </span><span class="nx">ForwardedFromType?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="c1">// &quot;user&quot; | &quot;channel&quot;</span>
+
+<span class="w">  </span><span class="c1">// --- Security ---</span>
+<span class="w">  </span><span class="nx">CommandAuthorized?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"> </span><span class="c1">// Is this sender allowed to run commands?</span>
+<span class="w">  </span><span class="nx">OwnerAllowFrom?</span><span class="o">:</span><span class="w"> </span><span class="kt">Array</span><span class="o">&lt;</span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">number</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// The allowlist</span>
+
+<span class="w">  </span><span class="c1">// --- Routing ---</span>
+<span class="w">  </span><span class="nx">SessionKey?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">        </span><span class="c1">// How to identify this conversation</span>
+<span class="w">  </span><span class="nx">OriginatingChannel?</span><span class="o">:</span><span class="w"> </span><span class="kt">OriginatingChannelType</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// ... 40+ more fields</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>That's a LOT of fields — and that's intentional. Different channels provide different information. Telegram gives you forwarding info. Discord gives you thread data. iMessage gives you message effects. The <code>MsgContext</code> is the "universal envelope" that can hold information from any platform.</p>
+<h3 id="step-3-dispatch-to-the-ai">Step 3: Dispatch to the AI<a class="headerlink" href="#step-3-dispatch-to-the-ai" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/auto-reply/dispatch.ts</code></strong></p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">dispatchInboundMessage</span><span class="p">(</span><span class="nx">params</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">ctx</span><span class="o">:</span><span class="w"> </span><span class="kt">MsgContext</span><span class="p">;</span><span class="w">           </span><span class="c1">// The normalized message</span>
+<span class="w">  </span><span class="nx">cfg</span><span class="o">:</span><span class="w"> </span><span class="kt">OpenClawConfig</span><span class="p">;</span><span class="w">       </span><span class="c1">// System config</span>
+<span class="w">  </span><span class="nx">dispatcher</span><span class="o">:</span><span class="w"> </span><span class="kt">ReplyDispatcher</span><span class="p">;</span><span class="w"> </span><span class="c1">// How to send the response back</span>
+<span class="p">})</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">DispatchInboundResult</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>The dispatch flow:
+1. <strong>Finalize context</strong> — set <code>CommandAuthorized</code> to <code>false</code> if not explicitly set (default-deny security)
+2. <strong>Route</strong> — figure out which AI agent handles this conversation (Layer 1's routing)
+3. <strong>Memory search</strong> — find relevant past conversations (Layer 7)
+4. <strong>Context assembly</strong> — build the prompt within token budget (Layer 8)
+5. <strong>AI inference</strong> — send to the AI provider (Layer 5)
+6. <strong>Tool execution</strong> — if the AI wants to use tools (Layer 6)
+7. <strong>Reply dispatch</strong> — send the response back through the channel's outbound adapter</p>
+<h3 id="step-4-response-goes-back-out">Step 4: Response Goes Back Out<a class="headerlink" href="#step-4-response-goes-back-out" title="Permanent link">&para;</a></h3>
+<p>The <code>ReplyDispatcher</code> sends the AI's response back through the channel's outbound adapter, which converts it into platform-specific format and sends it via the platform's API.</p>
+<hr />
+<h2 id="part-6-the-built-in-channels-all-22-of-them">Part 6: The Built-In Channels (All 22 of Them)<a class="headerlink" href="#part-6-the-built-in-channels-all-22-of-them" title="Permanent link">&para;</a></h2>
+<h3 id="tier-1-core-messaging-the-original-six">Tier 1: Core Messaging (The Original Six)<a class="headerlink" href="#tier-1-core-messaging-the-original-six" title="Permanent link">&para;</a></h3>
+<p>These were the first channels, built before the plugin system even existed.</p>
+<h4 id="telegram-extensionstelegram">Telegram (<code>extensions/telegram/</code>)<a class="headerlink" href="#telegram-extensionstelegram" title="Permanent link">&para;</a></h4>
+<p>The "golden child" — simplest to set up, most complete feature set.</p>
+<ul>
+<li><strong>Auth</strong>: Bot token (from @BotFather)</li>
+<li><strong>Chat types</strong>: DM, group, channel, thread</li>
+<li><strong>Features</strong>: Polls, reactions, threads, media, native commands (slash commands)</li>
+<li><strong>Text limit</strong>: 4,000 characters (markdown chunking)</li>
+<li><strong>Gateway</strong>: Webhook + polling modes</li>
+<li><strong>Status</strong>: Bot probe (username, rate limits), group audit (membership, permissions)</li>
+<li><strong>Unique</strong>: Supports both webhook (production) and polling (development) modes. The probe can check if the bot token is still valid without sending a message.</li>
+</ul>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">telegramPlugin</span><span class="o">:</span><span class="w"> </span><span class="kt">ChannelPlugin</span><span class="o">&lt;</span><span class="nx">ResolvedTelegramAccount</span><span class="p">,</span><span class="w"> </span><span class="nx">TelegramProbe</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;telegram&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">capabilities</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">chatTypes</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;direct&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;group&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;channel&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;thread&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nx">reactions</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">threads</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">media</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">polls</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">nativeCommands</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">blockStreaming</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">outbound</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">deliveryMode</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;direct&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">chunkerMode</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;markdown&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">textChunkLimit</span><span class="o">:</span><span class="w"> </span><span class="kt">4000</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">pollMaxOptions</span><span class="o">:</span><span class="w"> </span><span class="kt">10</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="c1">// ... full adapter suite</span>
+<span class="p">};</span>
+</code></pre></div>
+<h4 id="whatsapp-extensionswhatsapp">WhatsApp (<code>extensions/whatsapp/</code>)<a class="headerlink" href="#whatsapp-extensionswhatsapp" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Auth</strong>: QR code web login (like WhatsApp Web)</li>
+<li><strong>Chat types</strong>: DM, group only (no threads or channels)</li>
+<li><strong>Features</strong>: Polls, reactions, media</li>
+<li><strong>Unique</strong>: Forces account binding — your WhatsApp number IS the account. No bot tokens here, it's your actual phone.</li>
+<li><strong>Session management</strong>: Web-based session that can expire (requires re-scan of QR code)</li>
+<li><strong>Phone normalization</strong>: E164 format for allowlists</li>
+</ul>
+<h4 id="discord-extensionsdiscord">Discord (<code>extensions/discord/</code>)<a class="headerlink" href="#discord-extensionsdiscord" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Auth</strong>: Bot token (from Discord Developer Portal)</li>
+<li><strong>Chat types</strong>: DM, channel, thread</li>
+<li><strong>Features</strong>: Polls, reactions, threads, media, slash commands, streaming</li>
+<li><strong>Streaming</strong>: Coalesces responses (waits for 1500 chars or 1s idle before sending)</li>
+<li><strong>Unique</strong>: Subagent hooks for advanced features. Supports both bot token and optional user token (read-only).</li>
+<li><strong>Rich actions</strong>: Channel management, role management, kicks, bans, pins — Discord has the most actions of any channel</li>
+</ul>
+<h4 id="slack-extensionsslack">Slack (<code>extensions/slack/</code>)<a class="headerlink" href="#slack-extensionsslack" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Auth</strong>: Bot token + optional user token</li>
+<li><strong>Chat types</strong>: DM, channel, thread</li>
+<li><strong>Features</strong>: Polls, reactions, threads, media, interactive replies</li>
+<li><strong>Modes</strong>: Socket Mode (default, simpler) or HTTP webhook mode</li>
+<li><strong>Unique</strong>: Dual token support. The bot token does most things, but a user token enables read-only access to more data.</li>
+</ul>
+<h4 id="signal-extensionssignal">Signal (<code>extensions/signal/</code>)<a class="headerlink" href="#signal-extensionssignal" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Auth</strong>: E164 phone number (your Signal number)</li>
+<li><strong>Chat types</strong>: DM, group only</li>
+<li><strong>Features</strong>: Media (with size limits)</li>
+<li><strong>Backend</strong>: Uses signal-cli (a command-line Signal client) or an HTTP wrapper</li>
+<li><strong>Unique</strong>: Phone-number-based identity. The most privacy-focused channel.</li>
+</ul>
+<h4 id="imessage-extensionsimessage">iMessage (<code>extensions/imessage/</code>)<a class="headerlink" href="#imessage-extensionsimessage" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Auth</strong>: Native macOS integration</li>
+<li><strong>Chat types</strong>: DM, group</li>
+<li><strong>Features</strong>: Media</li>
+<li><strong>Unique</strong>: Only works on macOS. Simple wrapper around the system framework. If you want more features (reactions, effects, edit, unsend), use BlueBubbles instead.</li>
+</ul>
+<h3 id="tier-2-enterpriseteam-platforms">Tier 2: Enterprise/Team Platforms<a class="headerlink" href="#tier-2-enterpriseteam-platforms" title="Permanent link">&para;</a></h3>
+<h4 id="mattermost-extensionsmattermost">Mattermost (<code>extensions/mattermost/</code>)<a class="headerlink" href="#mattermost-extensionsmattermost" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Self-hosted team platform (like an open-source Slack)</li>
+<li>Webhook inbound + WebSocket for real-time</li>
+<li>Slash command registration after connection</li>
+<li>9 source files — moderately complex</li>
+</ul>
+<h4 id="feishulark-extensionsfeishu">Feishu/Lark (<code>extensions/feishu/</code>)<a class="headerlink" href="#feishulark-extensionsfeishu" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Chinese enterprise platform (Lark is the international name)</li>
+<li><strong>53 source files</strong> — the most complex channel by far</li>
+<li>Multi-domain: Chat, Documents, Wiki, Drive, Permissions, Bitable (spreadsheet DB)</li>
+<li>Registers 6 agent tools for document/data operations</li>
+<li>Card messages with streaming updates (progressive loading)</li>
+</ul>
+<h4 id="microsoft-teams-extensionsmsteams">Microsoft Teams (<code>extensions/msteams/</code>)<a class="headerlink" href="#microsoft-teams-extensionsmsteams" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Uses Microsoft Bot Framework</li>
+<li>Express.js HTTP server + ActivityHandler pattern</li>
+<li>43 source files</li>
+<li>Reactions support</li>
+</ul>
+<h4 id="google-chat-extensionsgooglechat">Google Chat (<code>extensions/googlechat/</code>)<a class="headerlink" href="#google-chat-extensionsgooglechat" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Google Cloud service account authentication</li>
+<li>Webhook inbound + REST API outbound</li>
+<li>Space-based routing (Google Chat uses "spaces" instead of "channels")</li>
+<li>14+ source files</li>
+</ul>
+<h4 id="matrix-extensionsmatrix">Matrix (<code>extensions/matrix/</code>)<a class="headerlink" href="#matrix-extensionsmatrix" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Open-source federated protocol</li>
+<li><strong>End-to-end encryption</strong> support (via matrix-sdk-crypto)</li>
+<li>Live directory discovery</li>
+<li>Was rewritten from scratch in March 2026 (old version: <code>matrix-js</code>)</li>
+</ul>
+<h4 id="nextcloud-talk-extensionsnextcloud-talk">Nextcloud Talk (<code>extensions/nextcloud-talk/</code>)<a class="headerlink" href="#nextcloud-talk-extensionsnextcloud-talk" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Self-hosted Nextcloud integration</li>
+<li>Webhook bot pattern</li>
+<li>Room-based routing</li>
+</ul>
+<h4 id="synology-chat-extensionssynology-chat">Synology Chat (<code>extensions/synology-chat/</code>)<a class="headerlink" href="#synology-chat-extensionssynology-chat" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Synology NAS native chat</li>
+<li>Webhook-based, simple architecture</li>
+</ul>
+<h3 id="tier-3-specializedregional-channels">Tier 3: Specialized/Regional Channels<a class="headerlink" href="#tier-3-specializedregional-channels" title="Permanent link">&para;</a></h3>
+<h4 id="line-extensionsline">LINE (<code>extensions/line/</code>)<a class="headerlink" href="#line-extensionsline" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Dominant in Japan, Taiwan, Thailand</li>
+<li>Rich card/Flex messages for UI</li>
+<li>Card command registration</li>
+</ul>
+<h4 id="irc-extensionsirc">IRC (<code>extensions/irc/</code>)<a class="headerlink" href="#irc-extensionsirc" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Classic Internet Relay Chat (oldest protocol supported!)</li>
+<li>Multi-network configuration</li>
+<li>SSL, SASL authentication</li>
+<li>16+ source files — surprisingly complex for such an old protocol</li>
+</ul>
+<h4 id="zalo-extensionszalo">Zalo (<code>extensions/zalo/</code>)<a class="headerlink" href="#zalo-extensionszalo" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Vietnam's dominant messaging platform</li>
+<li>Bot API (official business accounts)</li>
+<li>2,000-character text limit</li>
+</ul>
+<h4 id="zalo-personal-extensionszalouser">Zalo Personal (<code>extensions/zalouser/</code>)<a class="headerlink" href="#zalo-personal-extensionszalouser" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Zalo personal accounts (not bot)</li>
+<li>Uses <code>zca-js</code> library for direct account access</li>
+<li>Registers utility tools (send, image, link, friends)</li>
+</ul>
+<h4 id="twitch-extensionstwitch">Twitch (<code>extensions/twitch/</code>)<a class="headerlink" href="#twitch-extensionstwitch" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Streaming platform chat</li>
+<li>Uses Twurple SDK</li>
+<li>Primarily group (channel chat)</li>
+</ul>
+<h4 id="bluebubbles-extensionsbluebubbles">BlueBubbles (<code>extensions/bluebubbles/</code>)<a class="headerlink" href="#bluebubbles-extensionsbluebubbles" title="Permanent link">&para;</a></h4>
+<ul>
+<li>iMessage via BlueBubbles macOS app</li>
+<li>REST API bridge to iMessage</li>
+<li><strong>Full iMessage features</strong>: reactions, edit, unsend, reply, effects, group management</li>
+<li>Explicitly <code>preferOver: ["imessage"]</code> — if both are configured, BlueBubbles wins</li>
+<li>28+ source files</li>
+</ul>
+<h4 id="nostr-extensionsnostr">Nostr (<code>extensions/nostr/</code>)<a class="headerlink" href="#nostr-extensionsnostr" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Decentralized protocol</li>
+<li>NIP-04 encrypted DMs</li>
+<li>Relay-based messaging</li>
+<li>Public key authentication</li>
+<li>Custom HTTP route for profile management</li>
+</ul>
+<h4 id="tlonurbit-extensionstlon">Tlon/Urbit (<code>extensions/tlon/</code>)<a class="headerlink" href="#tlonurbit-extensionstlon" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Decentralized social network (Urbit)</li>
+<li>CLI-driven (binary discovery for the <code>tlon</code> command)</li>
+<li>Command whitelisting for security (only 12 allowed subcommands)</li>
+</ul>
+<h3 id="tier-4-the-web-ui-built-in-not-an-extension">Tier 4: The Web UI (Built-In, Not an Extension)<a class="headerlink" href="#tier-4-the-web-ui-built-in-not-an-extension" title="Permanent link">&para;</a></h3>
+<p><strong>Location: <code>src/channels/web/</code></strong></p>
+<p>The Web UI channel is special — it's not in <code>extensions/</code> but built directly into the core. It provides a browser-based chat interface that connects via WebSocket to the gateway. Think of it as the "default" channel that always works, even if no other channels are configured.</p>
+<hr />
+<h2 id="part-7-the-plugin-channel-runtime-sdk">Part 7: The Plugin Channel Runtime SDK<a class="headerlink" href="#part-7-the-plugin-channel-runtime-sdk" title="Permanent link">&para;</a></h2>
+<p><strong>File: <code>src/plugins/runtime/types.ts</code></strong></p>
+<p>When a channel extension starts up, it gets access to a rich SDK via <code>channelRuntime</code>. This is what lets external channel plugins do everything built-in channels can do.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">PluginRuntimeChannel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Text processing</span>
+<span class="w">  </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">chunkByNewline</span><span class="p">,</span><span class="w"> </span><span class="nx">chunkMarkdownText</span><span class="p">,</span><span class="w"> </span><span class="nx">chunkText</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">hasControlCommand</span><span class="p">,</span><span class="w"> </span><span class="nx">resolveChunkMode</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Reply dispatching (the core AI response flow)</span>
+<span class="w">  </span><span class="nx">reply</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">dispatchReplyWithBufferedBlockDispatcher</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">createReplyDispatcherWithTyping</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">dispatchReplyFromConfig</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">withReplyDispatcher</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">finalizeInboundContext</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Routing</span>
+<span class="w">  </span><span class="nx">routing</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">buildAgentSessionKey</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">resolveAgentRoute</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Device pairing</span>
+<span class="w">  </span><span class="nx">pairing</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">buildPairingReply</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">readAllowFromStore</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">upsertPairingRequest</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Media handling</span>
+<span class="w">  </span><span class="nx">media</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">fetchRemoteMedia</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">saveMediaBuffer</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Session management</span>
+<span class="w">  </span><span class="nx">session</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">resolveStorePath</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">recordSessionMetaFromInbound</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">recordInboundSession</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">updateLastRoute</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// @mention handling</span>
+<span class="w">  </span><span class="nx">mentions</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">buildMentionRegexes</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">matchesMentionPatterns</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Reaction handling</span>
+<span class="w">  </span><span class="nx">reactions</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">shouldAckReaction</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">removeAckReactionAfterReply</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Group policy</span>
+<span class="w">  </span><span class="nx">groups</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">resolveGroupPolicy</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">resolveRequireMention</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Command authorization</span>
+<span class="w">  </span><span class="nx">commands</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">resolveCommandAuthorizedFromAuthorizers</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">isControlCommandMessage</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">shouldHandleTextCommands</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>This SDK was added in February 2026 (commit <code>469cd5b46</code> by Gu XiaoBo) specifically because external channel plugin authors couldn't access the AI response dispatching pipeline. Before this, only built-in channels could process AI responses. After this commit, any extension can do everything a built-in channel does.</p>
+<hr />
+<h2 id="how-layer-4-evolved-git-history">How Layer 4 Evolved (Git History)<a class="headerlink" href="#how-layer-4-evolved-git-history" title="Permanent link">&para;</a></h2>
+<h3 id="era-1-the-monolith-before-january-2026">Era 1: The Monolith (Before January 2026)<a class="headerlink" href="#era-1-the-monolith-before-january-2026" title="Permanent link">&para;</a></h3>
+<p>OpenClaw didn't start with a channel system at all. It started as a <strong>Twilio webhook CLI</strong> — a simple tool that received SMS messages and replied with AI-generated text. There was no concept of "channels" or "plugins."</p>
+<p>The first messaging integrations were <strong>hardcoded "providers"</strong> living in <code>src/providers/plugins/</code>:
+- <code>telegram.ts</code>
+- <code>discord.ts</code>
+- <code>slack.ts</code>
+- <code>whatsapp.ts</code>
+- <code>signal.ts</code>
+- <code>imessage.ts</code></p>
+<p>Each file contained everything — configuration, sending, receiving, health checks — all in one big file. The type system was minimal. There was no adapter pattern.</p>
+<p>MS Teams was even worse — it lived in its own top-level directory <code>src/msteams/</code> with no relationship to the other providers at all.</p>
+<h3 id="era-2-the-great-rename-january-13-2026">Era 2: The Great Rename — January 13, 2026<a class="headerlink" href="#era-2-the-great-rename-january-13-2026" title="Permanent link">&para;</a></h3>
+<p><strong>Commit <code>90342a4f3</code></strong> — <code>refactor!: rename chat providers to channels</code></p>
+<p>This was the first architectural awakening. Peter Steinberger realized that "provider" was confusing because the same word was used for both AI providers (OpenAI, Anthropic) and messaging platforms (Telegram, Discord). The fix: messaging platforms became "channels."</p>
+<p><strong>Impact:</strong> 393 files changed, 8,005 insertions, 6,738 deletions.</p>
+<p>This wasn't just a search-and-replace. The renaming cascaded through:
+- Source directory: <code>src/providers/</code> → <code>src/channels/</code>
+- CLI commands: <code>providers status</code> → <code>channels status</code>
+- Config schema: <code>providers: {}</code> → <code>channels: {}</code>
+- Gateway methods: <code>providers.list</code> → <code>channels.list</code>
+- Documentation: <code>docs/providers/</code> → <code>docs/channels/</code></p>
+<p>This was a <strong>breaking change</strong> (the <code>!</code> in the commit message), meaning all existing configs had to be updated.</p>
+<h3 id="era-3-the-plugin-architecture-january-11-15-2026">Era 3: The Plugin Architecture — January 11-15, 2026<a class="headerlink" href="#era-3-the-plugin-architecture-january-11-15-2026" title="Permanent link">&para;</a></h3>
+<p>Just two days before the great rename, the plugin system was born:</p>
+<p><strong>January 11 — <code>cf0c72a55</code></strong> — <code>feat: add plugin architecture</code>
+- Created <code>src/plugins/</code> with 37 new files
+- First plugin: <code>extensions/voice-call/</code> (not a channel — a voice call tool)
+- Established the pattern: extensions live in <code>extensions/</code>, register via <code>api.registerX()</code></p>
+<p><strong>January 15 — <code>2b4a68e27</code></strong> — <code>feat: load channel plugins</code>
+- Connected the plugin system to channels
+- Created <code>src/channels/plugins/index.ts</code> — the bridge between plugins and channels
+- Now channels could be loaded as plugins instead of being hardcoded</p>
+<p><strong>January 15 — <code>5abe3c214</code></strong> — <code>feat: add plugin HTTP hooks + Zalo plugin</code>
+- Zalo was the <strong>FIRST channel plugin</strong> (not a built-in channel)
+- Added HTTP hook support so channels could receive webhooks through the plugin system
+- 36 files, 3,061 insertions</p>
+<p><strong>January 15 — <code>725a6b71d</code></strong> — <code>feat: add matrix channel plugin</code>
+- Matrix was the <strong>second channel plugin</strong>
+- Very comprehensive: E2EE support, poll types, thread binding
+- 51 files, 3,986 insertions</p>
+<h3 id="era-4-the-mass-migration-january-16-18-2026">Era 4: The Mass Migration — January 16-18, 2026<a class="headerlink" href="#era-4-the-mass-migration-january-16-18-2026" title="Permanent link">&para;</a></h3>
+<p>This is when the real transformation happened. Every built-in channel was extracted from <code>src/channels/plugins/</code> and moved to <code>extensions/</code>.</p>
+<p><strong>January 16 — <code>d9f9e93de</code></strong> — MS Teams goes first:
+- Extracted from <code>src/msteams/</code> to <code>extensions/msteams/</code>
+- First built-in channel to become a plugin
+- Created <code>src/channels/plugins/catalog.ts</code> to track bundled plugins</p>
+<p><strong>January 16 — <code>390bd11f3</code></strong> — Zalo Personal + Adapter Types:
+- Community contribution by @suminhthanh (first community channel!)
+- Introduced <code>src/channels/plugins/types.adapters.ts</code> — the adapter pattern was born
+- Added the directory CLI for listing contacts/groups</p>
+<p><strong>January 18 — <code>c5e19f5c6</code></strong> — THE BIG MIGRATION:
+- <strong>All six original channels</strong> moved to extensions in a single commit
+- Created: <code>extensions/discord/</code>, <code>extensions/imessage/</code>, <code>extensions/signal/</code>, <code>extensions/slack/</code>, <code>extensions/telegram/</code>, <code>extensions/whatsapp/</code>
+- Massively expanded <code>src/plugin-sdk/index.ts</code> (+160 lines of SDK exports)
+- 63 files, 4,076 insertions</p>
+<p><strong>January 18 — <code>ee6e534cc</code></strong> — The cleanup:
+- <strong>Deleted the old built-in files</strong>: <code>src/channels/plugins/discord.ts</code>, <code>imessage.ts</code>, <code>signal.ts</code>, <code>slack.ts</code>, <code>telegram.ts</code>, <code>whatsapp.ts</code> — 2,576 lines removed
+- Created <code>src/plugins/runtime/types.ts</code> (181 lines) — the runtime contract
+- The monolith era was officially over</p>
+<h3 id="era-5-the-cambrian-explosion-january-20-to-february-22-2026">Era 5: The Cambrian Explosion — January 20 to February 22, 2026<a class="headerlink" href="#era-5-the-cambrian-explosion-january-20-to-february-22-2026" title="Permanent link">&para;</a></h3>
+<p>With the plugin architecture mature, new channels appeared at incredible speed:</p>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Channel</th>
+<th>Author</th>
+<th>Notable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jan 20</td>
+<td><strong>Nostr</strong></td>
+<td>Peter + @joelklabo</td>
+<td>Decentralized protocol</td>
+</tr>
+<tr>
+<td>Jan 21</td>
+<td><strong>Mattermost</strong></td>
+<td>Dominic Damoah</td>
+<td>Open-source Slack alternative</td>
+</tr>
+<tr>
+<td>Jan 23</td>
+<td><strong>Google Chat</strong></td>
+<td>iHildy</td>
+<td>First "beta" channel</td>
+</tr>
+<tr>
+<td>Jan 25</td>
+<td><strong>LINE</strong></td>
+<td>@plum-dawg</td>
+<td>Asian market expansion</td>
+</tr>
+<tr>
+<td>Jan 27</td>
+<td><strong>Twitch</strong></td>
+<td>Community</td>
+<td>First streaming platform</td>
+</tr>
+<tr>
+<td>Feb 2-3</td>
+<td><strong>Feishu/Lark</strong></td>
+<td>Josh Palmer</td>
+<td>Most complex channel (53 files)</td>
+</tr>
+<tr>
+<td>Feb 10</td>
+<td><strong>IRC</strong></td>
+<td>Vignesh</td>
+<td>Oldest protocol, newest plugin</td>
+</tr>
+<tr>
+<td>Feb 13</td>
+<td><strong>Linq/BlueBubbles</strong></td>
+<td>George McCain</td>
+<td>Rich iMessage bridge</td>
+</tr>
+<tr>
+<td>Feb 22</td>
+<td><strong>Synology Chat</strong></td>
+<td>Jean-Marc</td>
+<td>NAS-native chat</td>
+</tr>
+</tbody>
+</table>
+<p>In one month, the channel count went from 6 to 20+. This was only possible because the plugin architecture made it easy to add channels without touching the core.</p>
+<h3 id="era-6-the-rename-cascade-january-27-30-2026">Era 6: The Rename Cascade — January 27-30, 2026<a class="headerlink" href="#era-6-the-rename-cascade-january-27-30-2026" title="Permanent link">&para;</a></h3>
+<p>During the explosion, the project itself was renamed twice:</p>
+<ol>
+<li><strong>Jan 27 — <code>6d16a658e</code></strong> — <code>refactor: rename clawdbot to moltbot with legacy compat</code></li>
+<li><strong>Jan 30 — <code>9a7160786</code></strong> — <code>refactor: rename to openclaw</code></li>
+</ol>
+<p>Each rename touched hundreds of files (the second one exceeded 140KB of diff). Config keys, package names, CLI commands, environment variables — everything changed. Extensions had to update their imports and registrations.</p>
+<h3 id="era-7-sdk-maturation-february-march-2026">Era 7: SDK Maturation — February-March 2026<a class="headerlink" href="#era-7-sdk-maturation-february-march-2026" title="Permanent link">&para;</a></h3>
+<p>The plugin SDK evolved to give external channels feature parity with built-in ones:</p>
+<p><strong>February 24 — <code>469cd5b46</code></strong> — <code>feat(plugin-sdk): Add channelRuntime support for external channel plugins</code>
+- By Gu XiaoBo — enabled external plugins to dispatch AI responses
+- Before this, only built-in channels could process the AI reply pipeline
+- Added <code>channelRuntime</code> to the gateway context</p>
+<p><strong>March 8 — <code>8e962668c</code></strong> — Matrix rewrite:
+- 273 files changed, 7,179 insertions, 16,054 deletions
+- Deleted the original <code>extensions/matrix-js/</code> entirely
+- Replaced with a ground-up rewrite at <code>extensions/matrix/</code>
+- Added migration docs and legacy crypto restore</p>
+<h3 id="era-8-the-great-deduplication-march-2026">Era 8: The Great Deduplication — March 2026<a class="headerlink" href="#era-8-the-great-deduplication-march-2026" title="Permanent link">&para;</a></h3>
+<p>With 20+ channels, there was a LOT of duplicated code. A sustained wave of refactoring shared common patterns:</p>
+<ul>
+<li><strong>Group policy</strong> — Unified across all channels that support groups</li>
+<li><strong>Config adapters</strong> — Shared base helpers for allowFrom, defaultTo, account accessors</li>
+<li><strong>Onboarding</strong> — Unified DM/group policy wizard scaffolding</li>
+<li><strong>Allowlists</strong> — Shared wildcard matching and compilation</li>
+<li><strong>Outbound</strong> — Unified threading and send flows</li>
+<li><strong>Plugin SDK scoping</strong> — Each channel migrated to "scoped imports" (import only what you need)</li>
+<li><strong>sendPayload</strong> — Added to all adapters with chunking and empty-payload guards</li>
+</ul>
+<p>This deduplication phase was critical — without it, fixing a bug in group policy would have required changes in 15+ files across 15+ extensions.</p>
+<hr />
+<h2 id="architecture-summary">Architecture Summary<a class="headerlink" href="#architecture-summary" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────┐
+│                    Gateway (Layer 2)                     │
+│                                                         │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │              Channel Manager                       │  │
+│  │  start / stop / restart / health check            │  │
+│  │  exponential backoff (5s → 5min, max 10 retries)  │  │
+│  └─────────────────────┬─────────────────────────────┘  │
+│                        │                                 │
+│  ┌─────────────────────┴─────────────────────────────┐  │
+│  │            Channel Plugin Contract                 │  │
+│  │                                                    │  │
+│  │  Required:  id, meta, capabilities, config         │  │
+│  │  Optional:  ~20 adapters (outbound, gateway,       │  │
+│  │             security, status, threading, etc.)      │  │
+│  └─────────────────────┬─────────────────────────────┘  │
+└────────────────────────┼────────────────────────────────┘
+                         │
+         ┌───────────────┼───────────────┐
+         │               │               │
+    ┌────┴────┐    ┌────┴────┐    ┌────┴────┐
+    │Telegram │    │ Discord │    │  Slack  │    ... 19 more
+    │         │    │         │    │         │
+    │ Bot API │    │ Gateway │    │ Socket  │
+    │ Webhook │    │ Socket  │    │  Mode   │
+    │         │    │         │    │         │
+    │ DM,grp, │    │ DM,chan,│    │ DM,chan,│
+    │ chan,thr │    │ thread  │    │ thread  │
+    │         │    │         │    │         │
+    │ Polls,  │    │ Polls,  │    │ Polls,  │
+    │ react,  │    │ react,  │    │ react,  │
+    │ media   │    │ slash,  │    │ media   │
+    │         │    │ stream, │    │         │
+    │         │    │ roles,  │    │         │
+    │         │    │ kicks   │    │         │
+    └─────────┘    └─────────┘    └─────────┘
+
+Inbound Flow:
+  Platform → Channel Plugin → MsgContext → Dispatch → AI → Reply → Channel Plugin → Platform
+
+Outbound Flow:
+  AI Response → Outbound Adapter → Chunker → Platform API → User
+</code></pre></div>
+<hr />
+<h2 id="key-files-reference">Key Files Reference<a class="headerlink" href="#key-files-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/channels/plugins/types.plugin.ts</code></td>
+<td>The ChannelPlugin contract (~20 adapters)</td>
+</tr>
+<tr>
+<td><code>src/channels/plugins/types.adapters.ts</code></td>
+<td>All adapter type definitions (383 lines)</td>
+</tr>
+<tr>
+<td><code>src/channels/plugins/types.core.ts</code></td>
+<td>Core types: capabilities, snapshots, policies (403 lines)</td>
+</tr>
+<tr>
+<td><code>src/channels/registry.ts</code></td>
+<td>Master channel list, aliases, metadata</td>
+</tr>
+<tr>
+<td><code>src/channels/plugins/index.ts</code></td>
+<td>Plugin loading, caching, lookup</td>
+</tr>
+<tr>
+<td><code>src/channels/plugins/message-action-names.ts</code></td>
+<td>50+ action constants</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-channels.ts</code></td>
+<td>Channel Manager lifecycle</td>
+</tr>
+<tr>
+<td><code>src/auto-reply/dispatch.ts</code></td>
+<td>Inbound message dispatch pipeline</td>
+</tr>
+<tr>
+<td><code>src/auto-reply/templating.ts</code></td>
+<td>MsgContext type definition</td>
+</tr>
+<tr>
+<td><code>src/plugins/runtime/types.ts</code></td>
+<td>Channel Runtime SDK types</td>
+</tr>
+<tr>
+<td><code>extensions/telegram/src/channel.ts</code></td>
+<td>Telegram plugin (reference implementation)</td>
+</tr>
+<tr>
+<td><code>extensions/discord/src/channel.ts</code></td>
+<td>Discord plugin (most feature-rich)</td>
+</tr>
+<tr>
+<td><code>extensions/feishu/</code></td>
+<td>Feishu plugin (most complex, 53 files)</td>
+</tr>
+<tr>
+<td><code>extensions/matrix/</code></td>
+<td>Matrix plugin (E2E encryption)</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

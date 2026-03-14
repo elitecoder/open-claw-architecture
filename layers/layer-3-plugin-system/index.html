@@ -1,0 +1,2886 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-2-gateway/">
+      
+      
+        <link rel="next" href="../layer-4-channel-integrations/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 3: Plugin System - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-3-plugin-system-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 3: Plugin System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 3?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-discovery-finding-the-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Discovery (Finding the Plugins)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Discovery (Finding the Plugins)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-does-openclaw-look-for-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Does OpenClaw Look for Plugins?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-discovery-works-srcpluginsdiscoveryts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Discovery Works (src/plugins/discovery.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-loading-starting-plugins-safely" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Loading (Starting Plugins Safely)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Loading (Starting Plugins Safely)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-plugin-manifest-openclawpluginjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Plugin Manifest (openclaw.plugin.json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-jiti-dynamic-loader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Jiti Dynamic Loader
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-14-step-loading-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 14-Step Loading Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-the-registry-the-plugin-phone-book" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: The Registry (The Plugin Phone Book)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: The Registry (The Plugin Phone Book)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registration-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registration Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-plugin-record" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Plugin Record
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-the-plugin-api-sdk-the-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: The Plugin API &amp; SDK (The Contract)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: The Plugin API &amp; SDK (The Contract)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-api-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The API Object
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-plugin-sdk-srcplugin-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Plugin SDK (src/plugin-sdk/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-plugin-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real Plugin Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-the-hook-system-plugin-lifecycle-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Hook System (Plugin Lifecycle Events)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Hook System (Plugin Lifecycle Events)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Are Hooks?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hook-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hook Categories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execution-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt-injection-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt Injection Protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-plugin-http-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Plugin HTTP Routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-plugin-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Plugin Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Plugin Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exclusive-slots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exclusive Slots
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-the-three-tier-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: The Three-Tier Cache
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-3-evolved-the-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 3 Evolved: The Git History
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 3 Evolved: The Git History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pre-plugin-era-november-24-2025-january-10-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-Plugin Era (November 24, 2025 — January 10, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-the-big-decision-january-11-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: The Big Decision (January 11, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-channel-extraction-sprint-january-13-15-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Channel Extraction Sprint (January 13-15, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-provider-auth-plugins-january-16-17-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Provider Auth Plugins (January 16-17, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-the-sdk-big-bang-january-18-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: The SDK Big Bang (January 18, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-extension-explosion-january-19-february-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Extension Explosion (January 19 — February 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-security-hardening-february-19-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Security Hardening (February 19+, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-api-maturation-february-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: API Maturation (February — March 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evolution-timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evolution Timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#by-the-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        By the Numbers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 3?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-discovery-finding-the-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Discovery (Finding the Plugins)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Discovery (Finding the Plugins)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-does-openclaw-look-for-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Does OpenClaw Look for Plugins?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-discovery-works-srcpluginsdiscoveryts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Discovery Works (src/plugins/discovery.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-loading-starting-plugins-safely" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Loading (Starting Plugins Safely)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Loading (Starting Plugins Safely)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-plugin-manifest-openclawpluginjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Plugin Manifest (openclaw.plugin.json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-jiti-dynamic-loader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Jiti Dynamic Loader
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-14-step-loading-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 14-Step Loading Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-the-registry-the-plugin-phone-book" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: The Registry (The Plugin Phone Book)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: The Registry (The Plugin Phone Book)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registration-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registration Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-plugin-record" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Plugin Record
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-the-plugin-api-sdk-the-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: The Plugin API &amp; SDK (The Contract)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: The Plugin API &amp; SDK (The Contract)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-api-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The API Object
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-plugin-sdk-srcplugin-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Plugin SDK (src/plugin-sdk/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-plugin-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real Plugin Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-the-hook-system-plugin-lifecycle-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Hook System (Plugin Lifecycle Events)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Hook System (Plugin Lifecycle Events)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Are Hooks?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hook-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hook Categories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execution-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt-injection-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt Injection Protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-plugin-http-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Plugin HTTP Routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-plugin-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Plugin Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Plugin Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exclusive-slots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exclusive Slots
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-the-three-tier-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: The Three-Tier Cache
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-3-evolved-the-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 3 Evolved: The Git History
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 3 Evolved: The Git History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pre-plugin-era-november-24-2025-january-10-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-Plugin Era (November 24, 2025 — January 10, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-the-big-decision-january-11-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: The Big Decision (January 11, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-channel-extraction-sprint-january-13-15-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Channel Extraction Sprint (January 13-15, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-provider-auth-plugins-january-16-17-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Provider Auth Plugins (January 16-17, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-the-sdk-big-bang-january-18-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: The SDK Big Bang (January 18, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-extension-explosion-january-19-february-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Extension Explosion (January 19 — February 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-security-hardening-february-19-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Security Hardening (February 19+, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-api-maturation-february-march-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: API Maturation (February — March 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evolution-timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evolution Timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#by-the-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        By the Numbers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-3-plugin-system-deep-dive">Layer 3: Plugin System — Deep Dive<a class="headerlink" href="#layer-3-plugin-system-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-layer-3">What Is Layer 3?<a class="headerlink" href="#what-is-layer-3" title="Permanent link">&para;</a></h2>
+<p>If Layer 1 is the brain stem and Layer 2 is the nervous system, Layer 3 is the <strong>immune system and organ transplant department</strong>. It lets you add new organs (channels, AI providers, tools) or swap existing ones — all without surgery on the core robot.</p>
+<p>The plugin system is what makes OpenClaw extensible. Want Discord support? That's a plugin. Want OpenAI as your AI provider? That's a plugin. Want the robot to remember things long-term? That's a plugin too. And you can write your own.</p>
+<p>Layer 3 has <strong>four major parts</strong>:</p>
+<ol>
+<li><strong>Discovery</strong> — Finding plugins on your computer</li>
+<li><strong>Loading</strong> — Starting them up safely</li>
+<li><strong>Registry</strong> — Keeping track of what they registered</li>
+<li><strong>SDK &amp; API</strong> — The "contract" between plugins and the core system</li>
+</ol>
+<hr />
+<h2 id="part-1-discovery-finding-the-plugins">Part 1: Discovery (Finding the Plugins)<a class="headerlink" href="#part-1-discovery-finding-the-plugins" title="Permanent link">&para;</a></h2>
+<h3 id="where-does-openclaw-look-for-plugins">Where Does OpenClaw Look for Plugins?<a class="headerlink" href="#where-does-openclaw-look-for-plugins" title="Permanent link">&para;</a></h3>
+<p>OpenClaw searches <strong>four locations</strong>, in priority order:</p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Location</th>
+<th>Origin Name</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 (highest)</td>
+<td>Config-specified paths</td>
+<td><code>config</code></td>
+<td><code>plugins.load.paths: ["~/my-plugins"]</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Workspace extensions</td>
+<td><code>workspace</code></td>
+<td><code>.openclaw/extensions/</code> in your project</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Bundled stock plugins</td>
+<td><code>bundled</code></td>
+<td><code>extensions/</code> in the OpenClaw install</td>
+</tr>
+<tr>
+<td>4 (lowest)</td>
+<td>Global user extensions</td>
+<td><code>global</code></td>
+<td><code>~/.openclaw/extensions/</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Priority matters for duplicates.</strong> If you have a Discord plugin in both <code>~/.openclaw/extensions/</code> (global) and <code>extensions/</code> (bundled), the global one wins because it has higher priority. This lets you override built-in plugins with your own versions.</p>
+<h3 id="how-discovery-works-srcpluginsdiscoveryts">How Discovery Works (<code>src/plugins/discovery.ts</code>)<a class="headerlink" href="#how-discovery-works-srcpluginsdiscoveryts" title="Permanent link">&para;</a></h3>
+<p>Think of discovery as a treasure hunt. The robot searches each location for things that look like plugins.</p>
+<h4 id="step-1-check-the-cache">Step 1: Check the Cache<a class="headerlink" href="#step-1-check-the-cache" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">discoveryCache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">expiresAt</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w"> </span><span class="nx">result</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginDiscoveryResult</span><span class="w"> </span><span class="p">}</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">DEFAULT_DISCOVERY_CACHE_MS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1000</span><span class="p">;</span><span class="w"> </span><span class="c1">// 1 second TTL</span>
+</code></pre></div>
+<p>Discovery results are cached for <strong>1 second</strong>. Why? Because during startup, many different parts of the code ask "what plugins do we have?" within the same second. Without caching, it would re-scan the filesystem dozens of times.</p>
+<p>The cache key includes: workspace path + user ID + all extension directories + config paths. If any of those change, the cache is invalidated.</p>
+<h4 id="step-2-scan-each-directory">Step 2: Scan Each Directory<a class="headerlink" href="#step-2-scan-each-directory" title="Permanent link">&para;</a></h4>
+<p>For each of the four locations, the robot:</p>
+<ol>
+<li>Lists all files and folders in the directory</li>
+<li><strong>For files</strong>: Checks if it's a valid extension file (<code>.ts</code>, <code>.js</code>, <code>.mts</code>, <code>.mjs</code>, etc. — but NOT <code>.d.ts</code> definition files)</li>
+<li><strong>For folders</strong>: Looks for a <code>package.json</code> with an <code>openclaw</code> section</li>
+</ol>
+<p>Folders with names ending in <code>.bak</code>, <code>.backup-</code>, or <code>.disabled</code> are skipped. This is like having a "recycle bin" — rename a plugin folder to <code>discord.disabled</code> and it won't load.</p>
+<h4 id="step-3-read-the-package-manifest">Step 3: Read the Package Manifest<a class="headerlink" href="#step-3-read-the-package-manifest" title="Permanent link">&para;</a></h4>
+<p>For each folder that has a <code>package.json</code>, the robot reads the <code>openclaw</code> section:</p>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;@openclaw/discord&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;openclaw&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;extensions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;./index.ts&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;discord&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Discord&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;docsPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/channels/discord&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The <code>extensions</code> array tells the robot which files to load. If there's no <code>openclaw</code> section, the robot looks for an <code>index.ts</code> or <code>index.js</code> file instead.</p>
+<h4 id="step-4-security-checks">Step 4: Security Checks<a class="headerlink" href="#step-4-security-checks" title="Permanent link">&para;</a></h4>
+<p>Every plugin candidate goes through <strong>three security gates</strong> before it's accepted:</p>
+<p><strong>Gate 1: Path Boundary Check</strong>
+<div class="language-text highlight"><pre><span></span><code>Is the plugin file actually INSIDE the plugin directory?
+</code></pre></div>
+Uses <code>safeRealpathSync()</code> to resolve symlinks and verify the real file path stays within bounds. This prevents a trick where a symlink at <code>~/.openclaw/extensions/evil</code> points to <code>/etc/passwd</code>.</p>
+<p><strong>Like:</strong> Making sure the new kid actually lives in the school district before enrolling them.</p>
+<p><strong>Gate 2: Permission Check (Unix only)</strong>
+<div class="language-text highlight"><pre><span></span><code>Are the file permissions safe?
+</code></pre></div>
+- Rejects world-writable files (<code>chmod 777</code>) — anyone could modify them
+- Checks file ownership matches expected user (or root)
+- For bundled plugins, auto-repairs unsafe permissions by stripping write bits</p>
+<p><strong>Like:</strong> Checking that the door to the teacher's lounge has a proper lock, not an open doorway.</p>
+<p><strong>Gate 3: Deduplication</strong>
+<div class="language-text highlight"><pre><span></span><code>Have we already seen this exact file?
+</code></pre></div>
+Tracks resolved paths in a <code>Set</code> to prevent the same plugin from appearing twice (e.g., via symlinks from two different directories).</p>
+<h4 id="step-5-build-the-candidate-list">Step 5: Build the Candidate List<a class="headerlink" href="#step-5-build-the-candidate-list" title="Permanent link">&para;</a></h4>
+<p>Each passing plugin becomes a <code>PluginCandidate</code>:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">idHint</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;discord&quot;</span><span class="p">,</span><span class="w">           </span><span class="c1">// Derived name for identification</span>
+<span class="w">  </span><span class="nx">source</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/path/to/index.ts&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Absolute path to entry file</span>
+<span class="w">  </span><span class="nx">rootDir</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/path/to/discord/&quot;</span><span class="p">,</span><span class="c1">// Plugin&#39;s root directory</span>
+<span class="w">  </span><span class="nx">origin</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bundled&quot;</span><span class="p">,</span><span class="w">           </span><span class="c1">// Where it was found</span>
+<span class="w">  </span><span class="nx">packageName</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;@openclaw/discord&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">packageVersion</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2026.3.13&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The <code>idHint</code> is derived heuristically — it strips scoped prefixes (<code>@openclaw/discord</code> → <code>discord</code>), applies canonical remaps (<code>ollama-provider</code> → <code>ollama</code>), and falls back to the filename.</p>
+<hr />
+<h2 id="part-2-loading-starting-plugins-safely">Part 2: Loading (Starting Plugins Safely)<a class="headerlink" href="#part-2-loading-starting-plugins-safely" title="Permanent link">&para;</a></h2>
+<h3 id="the-plugin-manifest-openclawpluginjson">The Plugin Manifest (<code>openclaw.plugin.json</code>)<a class="headerlink" href="#the-plugin-manifest-openclawpluginjson" title="Permanent link">&para;</a></h3>
+<p>Before loading any code, the robot reads each plugin's <strong>manifest</strong> — a JSON file that describes what the plugin is and what it needs:</p>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;memory-lancedb&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;memory&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Memory (LanceDB)&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Long-term memory with vector search&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;configSchema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;dbPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;apiKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;apiKey&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;uiHints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;apiKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;API Key&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sensitive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;placeholder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sk-...&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Required fields:</strong>
+- <code>id</code> — unique identifier (like a username for the plugin)
+- <code>configSchema</code> — JSON Schema for validating the plugin's config section</p>
+<p><strong>Optional fields:</strong>
+- <code>kind</code> — <code>"memory"</code> or <code>"context-engine"</code> (special slot plugins)
+- <code>channels</code>, <code>providers</code>, <code>skills</code> — what the plugin provides
+- <code>uiHints</code> — metadata for the settings UI (labels, placeholders, sensitivity flags)</p>
+<h3 id="the-jiti-dynamic-loader">The Jiti Dynamic Loader<a class="headerlink" href="#the-jiti-dynamic-loader" title="Permanent link">&para;</a></h3>
+<p>Plugins are written in TypeScript, but Node.js can't run TypeScript directly. OpenClaw uses <strong>Jiti</strong> — a just-in-time TypeScript importer:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">jitiLoader</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">createJiti</span><span class="p">(</span><span class="k">import</span><span class="p">.</span><span class="nx">meta</span><span class="p">.</span><span class="nx">url</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">interopDefault</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w">  </span><span class="c1">// Handle CommonJS default exports</span>
+<span class="w">  </span><span class="nx">extensions</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;.ts&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;.tsx&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;.mts&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;.cts&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;.js&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;.mjs&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;.cjs&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;.json&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">alias</span><span class="o">:</span><span class="w"> </span><span class="kt">aliasMap</span><span class="p">,</span><span class="w">       </span><span class="c1">// Plugin SDK path aliasing</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>Jiti compiles TypeScript on-the-fly, so plugin authors don't need a build step.</p>
+<p><strong>SDK Aliasing:</strong> Plugins import from <code>openclaw/plugin-sdk</code>, but the actual files are somewhere inside the OpenClaw installation. Jiti's alias map translates <code>openclaw/plugin-sdk/channels</code> → the real file path. This means plugins don't need to know where OpenClaw is installed.</p>
+<p><strong>Lazy initialization:</strong> Jiti is only created when the first plugin actually needs to load. If all plugins are disabled (like in tests), Jiti is never initialized — saving startup time.</p>
+<h3 id="the-14-step-loading-pipeline">The 14-Step Loading Pipeline<a class="headerlink" href="#the-14-step-loading-pipeline" title="Permanent link">&para;</a></h3>
+<p>For each discovered plugin candidate, the loader runs 14 steps. If any step fails, the plugin is marked as "error" and the loader moves to the next one — one bad plugin doesn't crash the whole system.</p>
+<h4 id="step-1-find-the-manifest-record">Step 1: Find the Manifest Record<a class="headerlink" href="#step-1-find-the-manifest-record" title="Permanent link">&para;</a></h4>
+<p>Look up the plugin's manifest from the manifest registry. Skip if not found.</p>
+<h4 id="step-2-check-for-overrides">Step 2: Check for Overrides<a class="headerlink" href="#step-2-check-for-overrides" title="Permanent link">&para;</a></h4>
+<p>If the same plugin ID exists from a higher-priority origin (e.g., you have a custom Discord plugin AND the bundled one), the lower-priority one is disabled with reason "overridden."</p>
+<h4 id="step-3-check-enable-state">Step 3: Check Enable State<a class="headerlink" href="#step-3-check-enable-state" title="Permanent link">&para;</a></h4>
+<p>The config has three ways to control which plugins load:</p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">plugins</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nv">allow</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;discord&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;telegram&quot;</span><span class="p">],</span><span class="w">  </span><span class="c1">// Allowlist (only these load)</span>
+<span class="w">    </span><span class="nv">deny</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;irc&quot;</span><span class="p">],</span><span class="w">                   </span><span class="c1">// Denylist (these never load)</span>
+<span class="w">    </span><span class="nv">entries</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">discord</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">enabled</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="w"> </span><span class="p">},</span><span class="w">    </span><span class="c1">// Per-plugin toggle</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Resolution: <code>deny</code> always wins → <code>allow</code> filters → <code>entries.enabled</code> toggles → bundled defaults.</p>
+<h4 id="step-4-memory-slot-policy">Step 4: Memory Slot Policy<a class="headerlink" href="#step-4-memory-slot-policy" title="Permanent link">&para;</a></h4>
+<p>Only ONE memory plugin can be active at a time (you can't have two competing long-term memories). The config specifies which one:</p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nv">plugins</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">slots</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;memory-lancedb&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>If a memory plugin isn't the chosen one, it's disabled before even loading its code — saving startup time.</p>
+<h4 id="step-5-validate-config-schema">Step 5: Validate Config Schema<a class="headerlink" href="#step-5-validate-config-schema" title="Permanent link">&para;</a></h4>
+<p>Confirm the manifest has a <code>configSchema</code>. Without it, the plugin can't validate its own config.</p>
+<h4 id="step-6-boundary-check-module-load">Step 6: Boundary Check + Module Load<a class="headerlink" href="#step-6-boundary-check-module-load" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">opened</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">openBoundaryFileSync</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">absolutePath</span><span class="o">:</span><span class="w"> </span><span class="kt">candidate.source</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">rootPath</span><span class="o">:</span><span class="w"> </span><span class="kt">pluginRoot</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">rejectHardlinks</span><span class="o">:</span><span class="w"> </span><span class="kt">candidate.origin</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="s2">&quot;bundled&quot;</span><span class="p">,</span>
+<span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">module</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">getJiti</span><span class="p">()(</span><span class="nx">safeSource</span><span class="p">);</span>
+</code></pre></div>
+<p>One more security check (path containment), then load the module via Jiti. Hardlink attacks are blocked for non-bundled plugins.</p>
+<h4 id="step-7-resolve-the-module-export">Step 7: Resolve the Module Export<a class="headerlink" href="#step-7-resolve-the-module-export" title="Permanent link">&para;</a></h4>
+<p>Plugins can export their code in multiple formats:
+- <code>export default { id, register() {...} }</code> — Object with register function
+- <code>export default function register(api) {...}</code> — Direct function
+- <code>module.exports = { register }</code> — CommonJS style
+- <code>export function activate(api) {...}</code> — Named export</p>
+<p>The loader handles all of them, normalizing to <code>{ definition, register }</code>.</p>
+<h4 id="step-8-validate-id-match">Step 8: Validate ID Match<a class="headerlink" href="#step-8-validate-id-match" title="Permanent link">&para;</a></h4>
+<p>The manifest says <code>id: "discord"</code> and the exported definition says <code>id: "discord"</code> — they must match. If they don't, it's an error (prevents someone from swapping plugin code without updating the manifest).</p>
+<h4 id="step-9-10-memory-slot-decision-final">Step 9-10: Memory Slot Decision (Final)<a class="headerlink" href="#step-9-10-memory-slot-decision-final" title="Permanent link">&para;</a></h4>
+<p>Now that the module is loaded and we know its <code>kind</code>, apply the memory slot policy one more time with the full definition.</p>
+<h4 id="step-11-validate-plugin-config">Step 11: Validate Plugin Config<a class="headerlink" href="#step-11-validate-plugin-config" title="Permanent link">&para;</a></h4>
+<p>The plugin's config section (from <code>config.plugins.entries.discord.config</code>) is validated against the plugin's config schema. Invalid config → error.</p>
+<h4 id="step-12-validate-only-mode-check">Step 12: Validate-Only Mode Check<a class="headerlink" href="#step-12-validate-only-mode-check" title="Permanent link">&para;</a></h4>
+<p>If we're just checking configs (not actually starting), skip the registration step.</p>
+<h4 id="step-13-call-registerapi">Step 13: Call <code>register(api)</code><a class="headerlink" href="#step-13-call-registerapi" title="Permanent link">&para;</a></h4>
+<p>This is the big moment. The loader creates an API object and calls the plugin's register function:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">createApi</span><span class="p">(</span><span class="nx">record</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">runtime</span><span class="p">,</span><span class="w"> </span><span class="nx">logger</span><span class="w"> </span><span class="p">});</span>
+<span class="nx">plugin</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="nx">api</span><span class="p">);</span>
+</code></pre></div>
+<p>Inside <code>register()</code>, the plugin calls methods like:
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">api</span><span class="p">.</span><span class="nx">registerChannel</span><span class="p">({</span><span class="w"> </span><span class="nx">plugin</span><span class="o">:</span><span class="w"> </span><span class="kt">discordPlugin</span><span class="w"> </span><span class="p">});</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerTool</span><span class="p">({</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;memory_recall&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;before_agent_start&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">handler</span><span class="p">);</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerHttpRoute</span><span class="p">({</span><span class="w"> </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/webhook/discord&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">handler</span><span class="p">,</span><span class="w"> </span><span class="nx">auth</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;plugin&quot;</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div></p>
+<p>Each call adds an entry to the plugin registry.</p>
+<h4 id="step-14-error-handling">Step 14: Error Handling<a class="headerlink" href="#step-14-error-handling" title="Permanent link">&para;</a></h4>
+<p>If anything in <code>register()</code> throws, the error is caught, logged, and the plugin is marked as "error" with the message stored in <code>record.error</code>. The loader continues to the next plugin.</p>
+<p><strong>Async warning:</strong> If <code>register()</code> returns a Promise, the loader warns "async registration is ignored." Registration must be synchronous because the gateway needs all plugins ready before it starts accepting connections.</p>
+<hr />
+<h2 id="part-3-the-registry-the-plugin-phone-book">Part 3: The Registry (The Plugin Phone Book)<a class="headerlink" href="#part-3-the-registry-the-plugin-phone-book" title="Permanent link">&para;</a></h2>
+<p>After all plugins have been loaded, the registry is a data structure containing everything every plugin registered:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">PluginRegistry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">plugins</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginRecord</span><span class="p">[];</span><span class="w">                    </span><span class="c1">// Metadata for each plugin</span>
+<span class="w">  </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginToolRegistration</span><span class="p">[];</span><span class="w">            </span><span class="c1">// Agent tools</span>
+<span class="w">  </span><span class="nx">hooks</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginHookRegistration</span><span class="p">[];</span><span class="w">            </span><span class="c1">// Legacy untyped hooks</span>
+<span class="w">  </span><span class="nx">typedHooks</span><span class="o">:</span><span class="w"> </span><span class="kt">TypedPluginHookRegistration</span><span class="p">[];</span><span class="w">  </span><span class="c1">// New typed hooks</span>
+<span class="w">  </span><span class="nx">channels</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginChannelRegistration</span><span class="p">[];</span><span class="w">      </span><span class="c1">// Messaging channels</span>
+<span class="w">  </span><span class="nx">providers</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginProviderRegistration</span><span class="p">[];</span><span class="w">    </span><span class="c1">// AI model providers</span>
+<span class="w">  </span><span class="nx">gatewayHandlers</span><span class="o">:</span><span class="w"> </span><span class="kt">GatewayRequestHandlers</span><span class="p">;</span><span class="w">    </span><span class="c1">// Custom gateway RPC methods</span>
+<span class="w">  </span><span class="nx">httpRoutes</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginHttpRouteRegistration</span><span class="p">[];</span><span class="w">  </span><span class="c1">// Custom HTTP endpoints</span>
+<span class="w">  </span><span class="nx">cliRegistrars</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginCliRegistration</span><span class="p">[];</span><span class="w">     </span><span class="c1">// CLI commands</span>
+<span class="w">  </span><span class="nx">services</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginServiceRegistration</span><span class="p">[];</span><span class="w">      </span><span class="c1">// Background services</span>
+<span class="w">  </span><span class="nx">commands</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginCommandRegistration</span><span class="p">[];</span><span class="w">      </span><span class="c1">// Chat commands (no LLM)</span>
+<span class="w">  </span><span class="nx">diagnostics</span><span class="o">:</span><span class="w"> </span><span class="kt">PluginDiagnostic</span><span class="p">[];</span><span class="w">            </span><span class="c1">// Warnings and errors</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>Think of it as a <strong>phone book</strong> — when the gateway needs to send a Discord message, it looks up the Discord channel in the registry. When the agent needs a tool, it checks the registry's tools list.</p>
+<h3 id="registration-validation">Registration Validation<a class="headerlink" href="#registration-validation" title="Permanent link">&para;</a></h3>
+<p>Each registration method has built-in validation:</p>
+<table>
+<thead>
+<tr>
+<th>Registration</th>
+<th>Validation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>registerChannel</code></td>
+<td>Channel ID must be unique across ALL plugins</td>
+</tr>
+<tr>
+<td><code>registerProvider</code></td>
+<td>Provider ID must be unique</td>
+</tr>
+<tr>
+<td><code>registerGatewayMethod</code></td>
+<td>Method name must not conflict with core methods or other plugins</td>
+</tr>
+<tr>
+<td><code>registerHttpRoute</code></td>
+<td>Path must not overlap with existing routes (unless <code>replaceExisting: true</code>)</td>
+</tr>
+<tr>
+<td><code>registerTool</code></td>
+<td>Tool name recorded for tracking</td>
+</tr>
+<tr>
+<td><code>registerService</code></td>
+<td>Service ID must be non-empty</td>
+</tr>
+<tr>
+<td><code>registerCommand</code></td>
+<td>Command name must be unique</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-plugin-record">The Plugin Record<a class="headerlink" href="#the-plugin-record" title="Permanent link">&para;</a></h3>
+<p>Each loaded plugin gets a <code>PluginRecord</code> that tracks everything about it:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;discord&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Discord&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2026.3.13&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">origin</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bundled&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;loaded&quot;</span><span class="p">,</span><span class="w">          </span><span class="c1">// or &quot;disabled&quot; or &quot;error&quot;</span>
+<span class="w">  </span><span class="nx">enabled</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">toolNames</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;discord_slash_commands&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">hookNames</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;subagent_hooks&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">channelIds</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;discord&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">providerIds</span><span class="o">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">gatewayMethods</span><span class="o">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">httpRoutes</span><span class="o">:</span><span class="w"> </span><span class="kt">2</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">hookCount</span><span class="o">:</span><span class="w"> </span><span class="kt">3</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This is what powers the <code>openclaw plugins status</code> CLI command — it shows you each plugin's status, what it registered, and any errors.</p>
+<hr />
+<h2 id="part-4-the-plugin-api-sdk-the-contract">Part 4: The Plugin API &amp; SDK (The Contract)<a class="headerlink" href="#part-4-the-plugin-api-sdk-the-contract" title="Permanent link">&para;</a></h2>
+<h3 id="the-api-object">The API Object<a class="headerlink" href="#the-api-object" title="Permanent link">&para;</a></h3>
+<p>When a plugin's <code>register(api)</code> function is called, <code>api</code> is an object with 12 registration methods:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">api</span><span class="p">.</span><span class="nx">registerTool</span><span class="p">(</span><span class="nx">tool</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="o">?</span><span class="p">)</span><span class="w">          </span><span class="c1">// Add an agent tool</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerHook</span><span class="p">(</span><span class="nx">events</span><span class="p">,</span><span class="w"> </span><span class="nx">handler</span><span class="p">)</span><span class="w">      </span><span class="c1">// Legacy hook registration</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">hookName</span><span class="p">,</span><span class="w"> </span><span class="nx">handler</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="o">?</span><span class="p">)</span><span class="w">       </span><span class="c1">// Typed hook registration (preferred)</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerChannel</span><span class="p">(</span><span class="nx">registration</span><span class="p">)</span><span class="w">      </span><span class="c1">// Add a messaging channel</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerProvider</span><span class="p">(</span><span class="nx">provider</span><span class="p">)</span><span class="w">         </span><span class="c1">// Add an AI model provider</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerGatewayMethod</span><span class="p">(</span><span class="nx">method</span><span class="p">,</span><span class="w"> </span><span class="nx">handler</span><span class="p">)</span><span class="w">  </span><span class="c1">// Add a gateway RPC method</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerHttpRoute</span><span class="p">(</span><span class="nx">params</span><span class="p">)</span><span class="w">          </span><span class="c1">// Add an HTTP endpoint</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerCli</span><span class="p">(</span><span class="nx">registrar</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="o">?</span><span class="p">)</span><span class="w">      </span><span class="c1">// Add CLI commands</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerService</span><span class="p">(</span><span class="nx">service</span><span class="p">)</span><span class="w">           </span><span class="c1">// Add a background service</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerCommand</span><span class="p">(</span><span class="nx">command</span><span class="p">)</span><span class="w">           </span><span class="c1">// Add a chat command (no LLM)</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">registerContextEngine</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">factory</span><span class="p">)</span><span class="w"> </span><span class="c1">// Replace the context engine</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">resolvePath</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span><span class="w">                 </span><span class="c1">// Resolve user paths (~/... etc.)</span>
+</code></pre></div>
+<p>Plus properties:
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">api</span><span class="p">.</span><span class="nx">id</span><span class="w">              </span><span class="c1">// Plugin identifier</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">config</span><span class="w">          </span><span class="c1">// Full OpenClaw config</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">pluginConfig</span><span class="w">    </span><span class="c1">// This plugin&#39;s config section</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">runtime</span><span class="w">         </span><span class="c1">// Runtime services (subagents, sessions, media, etc.)</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">logger</span><span class="w">          </span><span class="c1">// Logging interface (debug, info, warn, error)</span>
+</code></pre></div></p>
+<h3 id="the-plugin-sdk-srcplugin-sdk">The Plugin SDK (<code>src/plugin-sdk/</code>)<a class="headerlink" href="#the-plugin-sdk-srcplugin-sdk" title="Permanent link">&para;</a></h3>
+<p>The SDK is a separate package that plugins import. It exports <strong>150+ types and utilities</strong>:</p>
+<ul>
+<li><strong>Channel utilities:</strong> Channel types, account helpers, directory config, status helpers</li>
+<li><strong>Provider utilities:</strong> OAuth helpers, model auth, discovery functions</li>
+<li><strong>Webhook utilities:</strong> Webhook targets, authentication, request guards</li>
+<li><strong>Message utilities:</strong> Inbound envelope builders, outbound payload formatting, media handling</li>
+<li><strong>Session utilities:</strong> Account resolution, threading, pairing, history</li>
+<li><strong>Security:</strong> SSRF policy, allowlist compilation, command authorization</li>
+<li><strong>Runtime:</strong> Logger creation, environment resolution</li>
+</ul>
+<p>Plugins import from subpaths:
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ChannelPlugin</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;openclaw/plugin-sdk/channels&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">buildOauthProviderAuthResult</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;openclaw/plugin-sdk/auth&quot;</span><span class="p">;</span>
+</code></pre></div></p>
+<h3 id="real-plugin-examples">Real Plugin Examples<a class="headerlink" href="#real-plugin-examples" title="Permanent link">&para;</a></h3>
+<h4 id="example-1-discord-channel-plugin">Example 1: Discord Channel Plugin<a class="headerlink" href="#example-1-discord-channel-plugin" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// extensions/discord/index.ts</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">plugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;discord&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Discord&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">configSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">emptyPluginConfigSchema</span><span class="p">(),</span>
+<span class="w">  </span><span class="nx">register</span><span class="p">(</span><span class="nx">api</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">api</span><span class="p">.</span><span class="nx">registerChannel</span><span class="p">({</span><span class="w"> </span><span class="nx">plugin</span><span class="o">:</span><span class="w"> </span><span class="kt">discordPlugin</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="nx">registerDiscordSubagentHooks</span><span class="p">(</span><span class="nx">api</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">plugin</span><span class="p">;</span>
+</code></pre></div>
+<p>Simple — registers one channel and some hooks.</p>
+<h4 id="example-2-qwen-oauth-provider-plugin">Example 2: Qwen OAuth Provider Plugin<a class="headerlink" href="#example-2-qwen-oauth-provider-plugin" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// extensions/qwen-portal-auth/index.ts</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">plugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;qwen-portal-auth&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Qwen OAuth&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">configSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">emptyPluginConfigSchema</span><span class="p">(),</span>
+<span class="w">  </span><span class="nx">register</span><span class="p">(</span><span class="nx">api</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">api</span><span class="p">.</span><span class="nx">registerProvider</span><span class="p">({</span>
+<span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;qwen-portal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Qwen&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">auth</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">        </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;device&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Qwen OAuth&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">kind</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;device_code&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">run</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="c1">// OAuth device code flow (user scans QR code)</span>
+<span class="w">          </span><span class="k">return</span><span class="w"> </span><span class="nx">buildOauthProviderAuthResult</span><span class="p">({</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}]</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">plugin</span><span class="p">;</span>
+</code></pre></div>
+<p>Registers a provider with an OAuth authentication flow.</p>
+<h4 id="example-3-memory-plugin-with-hooks-and-tools">Example 3: Memory Plugin with Hooks and Tools<a class="headerlink" href="#example-3-memory-plugin-with-hooks-and-tools" title="Permanent link">&para;</a></h4>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// extensions/memory-lancedb/index.ts (simplified)</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">plugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;memory-lancedb&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">kind</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;memory&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">register</span><span class="p">(</span><span class="nx">api</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Register tools the agent can call</span>
+<span class="w">    </span><span class="nx">api</span><span class="p">.</span><span class="nx">registerTool</span><span class="p">({</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;memory_recall&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="nx">api</span><span class="p">.</span><span class="nx">registerTool</span><span class="p">({</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;memory_store&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Auto-recall: inject memories into prompt</span>
+<span class="w">    </span><span class="nx">api</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;before_agent_start&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">memories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">db</span><span class="p">.</span><span class="nx">search</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">prompt</span><span class="p">);</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">prependContext</span><span class="o">:</span><span class="w"> </span><span class="kt">formatMemories</span><span class="p">(</span><span class="nx">memories</span><span class="p">)</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Auto-capture: save conversation highlights</span>
+<span class="w">    </span><span class="nx">api</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;agent_end&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">db</span><span class="p">.</span><span class="nx">store</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">messages</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// CLI: openclaw ltm list</span>
+<span class="w">    </span><span class="nx">api</span><span class="p">.</span><span class="nx">registerCli</span><span class="p">(({</span><span class="w"> </span><span class="nx">program</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">program</span><span class="p">.</span><span class="nx">command</span><span class="p">(</span><span class="s2">&quot;ltm&quot;</span><span class="p">).</span><span class="nx">subcommand</span><span class="p">(</span><span class="s2">&quot;list&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">plugin</span><span class="p">;</span>
+</code></pre></div>
+<p>Full-featured — tools, hooks, and CLI commands.</p>
+<hr />
+<h2 id="part-5-the-hook-system-plugin-lifecycle-events">Part 5: The Hook System (Plugin Lifecycle Events)<a class="headerlink" href="#part-5-the-hook-system-plugin-lifecycle-events" title="Permanent link">&para;</a></h2>
+<h3 id="what-are-hooks">What Are Hooks?<a class="headerlink" href="#what-are-hooks" title="Permanent link">&para;</a></h3>
+<p>Hooks are like <strong>event subscriptions</strong>. Plugins say "tell me when X happens" and the system calls their handler at the right moment. There are <strong>24 hook types</strong> organized by lifecycle phase.</p>
+<h3 id="hook-categories">Hook Categories<a class="headerlink" href="#hook-categories" title="Permanent link">&para;</a></h3>
+<h4 id="model-prompt-phase-before-the-ai-thinks">Model &amp; Prompt Phase (Before the AI thinks)<a class="headerlink" href="#model-prompt-phase-before-the-ai-thinks" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>When</th>
+<th>Can Modify?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>before_model_resolve</code></td>
+<td>Before choosing which AI model to use</td>
+<td>Yes — override model/provider</td>
+</tr>
+<tr>
+<td><code>before_prompt_build</code></td>
+<td>Before assembling the system prompt</td>
+<td>Yes — inject/modify prompt</td>
+</tr>
+<tr>
+<td><code>before_agent_start</code></td>
+<td>Legacy: combines both above</td>
+<td>Yes — both model and prompt</td>
+</tr>
+</tbody>
+</table>
+<h4 id="agent-execution-while-the-ai-is-working">Agent Execution (While the AI is working)<a class="headerlink" href="#agent-execution-while-the-ai-is-working" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>When</th>
+<th>Can Modify?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>llm_input</code></td>
+<td>The exact payload sent to the LLM</td>
+<td>No — observe only</td>
+</tr>
+<tr>
+<td><code>llm_output</code></td>
+<td>The exact response from the LLM</td>
+<td>No — observe only</td>
+</tr>
+<tr>
+<td><code>agent_end</code></td>
+<td>Agent finished its turn</td>
+<td>No — observe only</td>
+</tr>
+<tr>
+<td><code>before_compaction</code></td>
+<td>Before old messages are compressed</td>
+<td>No — observe only</td>
+</tr>
+<tr>
+<td><code>after_compaction</code></td>
+<td>After compression completes</td>
+<td>No — observe only</td>
+</tr>
+<tr>
+<td><code>before_reset</code></td>
+<td>Before /new or /reset clears session</td>
+<td>No — observe only</td>
+</tr>
+</tbody>
+</table>
+<h4 id="message-flow-messages-coming-and-going">Message Flow (Messages coming and going)<a class="headerlink" href="#message-flow-messages-coming-and-going" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>When</th>
+<th>Can Modify?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>message_received</code></td>
+<td>Message arrived from a channel</td>
+<td>No — observe only</td>
+</tr>
+<tr>
+<td><code>message_sending</code></td>
+<td>Message about to be sent to channel</td>
+<td>Yes — modify or cancel</td>
+</tr>
+<tr>
+<td><code>message_sent</code></td>
+<td>Message delivery result</td>
+<td>No — observe only</td>
+</tr>
+</tbody>
+</table>
+<h4 id="tool-execution-when-the-agent-uses-tools">Tool Execution (When the agent uses tools)<a class="headerlink" href="#tool-execution-when-the-agent-uses-tools" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>When</th>
+<th>Can Modify?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>before_tool_call</code></td>
+<td>Tool about to execute</td>
+<td>Yes — modify params or block</td>
+</tr>
+<tr>
+<td><code>after_tool_call</code></td>
+<td>Tool finished executing</td>
+<td>No — observe only</td>
+</tr>
+<tr>
+<td><code>tool_result_persist</code></td>
+<td>Tool result before saving (SYNC)</td>
+<td>Yes — modify result</td>
+</tr>
+<tr>
+<td><code>before_message_write</code></td>
+<td>Message before saving (SYNC)</td>
+<td>Yes — modify or block</td>
+</tr>
+</tbody>
+</table>
+<h4 id="session-lifecycle">Session Lifecycle<a class="headerlink" href="#session-lifecycle" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>session_start</code></td>
+<td>New session created</td>
+</tr>
+<tr>
+<td><code>session_end</code></td>
+<td>Session ended</td>
+</tr>
+</tbody>
+</table>
+<h4 id="subagent-lifecycle">Subagent Lifecycle<a class="headerlink" href="#subagent-lifecycle" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>When</th>
+<th>Can Modify?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>subagent_spawning</code></td>
+<td>Subagent about to spawn</td>
+<td>Yes — block or modify</td>
+</tr>
+<tr>
+<td><code>subagent_delivery_target</code></td>
+<td>Resolving delivery target</td>
+<td>Yes — override target</td>
+</tr>
+<tr>
+<td><code>subagent_spawned</code></td>
+<td>Subagent created</td>
+<td>No — observe only</td>
+</tr>
+<tr>
+<td><code>subagent_ended</code></td>
+<td>Subagent ended</td>
+<td>No — observe only</td>
+</tr>
+</tbody>
+</table>
+<h4 id="gateway-lifecycle">Gateway Lifecycle<a class="headerlink" href="#gateway-lifecycle" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gateway_start</code></td>
+<td>Gateway server started</td>
+</tr>
+<tr>
+<td><code>gateway_stop</code></td>
+<td>Gateway shutting down</td>
+</tr>
+</tbody>
+</table>
+<h3 id="execution-models">Execution Models<a class="headerlink" href="#execution-models" title="Permanent link">&para;</a></h3>
+<p>Hooks run in two modes:</p>
+<p><strong>Parallel (Fire-and-Forget):</strong> All handlers run simultaneously, results are not collected. Used for observation-only hooks like <code>agent_end</code>, <code>message_received</code>, <code>gateway_start</code>.</p>
+<p><strong>Sequential (Priority-Ordered):</strong> Handlers run one at a time in priority order (highest first). Results are merged. Used for hooks that modify behavior like <code>before_prompt_build</code>, <code>message_sending</code>, <code>before_tool_call</code>.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">api</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;before_prompt_build&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">handler</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">priority</span><span class="o">:</span><span class="w"> </span><span class="kt">100</span><span class="w"> </span><span class="p">});</span><span class="w">  </span><span class="c1">// Runs first</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;before_prompt_build&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">handler</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">priority</span><span class="o">:</span><span class="w"> </span><span class="kt">50</span><span class="w"> </span><span class="p">});</span><span class="w">   </span><span class="c1">// Runs second</span>
+<span class="nx">api</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;before_prompt_build&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">handler</span><span class="p">);</span><span class="w">                      </span><span class="c1">// Runs last (default 0)</span>
+</code></pre></div>
+<p><strong>Synchronous (Special):</strong> Two hooks — <code>tool_result_persist</code> and <code>before_message_write</code> — are synchronous because they're in hot paths where async overhead would be too costly.</p>
+<h3 id="error-isolation">Error Isolation<a class="headerlink" href="#error-isolation" title="Permanent link">&para;</a></h3>
+<p>If a hook handler throws an error:
+- The error is logged
+- The handler is skipped
+- Other handlers continue executing
+- One bad hook doesn't crash the system</p>
+<h3 id="prompt-injection-protection">Prompt Injection Protection<a class="headerlink" href="#prompt-injection-protection" title="Permanent link">&para;</a></h3>
+<p>Plugins can modify the AI's system prompt via <code>before_prompt_build</code>. This is powerful but dangerous — a malicious plugin could inject instructions like "ignore all previous instructions."</p>
+<p>OpenClaw has a safety valve:</p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">plugins</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nv">entries</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">&quot;untrusted-plugin&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nv">hooks</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">allowPromptInjection</span><span class="p">:</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>When <code>allowPromptInjection: false</code>:
+- <code>before_prompt_build</code> → <strong>blocked entirely</strong> (can't register)
+- <code>before_agent_start</code> → <strong>wrapped</strong> to strip prompt fields (systemPrompt, prependContext, etc.) while still allowing model/provider overrides</p>
+<hr />
+<h2 id="part-6-plugin-http-routes">Part 6: Plugin HTTP Routes<a class="headerlink" href="#part-6-plugin-http-routes" title="Permanent link">&para;</a></h2>
+<p>Plugins can add their own HTTP endpoints to the gateway:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">api</span><span class="p">.</span><span class="nx">registerHttpRoute</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/webhook/custom&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">handler</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">res</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mf">200</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">res</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w">  </span><span class="c1">// Handled!</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">auth</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;gateway&quot;</span><span class="p">,</span><span class="w">    </span><span class="c1">// Requires gateway token</span>
+<span class="w">  </span><span class="nx">match</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;prefix&quot;</span><span class="p">,</span><span class="w">    </span><span class="c1">// Matches /webhook/custom and /webhook/custom/anything</span>
+<span class="p">});</span>
+</code></pre></div>
+<p><strong>Auth modes:</strong>
+- <code>"gateway"</code> — Requires the same authentication as the gateway (token, password, etc.)
+- <code>"plugin"</code> — No authentication required (the plugin manages its own auth)</p>
+<p><strong>Route matching:</strong>
+- <code>"exact"</code> — Only matches the exact path
+- <code>"prefix"</code> — Matches the path and any subpath</p>
+<p><strong>Integration with the HTTP pipeline:</strong>
+Plugin routes are checked at stages 9-10 of the gateway's 14-stage HTTP pipeline (after hooks, tools, OpenAI endpoints, but before health probes).</p>
+<p><strong>Security:</strong>
+- Paths are canonicalized to prevent encoding tricks
+- Overlapping routes are detected and rejected
+- Protected paths (like <code>/health</code>) require gateway auth even if the plugin says <code>"plugin"</code></p>
+<hr />
+<h2 id="part-7-plugin-configuration">Part 7: Plugin Configuration<a class="headerlink" href="#part-7-plugin-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="config-structure">Config Structure<a class="headerlink" href="#config-structure" title="Permanent link">&para;</a></h3>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">plugins</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nv">enabled</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w">                         </span><span class="c1">// Master switch</span>
+<span class="w">    </span><span class="nv">allow</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;discord&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;memory-lancedb&quot;</span><span class="p">],</span><span class="w">  </span><span class="c1">// Only load these (empty = load all)</span>
+<span class="w">    </span><span class="nv">deny</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;irc&quot;</span><span class="p">],</span><span class="w">                         </span><span class="c1">// Never load these</span>
+<span class="w">    </span><span class="nv">slots</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;memory-lancedb&quot;</span><span class="p">,</span><span class="w">            </span><span class="c1">// Which memory plugin to use</span>
+<span class="w">      </span><span class="nv">contextEngine</span><span class="p">:</span><span class="w"> </span><span class="k">null</span><span class="w">                  </span><span class="c1">// Which context engine to use</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nv">entries</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nv">&quot;memory-lancedb&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nv">enabled</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nv">config</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">                          </span><span class="c1">// Plugin-specific config</span>
+<span class="w">          </span><span class="nv">dbPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;~/.openclaw/memory&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nv">apiKey</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${OPENAI_API_KEY}&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nv">hooks</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nv">allowPromptInjection</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="w">       </span><span class="c1">// Trust this plugin&#39;s prompt hooks</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nv">installs</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">                            </span><span class="c1">// Installed plugins metadata</span>
+<span class="w">      </span><span class="nv">&quot;my-plugin&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nv">installPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;~/.openclaw/plugins/my-plugin&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nv">sourcePath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;~/dev/my-plugin&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="exclusive-slots">Exclusive Slots<a class="headerlink" href="#exclusive-slots" title="Permanent link">&para;</a></h3>
+<p>Two capabilities are <strong>exclusive</strong> — only one plugin can fill each slot:</p>
+<ol>
+<li><strong>Memory slot</strong> (<code>plugins.slots.memory</code>): Only one memory plugin active at a time. You can't have two competing long-term memories.</li>
+<li><strong>Context Engine slot</strong> (<code>plugins.slots.contextEngine</code>): Only one context engine active. It controls how the conversation window is assembled.</li>
+</ol>
+<p>If no slot is specified, the system uses its built-in implementation.</p>
+<hr />
+<h2 id="part-8-the-three-tier-cache">Part 8: The Three-Tier Cache<a class="headerlink" href="#part-8-the-three-tier-cache" title="Permanent link">&para;</a></h2>
+<p>The plugin system uses three layers of caching for performance:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>TTL</th>
+<th>Max Size</th>
+<th>What It Caches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Discovery Cache</td>
+<td>1 second</td>
+<td>Unbounded Map</td>
+<td>Filesystem scan results</td>
+</tr>
+<tr>
+<td>Manifest Cache</td>
+<td>1 second</td>
+<td>Unbounded Map</td>
+<td>Parsed manifest files</td>
+</tr>
+<tr>
+<td>Loader Registry Cache</td>
+<td>Forever (LRU)</td>
+<td>32 entries</td>
+<td>Fully loaded registries</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why 1-second TTL?</strong> During a single startup, dozens of code paths ask "what plugins are available?" The 1-second cache ensures the filesystem is scanned at most once per second. After startup, the cache naturally expires since nobody asks again until the next restart.</p>
+<p><strong>The 32-entry LRU</strong>: The fully loaded registry is expensive to create (involves Jiti compilation, module loading, registration). The LRU cache keeps the 32 most recent configurations, so switching between profiles doesn't require full reload.</p>
+<hr />
+<h2 id="how-layer-3-evolved-the-git-history">How Layer 3 Evolved: The Git History<a class="headerlink" href="#how-layer-3-evolved-the-git-history" title="Permanent link">&para;</a></h2>
+<h3 id="pre-plugin-era-november-24-2025-january-10-2026">Pre-Plugin Era (November 24, 2025 — January 10, 2026)<a class="headerlink" href="#pre-plugin-era-november-24-2025-january-10-2026" title="Permanent link">&para;</a></h3>
+<p>For the first <strong>48 days</strong>, there was NO plugin system. Channels (Discord, Telegram, WhatsApp, etc.) were hardcoded directly into <code>src/</code>. Adding a new channel meant modifying core files. The project was a monolith.</p>
+<h3 id="phase-1-the-big-decision-january-11-2026">Phase 1: The Big Decision (January 11, 2026)<a class="headerlink" href="#phase-1-the-big-decision-january-11-2026" title="Permanent link">&para;</a></h3>
+<p>Commit <code>cf0c72a55</code> — "feat: add plugin architecture" — created the entire scaffolding in one commit:</p>
+<ul>
+<li><code>src/plugins/discovery.ts</code> (269 lines) — finds plugins on disk</li>
+<li><code>src/plugins/loader.ts</code> (376 lines) — loads and initializes plugins</li>
+<li><code>src/plugins/registry.ts</code> (206 lines) — central registry</li>
+<li><code>src/cli/plugins-cli.ts</code> (266 lines) — CLI management commands</li>
+<li><code>docs/plugin.md</code> (192 lines) — documentation</li>
+<li>Tests for discovery and loader</li>
+</ul>
+<p>The <strong>first extension</strong> was <code>voice-call</code> (Twilio-based) — fitting since the project started as a Twilio webhook relay. It was the proof-of-concept that validated the plugin model.</p>
+<p>The next day (Jan 12), <code>src/plugins/types.ts</code> and <code>src/plugins/install.ts</code> (npm-based plugin installation) were added.</p>
+<h3 id="phase-2-channel-extraction-sprint-january-13-15-2026">Phase 2: Channel Extraction Sprint (January 13-15, 2026)<a class="headerlink" href="#phase-2-channel-extraction-sprint-january-13-15-2026" title="Permanent link">&para;</a></h3>
+<p>A 3-day sprint extracted channels from the monolith into plugins:</p>
+<ul>
+<li><strong>Jan 13</strong>: Breaking rename — "providers" → "channels" throughout the codebase</li>
+<li><strong>Jan 15</strong>: Channels loaded from plugin registry instead of hardcoded imports</li>
+<li><strong>Jan 15</strong>: HTTP webhook hooks added for plugins + Zalo channel (first community-contributed channel, ~2,000 lines from Vietnamese developers @suminhthanh and @longmaba)</li>
+<li><strong>Jan 15</strong>: Matrix channel plugin added</li>
+</ul>
+<h3 id="phase-3-provider-auth-plugins-january-16-17-2026">Phase 3: Provider Auth Plugins (January 16-17, 2026)<a class="headerlink" href="#phase-3-provider-auth-plugins-january-16-17-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Provider authentication extended to the plugin system</li>
+<li>MS Teams extracted from core into a plugin</li>
+<li>Config became schema-validated per plugin</li>
+</ul>
+<h3 id="phase-4-the-sdk-big-bang-january-18-2026">Phase 4: The SDK Big Bang (January 18, 2026)<a class="headerlink" href="#phase-4-the-sdk-big-bang-january-18-2026" title="Permanent link">&para;</a></h3>
+<p>The <strong>most important day</strong> in the plugin system's history. Five major commits:</p>
+<ol>
+<li><strong>Plugin SDK created</strong> (<code>src/plugin-sdk/index.ts</code>) — formalized the stable API surface that plugins import</li>
+<li><strong>Existing extensions migrated</strong> to use SDK imports instead of reaching into <code>src/</code> internals</li>
+<li><strong>Six core channels extracted in ONE commit</strong>: Discord, iMessage, Signal, Slack, Telegram, WhatsApp — each getting its own <code>extensions/&lt;channel&gt;/</code> directory</li>
+<li><strong>Plugin hooks system added</strong> — <code>api.on()</code> for lifecycle events</li>
+<li><strong>Memory plugins born</strong> — LanceDB vector storage + 13 hook types (agent, message, tool, session, gateway hooks)</li>
+</ol>
+<p><strong>Why the SDK?</strong> The previous week showed plugins reaching directly into <code>src/</code> internals. When internal code changed, plugins broke. The SDK provided a stable contract — change the internals all you want, as long as the SDK exports stay the same.</p>
+<h3 id="phase-5-extension-explosion-january-19-february-2026">Phase 5: Extension Explosion (January 19 — February 2026)<a class="headerlink" href="#phase-5-extension-explosion-january-19-february-2026" title="Permanent link">&para;</a></h3>
+<p>With the SDK in place, extensions proliferated:</p>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Extension</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jan 18</td>
+<td>BlueBubbles, memory-core, memory-lancedb</td>
+<td></td>
+</tr>
+<tr>
+<td>Jan 20</td>
+<td>Nostr, Nextcloud Talk</td>
+<td></td>
+</tr>
+<tr>
+<td>Jan 22</td>
+<td>LLM-task</td>
+<td></td>
+</tr>
+<tr>
+<td>Jan 23</td>
+<td>Google Chat</td>
+<td></td>
+</tr>
+<tr>
+<td>Jan 25</td>
+<td>LINE</td>
+<td>Community PR #1630 from @plum-dawg</td>
+</tr>
+<tr>
+<td>Jan 27</td>
+<td>Twitch</td>
+<td>Community PR #1612</td>
+</tr>
+<tr>
+<td>Jan 30</td>
+<td><em>Rename to "openclaw"</em></td>
+<td></td>
+</tr>
+<tr>
+<td>Feb 2</td>
+<td>Feishu/Lark</td>
+<td></td>
+</tr>
+<tr>
+<td>Feb 8</td>
+<td>Device-pair, Phone-control</td>
+<td>First non-channel plugins</td>
+</tr>
+<tr>
+<td>Feb 10</td>
+<td>IRC</td>
+<td></td>
+</tr>
+<tr>
+<td>Feb 13</td>
+<td>Thread-ownership</td>
+<td>Community contribution</td>
+</tr>
+<tr>
+<td>Feb 28</td>
+<td>Diffs</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Today there are <strong>44 extensions</strong> in the <code>extensions/</code> directory.</p>
+<h3 id="phase-6-security-hardening-february-19-2026">Phase 6: Security Hardening (February 19+, 2026)<a class="headerlink" href="#phase-6-security-hardening-february-19-2026" title="Permanent link">&para;</a></h3>
+<p>The open-source launch exposed the plugin system to untrusted code:</p>
+<ul>
+<li>Path containment enforcement (symlink and hardlink attacks blocked)</li>
+<li>Discovery trust checks (permission validation, ownership verification)</li>
+<li>Boundary hardening for file reads</li>
+<li>Prompt injection protection (<code>allowPromptInjection</code> config flag)</li>
+</ul>
+<h3 id="phase-7-api-maturation-february-march-2026">Phase 7: API Maturation (February — March 2026)<a class="headerlink" href="#phase-7-api-maturation-february-march-2026" title="Permanent link">&para;</a></h3>
+<p>The API grew via concrete needs:</p>
+<ul>
+<li><strong>Hook types expanded</strong>: Compaction hooks, reset hooks, LLM input/output observation (PR #16724 from @SecondThread), session lifecycle hooks, prompt policy enforcement</li>
+<li><strong>Context Engine slot</strong>: Full context engine replacement via plugin (PR #22201 from @josh at Martian)</li>
+<li><strong>Provider plugins</strong>: Ollama, SGLang, vLLM extracted as provider plugins</li>
+<li><strong>SDK subpaths</strong>: <code>openclaw/plugin-sdk/channels</code>, <code>openclaw/plugin-sdk/auth</code>, etc.</li>
+<li><strong>Collision detection</strong> (March 13, latest): Duplicate channel IDs and adapter registrations rejected at startup</li>
+</ul>
+<h3 id="evolution-timeline">Evolution Timeline<a class="headerlink" href="#evolution-timeline" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Event</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nov 24, 2025</td>
+<td>Project created</td>
+<td>No plugin system — monolith</td>
+</tr>
+<tr>
+<td><strong>Jan 11, 2026</strong></td>
+<td><strong>Plugin architecture created</strong></td>
+<td>discovery.ts, loader.ts, registry.ts, first extension</td>
+</tr>
+<tr>
+<td>Jan 13-15</td>
+<td>Channels extracted to plugins</td>
+<td>providers → channels rename</td>
+</tr>
+<tr>
+<td>Jan 16-17</td>
+<td>Provider auth plugins</td>
+<td>MS Teams extracted</td>
+</tr>
+<tr>
+<td><strong>Jan 18</strong></td>
+<td><strong>SDK Big Bang</strong></td>
+<td>SDK formalized, 6 channels extracted, hooks + memory</td>
+</tr>
+<tr>
+<td>Jan 19-30</td>
+<td>Extension explosion</td>
+<td>10+ new extensions in 12 days</td>
+</tr>
+<tr>
+<td>Jan 30</td>
+<td>Renamed to "openclaw"</td>
+<td></td>
+</tr>
+<tr>
+<td>Feb 8</td>
+<td>Non-channel plugins</td>
+<td>Device-pair, phone-control</td>
+</tr>
+<tr>
+<td>Feb 19+</td>
+<td>Security hardening</td>
+<td>Path containment, trust checks</td>
+</tr>
+<tr>
+<td>Mar 6</td>
+<td>Context engine slot</td>
+<td>Plugins can replace context management</td>
+</tr>
+<tr>
+<td>Mar 12</td>
+<td>Provider plugin extraction</td>
+<td>Ollama, SGLang, vLLM</td>
+</tr>
+<tr>
+<td>Mar 13</td>
+<td>Collision detection</td>
+<td>Duplicate channel ID rejection</td>
+</tr>
+</tbody>
+</table>
+<h3 id="by-the-numbers">By the Numbers<a class="headerlink" href="#by-the-numbers" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Commits touching <code>src/plugins/</code></td>
+<td><strong>399</strong></td>
+</tr>
+<tr>
+<td>Commits touching <code>src/plugin-sdk/</code></td>
+<td><strong>271</strong></td>
+</tr>
+<tr>
+<td>Commits touching <code>extensions/</code></td>
+<td><strong>1,894</strong></td>
+</tr>
+<tr>
+<td>Extensions in <code>extensions/</code></td>
+<td><strong>44</strong></td>
+</tr>
+<tr>
+<td>Days from project start to plugin system</td>
+<td><strong>48 days</strong></td>
+</tr>
+<tr>
+<td>Days from plugin architecture to SDK</td>
+<td><strong>7 days</strong></td>
+</tr>
+<tr>
+<td>Hook types available</td>
+<td><strong>24</strong></td>
+</tr>
+<tr>
+<td>Plugin API registration methods</td>
+<td><strong>12</strong></td>
+</tr>
+<tr>
+<td>SDK exports</td>
+<td><strong>150+</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-takeaways">Key Takeaways<a class="headerlink" href="#key-takeaways" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>The plugin system was a deliberate architectural decision, not organic growth.</strong> It arrived fully formed on Jan 11, 2026, after 48 days of monolithic development.</p>
+</li>
+<li>
+<p><strong>Voice-call was the proving ground.</strong> The first extension validated the model before the massive channel extraction.</p>
+</li>
+<li>
+<p><strong>The SDK was a retroactive stabilization layer.</strong> The 7-day gap between "plugin architecture" and "plugin SDK" shows the team learned that plugins reaching into internals was unsustainable.</p>
+</li>
+<li>
+<p><strong>January 18 was the true inflection point.</strong> Six core channels extracted + SDK + hooks + memory in a single day. This was when the plugin system went from "architecture" to "ecosystem."</p>
+</li>
+<li>
+<p><strong>Security came after openness.</strong> Path containment and trust checks were added after the open-source launch, showing hardening was reactive to the broader contributor base.</p>
+</li>
+<li>
+<p><strong>The API grew from concrete needs, not speculation.</strong> Each hook type and capability was added to support a specific extension. Nothing was designed hypothetically.</p>
+</li>
+</ol>
+<hr />
+<h2 id="file-reference">File Reference<a class="headerlink" href="#file-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/plugins/discovery.ts</code></td>
+<td>~738</td>
+<td>Scan plugin roots, security checks, deduplication</td>
+</tr>
+<tr>
+<td><code>src/plugins/manifest-registry.ts</code></td>
+<td>~266</td>
+<td>Load/validate manifests, resolve by origin</td>
+</tr>
+<tr>
+<td><code>src/plugins/loader.ts</code></td>
+<td>~912</td>
+<td>Jiti loading, 14-step pipeline, registry creation</td>
+</tr>
+<tr>
+<td><code>src/plugins/registry.ts</code></td>
+<td>~636</td>
+<td>Registry factory, API creation, registration functions</td>
+</tr>
+<tr>
+<td><code>src/plugins/types.ts</code></td>
+<td>~996</td>
+<td>All plugin types (API, hooks, events, contexts)</td>
+</tr>
+<tr>
+<td><code>src/plugins/manifest.ts</code></td>
+<td>~199</td>
+<td>Plugin manifest parsing</td>
+</tr>
+<tr>
+<td><code>src/plugins/hooks.ts</code></td>
+<td>~200+</td>
+<td>Hook execution engine</td>
+</tr>
+<tr>
+<td><code>src/plugins/hook-runner-global.ts</code></td>
+<td>~100+</td>
+<td>Global hook runner singleton</td>
+</tr>
+<tr>
+<td><code>src/plugins/roots.ts</code></td>
+<td>~47</td>
+<td>Resolve plugin source directories</td>
+</tr>
+<tr>
+<td><code>src/plugins/config-state.ts</code></td>
+<td>~100+</td>
+<td>Normalize plugin configuration</td>
+</tr>
+<tr>
+<td><code>src/plugin-sdk/index.ts</code></td>
+<td>~850+</td>
+<td>150+ SDK exports</td>
+</tr>
+<tr>
+<td><code>src/plugin-sdk/core.ts</code></td>
+<td>varies</td>
+<td>Core SDK types and helpers</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-plugins.ts</code></td>
+<td>varies</td>
+<td>Gateway plugin loading integration</td>
+</tr>
+<tr>
+<td><code>src/gateway/server/plugins-http.ts</code></td>
+<td>varies</td>
+<td>Plugin HTTP route handler</td>
+</tr>
+<tr>
+<td><code>src/gateway/server/plugins-http/route-match.ts</code></td>
+<td>varies</td>
+<td>Route matching logic</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

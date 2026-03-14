@@ -1,0 +1,2757 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-8-context-engine/">
+      
+      
+        <link rel="next" href="../layer-10-canvas-a2ui/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 9: Voice / TTS - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-9-voice-tts-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 9: Voice / TTS
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-voicetts-the-simple-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Voice/TTS? (The Simple Version)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-text-to-speech-core-making-the-ai-talk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Text-to-Speech Core — Making the AI Talk
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Text-to-Speech Core — Making the AI Talk">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-tts-configuration-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The TTS Configuration System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tts-directive-tags-ai-controlled-voice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TTS Directive Tags — AI-Controlled Voice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#text-preparation-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Text Preparation Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-the-main-tts-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: The Main TTS Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: The Main TTS Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#output-format-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output Format Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-conversion-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Conversion Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-tts-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-TTS Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-tts-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The /tts Command
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-agent-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Agent Tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-voice-calls-real-phone-conversations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Voice Calls — Real Phone Conversations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Voice Calls — Real Phone Conversations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#call-state-machine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Call State Machine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#three-telephony-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three Telephony Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#call-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Call Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-multi-turn-conversation-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Multi-Turn Conversation Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-streaming-real-time-audio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Streaming (Real-Time Audio)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audio-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audio Processing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webhook Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webhook Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tunneling-for-local-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tunneling for Local Development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inbound-call-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inbound Call Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#call-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Call Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-discord-voice-ai-in-voice-channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Discord Voice — AI in Voice Channels
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Discord Voice — AI in Voice Channels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#discord-voice-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discord Voice Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voice Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-voice-mapping-cross-provider-voice-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Voice Mapping — Cross-Provider Voice Names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-response-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Response Generation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git-history-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git History Evolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Git History Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-very-beginning-twilio-whatsapp-relay-nov-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Very Beginning: Twilio WhatsApp Relay (Nov 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-wake-and-talk-mode-dec-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voice Wake and Talk Mode (Dec 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#telegram-voice-notes-jan-4-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telegram Voice Notes (Jan 4, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-voice-call-plugin-explosion-jan-1114-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Voice-Call Plugin Explosion (Jan 11–14, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sherpa-onnx-fully-local-tts-jan-21-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sherpa-ONNX: Fully Local TTS (Jan 21, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-telegram-tts-core-migration-jan-2325-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Telegram-TTS → Core Migration (Jan 23–25, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community-hardening-feb-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community Hardening (Feb 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#discord-voice-channel-integration-feb-20-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discord Voice Channel Integration (Feb 20, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#late-additions-febmar-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Late Additions (Feb–Mar 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-evolution-in-four-sentences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Evolution in Four Sentences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-voicetts-the-simple-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Voice/TTS? (The Simple Version)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-text-to-speech-core-making-the-ai-talk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Text-to-Speech Core — Making the AI Talk
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Text-to-Speech Core — Making the AI Talk">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-tts-configuration-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The TTS Configuration System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tts-directive-tags-ai-controlled-voice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TTS Directive Tags — AI-Controlled Voice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#text-preparation-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Text Preparation Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-the-main-tts-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: The Main TTS Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: The Main TTS Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#output-format-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output Format Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-conversion-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Conversion Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-tts-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-TTS Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-tts-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The /tts Command
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-agent-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Agent Tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gateway-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-voice-calls-real-phone-conversations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Voice Calls — Real Phone Conversations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Voice Calls — Real Phone Conversations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#call-state-machine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Call State Machine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#three-telephony-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three Telephony Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#call-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Call Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-multi-turn-conversation-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Multi-Turn Conversation Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-streaming-real-time-audio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Streaming (Real-Time Audio)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audio-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audio Processing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webhook Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webhook Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tunneling-for-local-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tunneling for Local Development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inbound-call-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inbound Call Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#call-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Call Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-discord-voice-ai-in-voice-channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Discord Voice — AI in Voice Channels
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Discord Voice — AI in Voice Channels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#discord-voice-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discord Voice Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voice Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-voice-mapping-cross-provider-voice-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Voice Mapping — Cross-Provider Voice Names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-response-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Response Generation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git-history-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git History Evolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Git History Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-very-beginning-twilio-whatsapp-relay-nov-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Very Beginning: Twilio WhatsApp Relay (Nov 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-wake-and-talk-mode-dec-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voice Wake and Talk Mode (Dec 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#telegram-voice-notes-jan-4-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telegram Voice Notes (Jan 4, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-voice-call-plugin-explosion-jan-1114-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Voice-Call Plugin Explosion (Jan 11–14, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sherpa-onnx-fully-local-tts-jan-21-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sherpa-ONNX: Fully Local TTS (Jan 21, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-telegram-tts-core-migration-jan-2325-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Telegram-TTS → Core Migration (Jan 23–25, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community-hardening-feb-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community Hardening (Feb 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#discord-voice-channel-integration-feb-20-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discord Voice Channel Integration (Feb 20, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#late-additions-febmar-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Late Additions (Feb–Mar 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-evolution-in-four-sentences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Evolution in Four Sentences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-9-voice-tts-deep-dive">Layer 9: Voice / TTS — Deep Dive<a class="headerlink" href="#layer-9-voice-tts-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-voicetts-the-simple-version">What Is Voice/TTS? (The Simple Version)<a class="headerlink" href="#what-is-voicetts-the-simple-version" title="Permanent link">&para;</a></h2>
+<p>Imagine you have a super-smart friend who only communicates by text messages. That's your AI assistant. But sometimes you're driving, cooking, or just too lazy to read — you want your friend to <strong>talk to you</strong> with their actual voice. And sometimes you want to <strong>call them on the phone</strong> and have a real conversation.</p>
+<p>That's what the Voice/TTS layer does:</p>
+<ol>
+<li><strong>Text-to-Speech (TTS)</strong>: Takes the AI's text reply and converts it to audio — like having someone read it out loud</li>
+<li><strong>Voice Calls</strong>: Lets you actually phone-call the AI through Twilio, Telnyx, or Plivo — with real-time back-and-forth conversation</li>
+<li><strong>Discord Voice</strong>: Lets the AI join a Discord voice channel and talk/listen in real-time</li>
+</ol>
+<p>Think of it as three levels of voice:
+- <strong>Level 1</strong>: AI sends you a voice note instead of text (TTS)
+- <strong>Level 2</strong>: You call the AI on a real phone number (Voice Calls)
+- <strong>Level 3</strong>: AI sits in a Discord voice channel chatting with everyone (Discord Voice)</p>
+<hr />
+<h2 id="part-1-text-to-speech-core-making-the-ai-talk">Part 1: Text-to-Speech Core — Making the AI Talk<a class="headerlink" href="#part-1-text-to-speech-core-making-the-ai-talk" title="Permanent link">&para;</a></h2>
+<h3 id="the-tts-configuration-system">The TTS Configuration System<a class="headerlink" href="#the-tts-configuration-system" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/tts/tts-core.ts</code> (719 lines)</p>
+<p>TTS starts with configuration. There are four TTS backends, each with its own settings:</p>
+<h4 id="backend-1-elevenlabs-cloud-premium">Backend 1: ElevenLabs (Cloud, Premium)<a class="headerlink" href="#backend-1-elevenlabs-cloud-premium" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code>Default voice ID: pMsXgVXv3BLzUgSXRplE
+Default model: eleven_multilingual_v2
+API: POST to {baseUrl}/v1/text-to-speech/{voiceId}
+Auth: xi-api-key header
+</code></pre></div>
+<p>ElevenLabs is the premium option — it supports voice cloning, multiple languages, and fine-grained control:
+- <strong>stability</strong> (0–1): How consistent the voice sounds. Low = more expressive but variable
+- <strong>similarityBoost</strong> (0–1): How close to the original voice clone
+- <strong>style</strong> (0–1): How much style/emotion to add
+- <strong>useSpeakerBoost</strong>: Amplify the speaker characteristics
+- <strong>speed</strong> (0.5–2): Playback speed
+- <strong>seed</strong>: For reproducible audio output
+- <strong>applyTextNormalization</strong>: "auto", "on", or "off" — how to handle numbers, abbreviations, etc.
+- <strong>languageCode</strong>: 2-letter ISO 639-1 code for multilingual voices</p>
+<h4 id="backend-2-openai-tts-cloud-easy">Backend 2: OpenAI TTS (Cloud, Easy)<a class="headerlink" href="#backend-2-openai-tts-cloud-easy" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code>Default model: gpt-4o-mini-tts
+Default voice: alloy
+Models: gpt-4o-mini-tts, tts-1, tts-1-hd
+API: POST to {baseUrl}/audio/speech
+</code></pre></div>
+<p>OpenAI TTS has 14 voices: alloy, ash, ballad, cedar, coral, echo, fable, juniper, marin, onyx, nova, sage, shimmer, verse.</p>
+<p>The <code>gpt-4o-mini-tts</code> model is special — it supports <strong>instructions</strong> (like "speak in a warm, friendly tone"), which the older tts-1 models don't.</p>
+<p>Custom OpenAI-compatible endpoints are supported. When using a non-default base URL, any voice or model name is accepted (since third-party services may have different options).</p>
+<h4 id="backend-3-edge-tts-free-offline-ish">Backend 3: Edge TTS (Free, Offline-ish)<a class="headerlink" href="#backend-3-edge-tts-free-offline-ish" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code>Default voice: en-US-MichelleNeural
+Default language: en-US
+Default format: audio-24khz-48kbitrate-mono-mp3
+Library: node-edge-tts
+</code></pre></div>
+<p>Edge TTS uses Microsoft's text-to-speech engine (the one built into Edge browser). It's free, requires no API key, and works as a fallback when cloud providers aren't configured.</p>
+<h4 id="backend-4-sherpa-onnx-fully-local">Backend 4: Sherpa-ONNX (Fully Local)<a class="headerlink" href="#backend-4-sherpa-onnx-fully-local" title="Permanent link">&para;</a></h4>
+<p>A skill (not a code backend) that runs TTS entirely on your device using the Sherpa-ONNX inference engine with Piper VITS models. Zero cloud dependency. Supports macOS, Linux, and Windows.</p>
+<h3 id="tts-directive-tags-ai-controlled-voice">TTS Directive Tags — AI-Controlled Voice<a class="headerlink" href="#tts-directive-tags-ai-controlled-voice" title="Permanent link">&para;</a></h3>
+<p>The AI can embed special tags in its text to control how it's spoken:</p>
+<div class="language-text highlight"><pre><span></span><code>[[tts:provider=elevenlabs]]
+[[tts:voice=shimmer]]
+[[tts:speed=1.5]]
+[[tts:stability=0.8]]
+[[tts:text]]This is spoken differently from the visible text.[[/tts:text]]
+</code></pre></div>
+<p>The directive parser (<code>parseTtsDirectives()</code>) uses a two-pass regex:
+1. <strong>Block tags</strong>: <code>[[tts:text]]...[[/tts:text]]</code> — replacement text for TTS
+2. <strong>Inline tags</strong>: <code>[[tts:key=value]]</code> — override provider, voice, model, speed, etc.</p>
+<p>After parsing, directives are stripped from the visible text. The AI can write one thing and speak another.</p>
+<p><strong>Security</strong>: Model override permissions are controlled by a policy:
+<div class="language-typescript highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">allowText</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w">        </span><span class="c1">// AI can provide alternate TTS text</span>
+<span class="w">  </span><span class="nx">allowProvider</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span><span class="w">    </span><span class="c1">// AI can&#39;t switch providers (opt-in only — billing concern)</span>
+<span class="w">  </span><span class="nx">allowVoice</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w">       </span><span class="c1">// AI can pick a voice</span>
+<span class="w">  </span><span class="nx">allowModelId</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w">     </span><span class="c1">// AI can pick a model</span>
+<span class="w">  </span><span class="nx">allowVoiceSettings</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="c1">// AI can adjust stability/speed</span>
+<span class="w">  </span><span class="nx">allowNormalization</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">allowSeed</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><code>allowProvider</code> is false by default — because switching providers could incur unexpected costs.</p>
+<h3 id="text-preparation-pipeline">Text Preparation Pipeline<a class="headerlink" href="#text-preparation-pipeline" title="Permanent link">&para;</a></h3>
+<p>Before text reaches a TTS engine, it goes through several steps:</p>
+<ol>
+<li><strong>Parse directives</strong> — extract and remove <code>[[tts:...]]</code> tags</li>
+<li><strong>Strip markdown</strong> — remove <code>###</code>, <code>**bold**</code>, <code>`code`</code>, <code>&gt; blockquotes</code>, <code>~~strikethrough~~</code>, and horizontal rules</li>
+<li><strong>Check length</strong> — if text &gt; <code>maxTextLength</code> (default 1500 chars):</li>
+<li><strong>Summarize</strong> with AI (if enabled) — uses <code>completeSimple()</code> with temperature 0.3</li>
+<li><strong>Truncate</strong> if summarization is disabled or fails</li>
+<li><strong>Minimum check</strong> — skip TTS if text &lt; 10 chars after cleaning</li>
+</ol>
+<p>The summarization function (<code>summarizeText()</code>) supports configuring a separate <code>summaryModel</code> (e.g., a cheaper/faster model for summaries), and can even use Ollama for fully local summarization.</p>
+<hr />
+<h2 id="part-2-the-main-tts-engine">Part 2: The Main TTS Engine<a class="headerlink" href="#part-2-the-main-tts-engine" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/tts/tts.ts</code> (1,004 lines)</p>
+<h3 id="output-format-selection">Output Format Selection<a class="headerlink" href="#output-format-selection" title="Permanent link">&para;</a></h3>
+<p>Different channels need different audio formats:</p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Format</th>
+<th>Sample Rate</th>
+<th>Bitrate</th>
+<th>Voice Bubble?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Telegram</td>
+<td>opus</td>
+<td>48kHz</td>
+<td>64kbps</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Feishu</td>
+<td>opus</td>
+<td>48kHz</td>
+<td>64kbps</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>WhatsApp</td>
+<td>opus</td>
+<td>48kHz</td>
+<td>64kbps</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Everything else</td>
+<td>mp3</td>
+<td>44.1kHz</td>
+<td>128kbps</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Telephony (OpenAI)</td>
+<td>pcm</td>
+<td>24kHz</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Telephony (ElevenLabs)</td>
+<td>pcm</td>
+<td>22.05kHz</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>"Voice bubble" means the message appears as a playable voice note in the chat (like a WhatsApp voice message) rather than a file attachment.</p>
+<h3 id="the-conversion-flow">The Conversion Flow<a class="headerlink" href="#the-conversion-flow" title="Permanent link">&para;</a></h3>
+<p><strong><code>textToSpeech(params)</code></strong> — the main function:</p>
+<ol>
+<li>Resolve configuration (merge config + user prefs + directives)</li>
+<li>Select provider (user preference, then fallback order)</li>
+<li>Call the backend:</li>
+<li><strong>Edge</strong>: Use <code>node-edge-tts</code> library → generates file locally → retry with default format on failure</li>
+<li><strong>ElevenLabs</strong>: POST to API → receive audio buffer → write temp file</li>
+<li><strong>OpenAI</strong>: POST to API → receive audio buffer → write temp file</li>
+<li>Write audio to temp file with appropriate extension (.opus, .mp3, etc.)</li>
+<li>Schedule cleanup after 5 minutes</li>
+<li>Return <code>TtsResult</code> with audioPath, provider, latency, etc.</li>
+</ol>
+<p><strong>Provider fallback</strong>: If the first provider fails, the next one is tried. This is how Edge TTS serves as a free fallback.</p>
+<h3 id="auto-tts-modes">Auto-TTS Modes<a class="headerlink" href="#auto-tts-modes" title="Permanent link">&para;</a></h3>
+<p>The system has four auto-TTS modes that control when replies become audio:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>off</code></td>
+<td>Never auto-generate audio</td>
+</tr>
+<tr>
+<td><code>always</code></td>
+<td>Every reply becomes audio</td>
+</tr>
+<tr>
+<td><code>inbound</code></td>
+<td>Only when the user sent a voice message</td>
+</tr>
+<tr>
+<td><code>tagged</code></td>
+<td>Only when the AI includes <code>[[tts]]</code> directives</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>maybeApplyTtsToPayload()</code></strong> — the integration point for message delivery:
+1. Check auto-mode gates (off? skip. inbound? check if user sent audio. tagged? check for directives.)
+2. Check mode gates — if mode="final", skip non-final streaming chunks
+3. Skip if message already has media (mediaUrl/mediaUrls or "MEDIA:" prefix)
+4. Process text through the preparation pipeline
+5. Convert to audio
+6. Attach <code>mediaUrl</code> to the payload; set <code>audioAsVoice=true</code> for Telegram/Feishu/WhatsApp</p>
+<h3 id="user-preferences">User Preferences<a class="headerlink" href="#user-preferences" title="Permanent link">&para;</a></h3>
+<p>TTS preferences persist in <code>~/.openclaw/settings/tts.json</code> using atomic writes (write to temp file, then rename). Users can control:
+- Auto mode (off/always/inbound/tagged)
+- Provider (openai/elevenlabs/edge)
+- Max text length (100–4096 chars)
+- Summarization on/off</p>
+<h3 id="the-tts-command">The <code>/tts</code> Command<a class="headerlink" href="#the-tts-command" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/auto-reply/reply/commands-tts.ts</code> (280 lines)</p>
+<p>Users can control TTS through chat commands:
+- <code>/tts</code> or <code>/tts status</code> — show current settings
+- <code>/tts on</code> / <code>/tts off</code> — enable/disable
+- <code>/tts provider openai</code> — switch provider
+- <code>/tts limit 2000</code> — change max text length
+- <code>/tts summary on</code> — enable auto-summarization
+- <code>/tts audio Hello world</code> — generate audio on demand
+- <code>/tts help</code> — show usage</p>
+<h3 id="the-agent-tool">The Agent Tool<a class="headerlink" href="#the-agent-tool" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/agents/tools/tts-tool.ts</code> (62 lines)</p>
+<p>The AI can also explicitly generate audio via the <code>tts</code> tool:
+<div class="language-typescript highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;tts&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">schema</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">String</span><span class="p">,</span><span class="w">          </span><span class="c1">// Required: text to convert</span>
+<span class="w">    </span><span class="nx">channel</span><span class="o">:</span><span class="w"> </span><span class="kt">Optional</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="w">  </span><span class="c1">// Optional: channel for format selection</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>On success, returns <code>MEDIA:{audioPath}</code> (with optional <code>[[audio_as_voice]]</code> tag). The tool description includes <code>SILENT_REPLY_TOKEN</code> — telling the AI to not send a text reply after generating audio, to avoid duplicate messages.</p>
+<h3 id="gateway-api">Gateway API<a class="headerlink" href="#gateway-api" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/gateway/server-methods/tts.ts</code> (157 lines)</p>
+<p>External clients (companion apps, web UI) can access TTS through:
+- <code>tts.status</code> — current settings, provider, key availability
+- <code>tts.convert</code> — convert text to audio
+- <code>tts.enable</code> / <code>tts.disable</code> — toggle
+- <code>tts.setProvider</code> — switch provider
+- <code>tts.providers</code> — list available providers with models and voices</p>
+<hr />
+<h2 id="part-3-voice-calls-real-phone-conversations">Part 3: Voice Calls — Real Phone Conversations<a class="headerlink" href="#part-3-voice-calls-real-phone-conversations" title="Permanent link">&para;</a></h2>
+<p><strong>Directory:</strong> <code>extensions/voice-call/</code> (60+ files)</p>
+<p>This is where things get serious. The voice-call extension lets you have actual phone conversations with the AI — including outbound calls, inbound calls, and multi-turn dialogue.</p>
+<h3 id="call-state-machine">Call State Machine<a class="headerlink" href="#call-state-machine" title="Permanent link">&para;</a></h3>
+<p>Every call follows this state machine:</p>
+<div class="language-text highlight"><pre><span></span><code>[initiated] → [ringing] → [answered] → [active]
+                                           │
+                                    ┌──────┴──────┐
+                                    ▼              ▼
+                               [speaking]  ←→  [listening]
+                                    │
+                                    ▼ (terminal)
+        [completed | hangup-user | hangup-bot | timeout |
+         error | failed | no-answer | busy | voicemail]
+</code></pre></div>
+<p>States only move <strong>forward</strong> (you can't go from "answered" back to "ringing"), except for the <code>speaking ↔ listening</code> cycle which repeats for multi-turn conversations. Any state can transition to a terminal state.</p>
+<h3 id="three-telephony-providers">Three Telephony Providers<a class="headerlink" href="#three-telephony-providers" title="Permanent link">&para;</a></h3>
+<h4 id="twilio">Twilio<a class="headerlink" href="#twilio" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Auth</strong>: Account SID + Auth Token</li>
+<li><strong>Webhook verification</strong>: HMAC-SHA1 (URL + sorted POST params)</li>
+<li><strong>Media streams</strong>: WebSocket-based real-time audio</li>
+<li><strong>Special</strong>: TwiML-based call control, <code>&lt;Gather&gt;</code> for speech recognition, <code>&lt;Say&gt;</code> for TTS, <code>&lt;Stream&gt;</code> for bidirectional audio</li>
+<li><strong>Token auth</strong>: Per-call crypto.randomBytes(16) tokens passed via <code>&lt;Parameter&gt;</code> (not query string, for security)</li>
+</ul>
+<h4 id="telnyx">Telnyx<a class="headerlink" href="#telnyx" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Auth</strong>: Bearer token (API key)</li>
+<li><strong>Webhook verification</strong>: Ed25519 signature with timestamp clock-skew check (5 min max)</li>
+<li><strong>Call control</strong>: REST API v2 (<code>https://api.telnyx.com/v2</code>)</li>
+<li><strong>Special</strong>: client_state field (Base64-encoded callId) for tracking</li>
+<li><strong>Hangup cause mapping</strong>: Telnyx codes → normalized EndReason (normal_clearing→completed, no_answer→no-answer, etc.)</li>
+</ul>
+<h4 id="plivo">Plivo<a class="headerlink" href="#plivo" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Auth</strong>: Basic auth (Base64 of authId:authToken)</li>
+<li><strong>Webhook verification</strong>: HMAC-SHA256, supports V2 and V3 signatures</li>
+<li><strong>Call control</strong>: REST API (<code>https://api.plivo.com/v1/Account/{authId}</code>)</li>
+<li><strong>Special</strong>: XML-based flow routing (flow=xml-speak, flow=xml-listen), transfer between call legs</li>
+</ul>
+<h3 id="call-modes">Call Modes<a class="headerlink" href="#call-modes" title="Permanent link">&para;</a></h3>
+<p><strong>Notify mode</strong>: The AI calls you, says a message, waits a few seconds (<code>notifyHangupDelaySec</code>, default 3s), and hangs up. One-way delivery.</p>
+<p><strong>Conversation mode</strong>: Full multi-turn dialogue. The AI speaks, then listens, then responds, in a loop until someone hangs up or a timeout is reached.</p>
+<h3 id="the-multi-turn-conversation-loop">The Multi-Turn Conversation Loop<a class="headerlink" href="#the-multi-turn-conversation-loop" title="Permanent link">&para;</a></h3>
+<p>When <code>continueCall()</code> is called:</p>
+<ol>
+<li><strong>Speak</strong> the prompt — transitions to <code>speaking</code> state</li>
+<li><strong>Listen</strong> — transitions to <code>listening</code> state, generates a <code>turnToken</code> (nonce for replay hardening)</li>
+<li><strong>Wait</strong> for transcript — <code>waitForFinalTranscript()</code> with timeout (180s default)</li>
+<li><strong>Process</strong> — the transcript is returned to the caller</li>
+<li><strong>Generate response</strong> — <code>generateVoiceResponse()</code> runs an embedded Pi agent</li>
+<li>Loop back to step 1</li>
+</ol>
+<p>Latency is tracked per turn: <code>lastTurnLatencyMs</code> (total) and <code>lastTurnListenWaitMs</code> (listening portion).</p>
+<h3 id="media-streaming-real-time-audio">Media Streaming (Real-Time Audio)<a class="headerlink" href="#media-streaming-real-time-audio" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>extensions/voice-call/src/media-stream.ts</code> (528 lines)</p>
+<p>For Twilio streaming, audio flows through WebSockets in real-time:</p>
+<div class="language-text highlight"><pre><span></span><code>User speaks on phone
+  → Twilio sends Opus audio frames via WebSocket
+  → MediaStreamHandler receives &quot;media&quot; messages
+  → Forwards audio to OpenAI Realtime STT session
+  → STT transcribes to text
+  → manager.processEvent(call.speech)
+  → generateVoiceResponse() via embedded Pi agent
+  → TelephonyTtsProvider synthesizes response audio
+  → Convert PCM → mu-law 8kHz (telephony standard)
+  → Queue for serialized playback (prevents overlap)
+  → Chunk into 20ms frames (160 bytes @ 8kHz mono)
+  → Send back through WebSocket
+  → Twilio plays audio to caller
+</code></pre></div>
+<p><strong>Connection limits</strong> (anti-abuse):
+- Max pending connections: 32
+- Max per IP: 4
+- Max total: 128
+- Pre-start timeout: 5s</p>
+<p><strong>TTS Queue</strong> (<code>queueTts()</code>): Serializes TTS playback — ensures audio chunks don't overlap. Uses an AbortController for barge-in (when the user starts talking mid-playback).</p>
+<h3 id="audio-processing">Audio Processing<a class="headerlink" href="#audio-processing" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>extensions/voice-call/src/telephony-audio.ts</code> (91 lines)</p>
+<p>Telephony uses a specific audio format: <strong>8kHz mono mu-law</strong> (G.711 standard). The system converts from the TTS output:</p>
+<ol>
+<li><strong>Resample</strong> — linear interpolation from source sample rate (24kHz for OpenAI, 22.05kHz for ElevenLabs) down to 8kHz</li>
+<li><strong>PCM to mu-law</strong> — compress 16-bit linear PCM to 8-bit mu-law encoding:</li>
+<li>Sign bit extraction</li>
+<li>Exponent field (3 bits) — logarithmic compression</li>
+<li>Mantissa (4 bits) — fine detail</li>
+<li>Final bit inversion: <code>~(sign | (exp &lt;&lt; 4) | mantissa) &amp; 0xff</code></li>
+<li><strong>Chunk</strong> — split into 20ms frames (160 bytes at 8kHz mono)</li>
+</ol>
+<h3 id="webhook-server">Webhook Server<a class="headerlink" href="#webhook-server" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>extensions/voice-call/src/webhook.ts</code> (488 lines)</p>
+<p>The webhook server receives callbacks from telephony providers:</p>
+<ol>
+<li>HTTP server on port 3334 (default), bound to 127.0.0.1</li>
+<li>WebSocket upgrade support for media streams</li>
+<li>Request pipeline:</li>
+<li>Path matching (<code>/voice/webhook</code> or <code>/voice/hold-music</code>)</li>
+<li>Signature verification (HMAC-SHA1/Ed25519/HMAC-SHA256 depending on provider)</li>
+<li>Event parsing → normalized events</li>
+<li>Replay detection (logged but still processed)</li>
+<li>Pass to <code>manager.processEvent()</code></li>
+<li>Return provider-specific response (TwiML XML or JSON)</li>
+</ol>
+<p><strong>Stale call reaper</strong>: Optional periodic cleanup of calls stuck in non-terminal states (<code>staleCallReaperSeconds</code> config).</p>
+<h3 id="webhook-security">Webhook Security<a class="headerlink" href="#webhook-security" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>extensions/voice-call/src/webhook-security.ts</code> (981 lines)</p>
+<p>This is the most security-critical file in the voice system:</p>
+<p><strong>Replay protection</strong>:
+- Per-provider replay cache mapping dedupeKey → expiration
+- 10-minute replay window
+- Auto-prune when cache exceeds 10,000 entries
+- Prunes every 64th call for efficiency</p>
+<p><strong>URL reconstruction</strong> (for signature verification):
+- Priority: X-Forwarded-Proto + X-Forwarded-Host → X-Original-Host → Ngrok-Forwarded-Host → Host header → fallback
+- RFC 1123 hostname validation
+- IPv6 support (<code>[::1]:port</code> format)
+- Rejects <code>@</code> character (user info injection attack)
+- Optional allowedHosts whitelist
+- Optional trustedProxyIPs list</p>
+<h3 id="tunneling-for-local-development">Tunneling for Local Development<a class="headerlink" href="#tunneling-for-local-development" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>extensions/voice-call/src/tunnel.ts</code> (315 lines)</p>
+<p>Since telephony providers need to reach your webhook, local development requires tunneling:</p>
+<p><strong>ngrok</strong>:
+- Spawns ngrok CLI process
+- Parses JSON logs for public URL
+- 30s startup timeout
+- Supports custom domains</p>
+<p><strong>Tailscale</strong>:
+- Two modes: <code>serve</code> (tailnet-private) or <code>funnel</code> (public HTTPS)
+- Resolves Tailscale DNS name
+- 10s timeout</p>
+<h3 id="inbound-call-policy">Inbound Call Policy<a class="headerlink" href="#inbound-call-policy" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>extensions/voice-call/src/allowlist.ts</code> (20 lines)</p>
+<p>Four policies for who can call the AI:
+| Policy | Behavior |
+|--------|----------|
+| <code>disabled</code> | Block all inbound calls |
+| <code>allowlist</code> | Only numbers in <code>allowFrom</code> list |
+| <code>pairing</code> | Same as allowlist (future expansion) |
+| <code>open</code> | Accept all inbound calls |</p>
+<p>Phone numbers are normalized (strip non-digits) before comparison. Rejected calls are hung up immediately.</p>
+<h3 id="call-storage">Call Storage<a class="headerlink" href="#call-storage" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>extensions/voice-call/src/manager/store.ts</code> (95 lines)</p>
+<p>Calls are persisted in JSONL format at <code>~/.openclaw/voice-calls/calls.jsonl</code>. Each line is a complete <code>CallRecord</code> with:
+- callId, providerCallId, provider, direction, state
+- from, to, sessionKey, timestamps
+- endReason, transcript array, metadata</p>
+<p>Writes are fire-and-forget (async, non-blocking). On startup, the system reloads active calls and verifies them with the provider.</p>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>extensions/voice-call/src/config.ts</code> (526 lines)</p>
+<p>Key defaults:
+| Setting | Default |
+|---------|---------|
+| enabled | false |
+| maxDurationSeconds | 300 (5 minutes) |
+| silenceTimeoutMs | 800ms |
+| transcriptTimeoutMs | 180,000ms (3 minutes) |
+| ringTimeoutMs | 30,000ms (30 seconds) |
+| maxConcurrentCalls | 1 |
+| webhook port | 3334 |
+| webhook bind | 127.0.0.1 |
+| responseModel | openai/gpt-4o-mini |
+| responseTimeoutMs | 30,000ms |</p>
+<p>Streaming config:
+| Setting | Default |
+|---------|---------|
+| sttProvider | openai-realtime |
+| sttModel | gpt-4o-transcribe |
+| silenceDurationMs | 800ms |
+| vadThreshold | 0.5 |
+| preStartTimeoutMs | 5,000ms |
+| maxPendingConnections | 32 |
+| maxConnections | 128 |</p>
+<h3 id="cli-commands">CLI Commands<a class="headerlink" href="#cli-commands" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>extensions/voice-call/src/cli.ts</code> (381 lines)</p>
+<ul>
+<li><code>voicecall call --message "Hello" --to +1234567890</code> — initiate a call</li>
+<li><code>voicecall continue --call-id &lt;id&gt; --message "How are you?"</code> — multi-turn</li>
+<li><code>voicecall speak --call-id &lt;id&gt; --message "Goodbye"</code> — one-way speech</li>
+<li><code>voicecall end --call-id &lt;id&gt;</code> — hang up</li>
+<li><code>voicecall status --call-id &lt;id&gt;</code> — show call details</li>
+<li><code>voicecall tail</code> — stream call logs</li>
+<li><code>voicecall latency</code> — analyze turn latency (min/max/avg/p50/p95)</li>
+<li><code>voicecall expose --mode funnel</code> — set up Tailscale tunnel</li>
+</ul>
+<hr />
+<h2 id="part-4-discord-voice-ai-in-voice-channels">Part 4: Discord Voice — AI in Voice Channels<a class="headerlink" href="#part-4-discord-voice-ai-in-voice-channels" title="Permanent link">&para;</a></h2>
+<p><strong>Directory:</strong> <code>src/discord/voice/</code> (3 files)</p>
+<h3 id="discord-voice-manager">Discord Voice Manager<a class="headerlink" href="#discord-voice-manager" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/discord/voice/manager.ts</code> (903 lines)</p>
+<p>This lets the AI join Discord voice channels and participate in conversations.</p>
+<p><strong>Audio specs</strong>:
+| Setting | Value |
+|---------|-------|
+| Sample rate | 48kHz (Discord standard) |
+| Channels | 2 (stereo) |
+| Bit depth | 16 (PCM) |
+| Min segment | 0.35 seconds |
+| Silence timeout | 1000ms |
+| Playback ready timeout | 15,000ms |
+| Speaking ready timeout | 60,000ms |</p>
+<p><strong>Join flow</strong>:
+1. Fetch voice channel from Discord API
+2. Create <code>VoiceConnection</code> via <code>@discordjs/voice</code>
+3. Subscribe <code>AudioPlayer</code> to connection
+4. Register speaking detection handlers
+5. Handle disconnection (auto-reconnect or cleanup)</p>
+<p><strong>Speaking detection</strong>:
+When a user speaks, the manager:
+1. Detects speaking start via Discord's speaking event
+2. Subscribes to the user's audio stream
+3. Decodes Opus audio frames
+4. Writes raw audio to WAV file
+5. Transcribes using the media capability (likely Whisper)
+6. Generates a response via the agent
+7. Converts response to audio via TTS
+8. Queues playback through the AudioPlayer</p>
+<p><strong>DAVE protocol</strong>: Discord's end-to-end encryption for voice. The manager sets <code>selfDeaf=false, selfMute=false</code> and tracks decryption failures. If too many failures occur, it performs auto-recovery (leave + rejoin the channel).</p>
+<p><strong>Speaker context caching</strong>: To avoid looking up the same user repeatedly, speaker info (label, isOwner) is cached for 60 seconds per guild:user pair.</p>
+<h3 id="voice-commands">Voice Commands<a class="headerlink" href="#voice-commands" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/discord/voice/command.ts</code> (374 lines)</p>
+<p>Discord slash commands:
+- <code>/voice join -channel &lt;channel&gt;</code> — join a voice channel
+- <code>/voice leave</code> — leave the current voice channel
+- <code>/voice status</code> — show active voice sessions</p>
+<p><strong>Authorization</strong> checks:
+- Guild membership
+- Channel-level enabled/allowlist config
+- Member roles
+- Owner allowlist
+- Access group policy</p>
+<hr />
+<h2 id="part-5-voice-mapping-cross-provider-voice-names">Part 5: Voice Mapping — Cross-Provider Voice Names<a class="headerlink" href="#part-5-voice-mapping-cross-provider-voice-names" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>extensions/voice-call/src/voice-mapping.ts</code> (68 lines)</p>
+<p>When using TwiML's <code>&lt;Say&gt;</code> element (Twilio's built-in TTS), OpenAI voice names are mapped to Amazon Polly voices:</p>
+<table>
+<thead>
+<tr>
+<th>OpenAI</th>
+<th>Polly</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>alloy</td>
+<td>Polly.Joanna</td>
+</tr>
+<tr>
+<td>echo</td>
+<td>Polly.Matthew</td>
+</tr>
+<tr>
+<td>fable</td>
+<td>Polly.Amy</td>
+</tr>
+<tr>
+<td>onyx</td>
+<td>Polly.Brian</td>
+</tr>
+<tr>
+<td>nova</td>
+<td>Polly.Salli</td>
+</tr>
+<tr>
+<td>shimmer</td>
+<td>Polly.Kimberly</td>
+</tr>
+</tbody>
+</table>
+<p>Names starting with "Polly." or "Google." are passed through as-is. XML special characters are escaped.</p>
+<hr />
+<h2 id="part-6-response-generation">Part 6: Response Generation<a class="headerlink" href="#part-6-response-generation" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>extensions/voice-call/src/response-generator.ts</code> (159 lines)</p>
+<p>When the AI needs to respond during a voice call:</p>
+<ol>
+<li>Load core agent dependencies (via core-bridge dynamic import)</li>
+<li>Build session key: <code>voice:{normalizedPhone}</code></li>
+<li>Resolve model from <code>voiceConfig.responseModel</code> (default: openai/gpt-4o-mini)</li>
+<li>Build system prompt with conversation history</li>
+<li>Run embedded Pi agent with:</li>
+<li><code>messageProvider: "voice"</code></li>
+<li><code>lane: "voice"</code> (separate processing lane)</li>
+<li>Timeout: 30s default</li>
+<li>Extract text from agent payloads, join with spaces</li>
+</ol>
+<p>The agent runs in a dedicated "voice" lane to avoid competing with text message processing.</p>
+<hr />
+<h2 id="git-history-evolution">Git History Evolution<a class="headerlink" href="#git-history-evolution" title="Permanent link">&para;</a></h2>
+<h3 id="the-very-beginning-twilio-whatsapp-relay-nov-2025">The Very Beginning: Twilio WhatsApp Relay (Nov 2025)<a class="headerlink" href="#the-very-beginning-twilio-whatsapp-relay-nov-2025" title="Permanent link">&para;</a></h3>
+<p>The project's <strong>first-ever commit</strong> on November 24, 2025, by <strong>Peter Steinberger</strong>, was called "Warelay" — a WhatsApp relay using Twilio webhooks. Twilio was the original telephony backbone. But by December 5, Twilio was dropped from the core runtime as the project pivoted to web-first.</p>
+<h3 id="voice-wake-and-talk-mode-dec-2025">Voice Wake and Talk Mode (Dec 2025)<a class="headerlink" href="#voice-wake-and-talk-mode-dec-2025" title="Permanent link">&para;</a></h3>
+<p>Starting December 6, Peter Steinberger built voice wake features for macOS — permission callbacks, voice wake overlays, and configurable wake words for iOS. On <strong>December 30</strong>, a burst of commits added:
+- <strong>ElevenLabs integration</strong> — first TTS provider, wired as default for macOS talk mode
+- Extracted <code>ElevenLabsKit</code> as its own module
+- Hard timeouts for synthesis to prevent hangs
+- <strong>Talk mode key distribution</strong> — gateway-level TTS polling for native apps
+- <strong>Streaming audio playback</strong> — <code>PCMStreamingAudioPlayer</code> for real-time TTS (1,091 lines)</p>
+<p>This was the foundation: voice on native apps via ElevenLabs streaming.</p>
+<h3 id="telegram-voice-notes-jan-4-2026">Telegram Voice Notes (Jan 4, 2026)<a class="headerlink" href="#telegram-voice-notes-jan-4-2026" title="Permanent link">&para;</a></h3>
+<p><strong>Manuel Maly</strong> (@manmal) added the first channel-specific voice support: Telegram voice notes using <code>[[audio_as_voice]]</code> tags. This established the pattern of channel-aware audio formatting.</p>
+<h3 id="the-voice-call-plugin-explosion-jan-1114-2026">The Voice-Call Plugin Explosion (Jan 11–14, 2026)<a class="headerlink" href="#the-voice-call-plugin-explosion-jan-1114-2026" title="Permanent link">&para;</a></h3>
+<p>In a four-day sprint, Peter Steinberger created the entire voice-call extension:</p>
+<ul>
+<li><strong>Jan 11</strong>: Created the plugin architecture and scaffolded the voice-call extension (24+ files)</li>
+<li><strong>Jan 12</strong>: Massive implementation commit — Twilio provider (537 lines), Telnyx provider (364 lines), OpenAI Realtime STT (303 lines), OpenAI TTS provider (264 lines), media stream handling, tunnel support, webhook security, voice mapping. Thousands of lines in a single commit.</li>
+<li><strong>Jan 13</strong>: Released voice-call plugin v0.1.0</li>
+<li><strong>Jan 13</strong>: <strong>vrknetha</strong> contributed the <strong>Plivo provider</strong> (1,861 lines) — third telephony provider, community PR #846</li>
+<li><strong>Jan 14</strong>: Refactored Twilio into api/webhook modules and split the call manager</li>
+</ul>
+<h3 id="sherpa-onnx-fully-local-tts-jan-21-2026">Sherpa-ONNX: Fully Local TTS (Jan 21, 2026)<a class="headerlink" href="#sherpa-onnx-fully-local-tts-jan-21-2026" title="Permanent link">&para;</a></h3>
+<p>Peter Steinberger added the sherpa-onnx-tts skill — a shell script wrapper around the Sherpa-ONNX inference engine for completely local, offline TTS using Piper VITS models.</p>
+<h3 id="the-telegram-tts-core-migration-jan-2325-2026">The Telegram-TTS → Core Migration (Jan 23–25, 2026)<a class="headerlink" href="#the-telegram-tts-core-migration-jan-2325-2026" title="Permanent link">&para;</a></h3>
+<p>This is a fascinating evolution story:</p>
+<ol>
+<li><strong>Jan 23</strong>: <strong>Glucksberg</strong> created a standalone <code>telegram-tts</code> extension — TTS voice responses just for Telegram</li>
+<li><strong>Jan 24</strong>: Glucksberg added auto-TTS hooks, provider switching, <code>/tts_limit</code> command, and auto-summarization</li>
+<li><strong>Jan 24</strong>: Peter Steinberger saw the value and <strong>moved TTS into core</strong> (PR #1559, crediting Glucksberg). Deleted the entire telegram-tts extension (1,042 lines removed) and created the core TTS system: <code>src/tts/tts.ts</code> (630 lines), tests (234 lines), agent tool (60 lines), gateway endpoint (138 lines). This was the architectural pivotTTS became a first-class feature available to ALL channels, not just Telegram.</li>
+<li><strong>Jan 24</strong>: <strong>Seb Slight</strong> added <strong>auto-mode gating</strong> on inbound voice notes (#1667) — when users send voice, replies auto-generate as audio</li>
+<li><strong>Jan 25</strong>: Peter Steinberger added <strong>Edge TTS</strong> as a free fallback (467 lines) — TTS now works without any API keys</li>
+<li><strong>Jan 25</strong>: <strong>zhixian</strong> added custom OpenAI-compatible TTS endpoints</li>
+<li><strong>Jan 25</strong>: <strong>Dan Guido</strong> fixed TTS audio overlap with an iterative queue (#1713) — preventing heap exhaustion from concurrent synthesis</li>
+</ol>
+<h3 id="community-hardening-feb-2026">Community Hardening (Feb 2026)<a class="headerlink" href="#community-hardening-feb-2026" title="Permanent link">&para;</a></h3>
+<p>February brought a wave of community contributions:</p>
+<ul>
+<li><strong>nyanjou</strong>: Discord voice message send/receive support</li>
+<li><strong>danielwanwx</strong>: Strip markdown before TTS (#13237) — removing <code>###</code> and <code>**</code> that sound terrible when read aloud</li>
+<li><strong>mcwigglesmcgee</strong>: Fixed Twilio stream auth — tokens moved from query string to <code>&lt;Parameter&gt;</code> for security (#14029)</li>
+<li><strong>Marcus Castro</strong>: Preserve TTS overrides across session resets</li>
+<li><strong>大猫子 (lailoo)</strong>: Added 5 missing OpenAI voices: ballad, cedar, juniper, marin, verse (#11020)</li>
+<li><strong>David Cantu Martinez</strong>: Hang up rejected inbound calls instead of leaving them ringing (#15892)</li>
+<li><strong>ikari</strong>: Show ALL provider errors, not just the last one</li>
+<li><strong>zerone0x</strong>: Updated tool description to prevent duplicate audio delivery (#18046)</li>
+</ul>
+<h3 id="discord-voice-channel-integration-feb-20-2026">Discord Voice Channel Integration (Feb 20, 2026)<a class="headerlink" href="#discord-voice-channel-integration-feb-20-2026" title="Permanent link">&para;</a></h3>
+<p><strong>Shadow</strong> created the Discord voice channel system (#18774) — <code>command.ts</code> (339 lines) and <code>manager.ts</code> (670 lines). This was a major feature: the AI could now <strong>join Discord voice channels</strong> and participate in real-time conversations with Opus audio, DAVE protocol encryption, and integrated STT/TTS. 1,917 lines total.</p>
+<h3 id="late-additions-febmar-2026">Late Additions (Feb–Mar 2026)<a class="headerlink" href="#late-additions-febmar-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Feb 21</strong>: Peter Steinberger made TTS model/provider overrides opt-in (preventing billing surprises)</li>
+<li><strong>Feb 27</strong>: <strong>Hershey Goldberger</strong> added call-waiting queue for inbound Twilio calls</li>
+<li><strong>Feb 28</strong>: <strong>Greg Mousseau</strong> added Android ElevenLabs streaming TTS via WebSocket (325 lines)</li>
+<li><strong>Feb 28</strong>: <strong>smthfoxy</strong> enabled opus voice bubbles for Feishu and WhatsApp (#27366)</li>
+<li><strong>Mar 5</strong>: <strong>Kai</strong> added OpenAI TTS baseUrl support for Discord voice (#34321)</li>
+<li><strong>Mar 11</strong>: <strong>ademczuk</strong> added speed and instructions fields to voice-call OpenAI config (#39226)</li>
+<li><strong>Mar 13</strong>: Peter Steinberger added <strong>persisted replay protection</strong> — a durable replay ledger for webhook dedup against replay attacks</li>
+</ul>
+<h3 id="the-evolution-in-four-sentences">The Evolution in Four Sentences<a class="headerlink" href="#the-evolution-in-four-sentences" title="Permanent link">&para;</a></h3>
+<p>Voice started as a Twilio WhatsApp relay in the first-ever commit (Nov 2025), then pivoted to ElevenLabs streaming for macOS talk mode (Dec 2025). The voice-call telephony plugin was built in a four-day sprint (Jan 11–14, 2026) with three providers (Twilio, Telnyx, Plivo). A community contribution (Glucksberg's telegram-tts) catalyzed TTS moving into core as a first-class feature available to all channels (Jan 24). Discord voice channels, Android streaming, and extensive community hardening rounded out the system through March 2026.</p>
+<hr />
+<h2 id="architecture-diagram">Architecture Diagram<a class="headerlink" href="#architecture-diagram" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────────┐
+│                         Voice / TTS Layer                            │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │                    TTS Core (src/tts/)                          │  │
+│  │                                                                 │  │
+│  │  Text Input → Strip Markdown → Parse Directives → Summarize?   │  │
+│  │                                                                 │  │
+│  │  ┌─────────────┐  ┌──────────┐  ┌─────────┐  ┌────────────┐  │  │
+│  │  │ ElevenLabs  │  │ OpenAI   │  │ Edge    │  │ Sherpa-ONNX│  │  │
+│  │  │ (Cloud)     │  │ TTS      │  │ (Free)  │  │ (Local)    │  │  │
+│  │  │             │  │ (Cloud)  │  │         │  │            │  │  │
+│  │  │ 11 models   │  │ 3 models │  │ MS      │  │ Piper VITS │  │  │
+│  │  │ Voice clone │  │ 14 voices│  │ Voices  │  │ models     │  │  │
+│  │  │ stability/  │  │ instruct │  │ No key  │  │ No cloud   │  │  │
+│  │  │ similarity  │  │ (mini)   │  │ needed  │  │ needed     │  │  │
+│  │  └──────┬──────┘  └────┬─────┘  └────┬────┘  └─────┬──────┘  │  │
+│  │         └───────────┬──┴─────────────┴──────────────┘         │  │
+│  │                     ▼                                          │  │
+│  │        Output Format Selection                                 │  │
+│  │        TG/Feishu/WA → opus (voice bubble)                     │  │
+│  │        Others → mp3 (audio file)                               │  │
+│  │        Telephony → pcm/mu-law 8kHz                            │  │
+│  │                                                                 │  │
+│  │  Triggers: Agent tool │ Auto-mode │ /tts command │ Gateway    │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │            Voice Call Extension (extensions/voice-call/)        │  │
+│  │                                                                 │  │
+│  │  ┌─────────────────────────────────────────────────────────┐   │  │
+│  │  │                  Call Manager                             │   │  │
+│  │  │                                                          │   │  │
+│  │  │  State Machine:                                          │   │  │
+│  │  │  initiated → ringing → answered → active                 │   │  │
+│  │  │                                     ↕                    │   │  │
+│  │  │                              speaking ↔ listening         │   │  │
+│  │  │                                     ↓                    │   │  │
+│  │  │                              [terminal states]           │   │  │
+│  │  │                                                          │   │  │
+│  │  │  Storage: ~/.openclaw/voice-calls/calls.jsonl            │   │  │
+│  │  │  Max concurrent: 1 (default)                             │   │  │
+│  │  │  Max duration: 300s (default)                            │   │  │
+│  │  └─────────────────────────────────────────────────────────┘   │  │
+│  │                                                                 │  │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐  │  │
+│  │  │ Twilio   │  │ Telnyx   │  │ Plivo    │  │ Mock         │  │  │
+│  │  │          │  │          │  │          │  │ (testing)    │  │  │
+│  │  │ HMAC-SHA1│  │ Ed25519  │  │HMAC-SHA256│ │              │  │  │
+│  │  │ TwiML    │  │ REST v2  │  │ XML flow │  │              │  │  │
+│  │  │ &lt;Stream&gt; │  │ Bearer   │  │ Basic    │  │              │  │  │
+│  │  └──────────┘  └──────────┘  └──────────┘  └──────────────┘  │  │
+│  │                                                                 │  │
+│  │  ┌─────────────────────────────────────────────────────────┐   │  │
+│  │  │              Media Streaming Pipeline                     │   │  │
+│  │  │                                                          │   │  │
+│  │  │  Phone → Twilio → WebSocket → OpenAI Realtime STT       │   │  │
+│  │  │       → Transcript → Pi Agent → TTS → mu-law 8kHz       │   │  │
+│  │  │       → 20ms chunks → WebSocket → Twilio → Phone        │   │  │
+│  │  │                                                          │   │  │
+│  │  │  Limits: 32 pending, 4/IP, 128 total connections         │   │  │
+│  │  └─────────────────────────────────────────────────────────┘   │  │
+│  │                                                                 │  │
+│  │  Webhook: port 3334 │ Tunnel: ngrok/tailscale │ CLI commands  │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │           Discord Voice (src/discord/voice/)                   │  │
+│  │                                                                 │  │
+│  │  /voice join → VoiceConnection → Speaking Detection            │  │
+│  │  → Opus Decode → WAV → Whisper STT → Agent → TTS              │  │
+│  │  → AudioResource → AudioPlayer → Discord Voice Channel         │  │
+│  │                                                                 │  │
+│  │  48kHz stereo │ DAVE encryption │ Auto-reconnect               │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="key-files-reference">Key Files Reference<a class="headerlink" href="#key-files-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/tts/tts-core.ts</code></td>
+<td>719</td>
+<td>Backend functions (ElevenLabs/OpenAI/Edge), directives, config types</td>
+</tr>
+<tr>
+<td><code>src/tts/tts.ts</code></td>
+<td>1,004</td>
+<td>Main TTS engine, auto-mode, format selection, user prefs</td>
+</tr>
+<tr>
+<td><code>src/tts/tts.test.ts</code></td>
+<td>748</td>
+<td>Comprehensive TTS tests</td>
+</tr>
+<tr>
+<td><code>src/tts/prepare-text.test.ts</code></td>
+<td>68</td>
+<td>Markdown stripping tests</td>
+</tr>
+<tr>
+<td><code>src/config/types.tts.ts</code></td>
+<td>90</td>
+<td>TTS configuration schema</td>
+</tr>
+<tr>
+<td><code>src/agents/tools/tts-tool.ts</code></td>
+<td>62</td>
+<td>Agent TTS tool</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-methods/tts.ts</code></td>
+<td>157</td>
+<td>Gateway TTS API</td>
+</tr>
+<tr>
+<td><code>src/auto-reply/reply/commands-tts.ts</code></td>
+<td>280</td>
+<td><code>/tts</code> chat commands</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/index.ts</code></td>
+<td>565</td>
+<td>Voice-call extension entry</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/types.ts</code></td>
+<td>305</td>
+<td>Call types, state machine, events</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/config.ts</code></td>
+<td>526</td>
+<td>Voice-call configuration</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/manager.ts</code></td>
+<td>319</td>
+<td>Call manager</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/manager/state.ts</code></td>
+<td>49</td>
+<td>State transitions</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/manager/events.ts</code></td>
+<td>259</td>
+<td>Event processing pipeline</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/manager/outbound.ts</code></td>
+<td>381</td>
+<td>Outbound calls, speaking, multi-turn</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/manager/store.ts</code></td>
+<td>95</td>
+<td>JSONL persistence</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/manager/timers.ts</code></td>
+<td>113</td>
+<td>Max duration and transcript timeouts</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/media-stream.ts</code></td>
+<td>528</td>
+<td>WebSocket media streaming</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/telephony-audio.ts</code></td>
+<td>91</td>
+<td>PCM→mu-law conversion, resampling</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/telephony-tts.ts</code></td>
+<td>83</td>
+<td>TTS for telephony (mu-law output)</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/response-generator.ts</code></td>
+<td>159</td>
+<td>AI response via embedded Pi agent</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/webhook.ts</code></td>
+<td>488</td>
+<td>Webhook server</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/webhook-security.ts</code></td>
+<td>981</td>
+<td>Signature verification, replay protection</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/tunnel.ts</code></td>
+<td>315</td>
+<td>ngrok/Tailscale tunneling</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/allowlist.ts</code></td>
+<td>20</td>
+<td>Caller allowlisting</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/voice-mapping.ts</code></td>
+<td>68</td>
+<td>OpenAI→Polly voice mapping</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/providers/base.ts</code></td>
+<td>79</td>
+<td>Provider interface</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/providers/twilio.ts</code></td>
+<td>709</td>
+<td>Twilio implementation</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/providers/telnyx.ts</code></td>
+<td>358</td>
+<td>Telnyx implementation</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/providers/plivo.ts</code></td>
+<td>594</td>
+<td>Plivo implementation</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/providers/stt-openai-realtime.ts</code></td>
+<td>~303</td>
+<td>OpenAI Realtime STT</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/providers/tts-openai.ts</code></td>
+<td>~264</td>
+<td>OpenAI TTS for telephony</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/cli.ts</code></td>
+<td>381</td>
+<td>CLI commands</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/runtime.ts</code></td>
+<td>265</td>
+<td>Runtime initialization</td>
+</tr>
+<tr>
+<td><code>extensions/voice-call/src/core-bridge.ts</code></td>
+<td>160</td>
+<td>Bridge to core agent system</td>
+</tr>
+<tr>
+<td><code>src/discord/voice/command.ts</code></td>
+<td>374</td>
+<td>Discord voice slash commands</td>
+</tr>
+<tr>
+<td><code>src/discord/voice/manager.ts</code></td>
+<td>903</td>
+<td>Discord voice channel manager</td>
+</tr>
+<tr>
+<td><code>skills/sherpa-onnx-tts/SKILL.md</code></td>
+<td>104</td>
+<td>Local TTS skill documentation</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

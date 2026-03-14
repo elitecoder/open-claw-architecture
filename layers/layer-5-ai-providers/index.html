@@ -1,0 +1,3643 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-4-channel-integrations/">
+      
+      
+        <link rel="next" href="../layer-6-skills/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 5: AI Providers - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-5-ai-providers-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 5: AI Providers
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 5?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-model-provider-types-the-data-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Model &amp; Provider Types (The Data Structures)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Model &amp; Provider Types (The Data Structures)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-provider-vs-a-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is a "Provider" vs a "Model"?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-protocols-the-languages-ai-brains-speak" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Protocols — The Languages AI Brains Speak
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-definition-what-describes-a-single-ai-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Definition — What Describes a Single AI Brain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-configuration-where-to-find-an-ai-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider Configuration — Where to Find an AI Brain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-compatibility-flags-handling-each-brains-quirks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Compatibility Flags — Handling Each Brain's Quirks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#top-level-models-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top-Level Models Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-provider-discovery-finding-available-ai-brains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Provider Discovery (Finding Available AI Brains)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Provider Discovery (Finding Available AI Brains)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-discovery-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Discovery Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-discovery-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Discovery Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-simple-loaders-check-your-api-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Simple Loaders (Check Your API Keys)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-plugin-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Plugin Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-special-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: Special Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-authentication-proving-youre-allowed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Authentication (Proving You're Allowed)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Authentication (Proving You&#39;re Allowed)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-auth-challenge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Auth Challenge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-auth-resolution-waterfall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Auth Resolution Waterfall
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auth-profiles-saved-credentials-with-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auth Profiles — Saved Credentials with Rotation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#oauth-flows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OAuth Flows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secret-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secret Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-model-selection-routing-picking-the-right-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Model Selection &amp; Routing (Picking the Right Brain)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Model Selection &amp; Routing (Picking the Right Brain)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-model-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Model Reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-id-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider ID Normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-id-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model ID Normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-default-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Default Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-resolution-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Resolution Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-allowlists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Allowlists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thinking-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Thinking Levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-the-inference-pipeline-actually-talking-to-the-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Inference Pipeline (Actually Talking to the Brain)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Inference Pipeline (Actually Talking to the Brain)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-core-runtime-pi-embedded-runner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Core Runtime: pi-embedded-runner
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-run-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Run Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-single-inference-attempt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A Single Inference Attempt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-core-streaming-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Core Streaming Call
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-resolution-at-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Resolution at Runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stream-wrappers-provider-specific-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stream Wrappers — Provider-Specific Streaming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#context-window-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Window Guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-usage-tracking-cost-counting-tokens-and-dollars" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Usage Tracking &amp; Cost (Counting Tokens and Dollars)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Usage Tracking &amp; Cost (Counting Tokens and Dollars)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-token-counting-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Token Counting Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raw-provider-usage-the-babel-tower" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raw Provider Usage — The Babel Tower
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalized-usage-the-common-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalized Usage — The Common Language
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-usage-snapshot-with-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Usage Snapshot with Costs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-tracking-fixes-a-story-of-getting-it-right" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost Tracking Fixes (A Story of Getting It Right)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-provider-capabilities-compatibility-handling-quirks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Provider Capabilities &amp; Compatibility (Handling Quirks)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Provider Capabilities &amp; Compatibility (Handling Quirks)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-provider-capabilities-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Provider Capabilities System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-specific-quirks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider-Specific Quirks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transcript-hygiene-cleaning-up-conversation-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transcript Hygiene — Cleaning Up Conversation History
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-the-complete-provider-ecosystem-all-50-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: The Complete Provider Ecosystem (All 50+ Providers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 8: The Complete Provider Ecosystem (All 50+ Providers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tier-1-major-cloud-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 1: Major Cloud Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-2-regionalspecialized-cloud-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 2: Regional/Specialized Cloud Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-3-aggregatorproxy-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 3: Aggregator/Proxy Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-4-self-hostedlocal-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 4: Self-Hosted/Local Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-auth-flow-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider Auth Flow Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-9-the-modelsjson-file-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 9: The models.json File (Persistence)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 9: The models.json File (Persistence)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-provider-config-is-saved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Provider Config Is Saved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-write-lock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Write Lock
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-planning-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Planning System
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-5-evolved-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 5 Evolved (Git History)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 5 Evolved (Git History)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#era-1-single-embedded-runtime-december-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 1: Single Embedded Runtime (December 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-2-the-provider-explosion-january-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 2: The Provider Explosion (January 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-3-protocol-diversification-february-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 3: Protocol Diversification (February 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-4-websocket-first-streaming-march-1-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 4: WebSocket-First Streaming (March 1, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-5-reasoning-model-support-ongoing-jan-mar-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 5: Reasoning Model Support (Ongoing, Jan-Mar 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-6-architecture-maturity-march-8-13-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 6: Architecture Maturity (March 8-13, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-10-canvas-a2ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-layer-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Layer 5?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-model-provider-types-the-data-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Model &amp; Provider Types (The Data Structures)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: Model &amp; Provider Types (The Data Structures)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-provider-vs-a-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is a "Provider" vs a "Model"?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-protocols-the-languages-ai-brains-speak" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Protocols — The Languages AI Brains Speak
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-definition-what-describes-a-single-ai-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Definition — What Describes a Single AI Brain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-configuration-where-to-find-an-ai-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider Configuration — Where to Find an AI Brain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-compatibility-flags-handling-each-brains-quirks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Compatibility Flags — Handling Each Brain's Quirks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#top-level-models-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top-Level Models Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-provider-discovery-finding-available-ai-brains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: Provider Discovery (Finding Available AI Brains)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: Provider Discovery (Finding Available AI Brains)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-discovery-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Discovery Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-discovery-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Discovery Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-simple-loaders-check-your-api-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Simple Loaders (Check Your API Keys)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-plugin-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Plugin Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-special-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: Special Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-authentication-proving-youre-allowed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: Authentication (Proving You're Allowed)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: Authentication (Proving You&#39;re Allowed)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-auth-challenge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Auth Challenge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-auth-resolution-waterfall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Auth Resolution Waterfall
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auth-profiles-saved-credentials-with-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auth Profiles — Saved Credentials with Rotation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#oauth-flows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OAuth Flows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secret-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secret Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-model-selection-routing-picking-the-right-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: Model Selection &amp; Routing (Picking the Right Brain)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: Model Selection &amp; Routing (Picking the Right Brain)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-model-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Model Reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-id-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider ID Normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-id-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model ID Normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-default-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Default Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-resolution-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Resolution Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-allowlists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Allowlists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thinking-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Thinking Levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-the-inference-pipeline-actually-talking-to-the-brain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Inference Pipeline (Actually Talking to the Brain)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Inference Pipeline (Actually Talking to the Brain)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-core-runtime-pi-embedded-runner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Core Runtime: pi-embedded-runner
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-run-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Run Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-single-inference-attempt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A Single Inference Attempt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-core-streaming-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Core Streaming Call
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-resolution-at-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Resolution at Runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stream-wrappers-provider-specific-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stream Wrappers — Provider-Specific Streaming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#context-window-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Window Guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-usage-tracking-cost-counting-tokens-and-dollars" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Usage Tracking &amp; Cost (Counting Tokens and Dollars)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Usage Tracking &amp; Cost (Counting Tokens and Dollars)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-token-counting-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Token Counting Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raw-provider-usage-the-babel-tower" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raw Provider Usage — The Babel Tower
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalized-usage-the-common-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalized Usage — The Common Language
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-usage-snapshot-with-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Usage Snapshot with Costs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-tracking-fixes-a-story-of-getting-it-right" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost Tracking Fixes (A Story of Getting It Right)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-provider-capabilities-compatibility-handling-quirks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Provider Capabilities &amp; Compatibility (Handling Quirks)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Provider Capabilities &amp; Compatibility (Handling Quirks)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-provider-capabilities-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Provider Capabilities System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-specific-quirks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider-Specific Quirks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transcript-hygiene-cleaning-up-conversation-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transcript Hygiene — Cleaning Up Conversation History
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-the-complete-provider-ecosystem-all-50-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: The Complete Provider Ecosystem (All 50+ Providers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 8: The Complete Provider Ecosystem (All 50+ Providers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tier-1-major-cloud-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 1: Major Cloud Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-2-regionalspecialized-cloud-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 2: Regional/Specialized Cloud Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-3-aggregatorproxy-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 3: Aggregator/Proxy Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tier-4-self-hostedlocal-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 4: Self-Hosted/Local Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-auth-flow-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider Auth Flow Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-9-the-modelsjson-file-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 9: The models.json File (Persistence)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 9: The models.json File (Persistence)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-provider-config-is-saved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Provider Config Is Saved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-write-lock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Write Lock
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-planning-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Planning System
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-layer-5-evolved-git-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Layer 5 Evolved (Git History)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Layer 5 Evolved (Git History)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#era-1-single-embedded-runtime-december-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 1: Single Embedded Runtime (December 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-2-the-provider-explosion-january-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 2: The Provider Explosion (January 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-3-protocol-diversification-february-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 3: Protocol Diversification (February 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-4-websocket-first-streaming-march-1-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 4: WebSocket-First Streaming (March 1, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-5-reasoning-model-support-ongoing-jan-mar-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 5: Reasoning Model Support (Ongoing, Jan-Mar 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#era-6-architecture-maturity-march-8-13-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Era 6: Architecture Maturity (March 8-13, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-5-ai-providers-deep-dive">Layer 5: AI Providers — Deep Dive<a class="headerlink" href="#layer-5-ai-providers-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-layer-5">What Is Layer 5?<a class="headerlink" href="#what-is-layer-5" title="Permanent link">&para;</a></h2>
+<p>If the channels (Layer 4) are the robot's ears and mouth, then the AI providers are its <strong>actual brain cells</strong>. When someone sends a message, the robot needs to <em>think</em> about it and come up with a response. That thinking is done by a large language model (LLM) — like Claude, GPT, or Gemini — running on some server somewhere.</p>
+<p>Layer 5 is the system that lets OpenClaw talk to <strong>any</strong> AI brain. Want to use Anthropic's Claude? OpenAI's GPT? Google's Gemini? A model running on your own laptop with Ollama? A model on AWS Bedrock? OpenClaw doesn't care — it has a universal translator for all of them.</p>
+<p>Think of it like a universal TV remote. Each TV brand uses a different signal, but the universal remote knows how to talk to all of them. Layer 5 is that universal remote for AI brains.</p>
+<p>Layer 5 has <strong>seven major parts</strong>:</p>
+<ol>
+<li><strong>Model &amp; Provider Types</strong> — The data structures that describe AI brains</li>
+<li><strong>Provider Discovery</strong> — Finding which AI brains are available</li>
+<li><strong>Authentication</strong> — Proving you're allowed to use each brain</li>
+<li><strong>Model Selection &amp; Routing</strong> — Picking the right brain for the job</li>
+<li><strong>The Inference Pipeline</strong> — Actually sending messages to the brain and getting responses</li>
+<li><strong>Usage Tracking &amp; Cost</strong> — Counting tokens and dollars</li>
+<li><strong>Provider Capabilities &amp; Compatibility</strong> — Handling each brain's quirks</li>
+</ol>
+<hr />
+<h2 id="part-1-model-provider-types-the-data-structures">Part 1: Model &amp; Provider Types (The Data Structures)<a class="headerlink" href="#part-1-model-provider-types-the-data-structures" title="Permanent link">&para;</a></h2>
+<h3 id="what-is-a-provider-vs-a-model">What Is a "Provider" vs a "Model"?<a class="headerlink" href="#what-is-a-provider-vs-a-model" title="Permanent link">&para;</a></h3>
+<p>A <strong>provider</strong> is a company or service that hosts AI models. Think of it like a TV network (NBC, Netflix, HBO). A <strong>model</strong> is a specific AI brain offered by that provider. Think of it like a specific TV show on that network.</p>
+<div class="language-text highlight"><pre><span></span><code>Provider: Anthropic          Provider: OpenAI          Provider: Ollama (local)
+  ├── claude-opus-4-6          ├── gpt-5.4                ├── llama3
+  ├── claude-sonnet-4.5        ├── gpt-5.2                ├── mistral
+  └── claude-haiku-4.5         └── gpt-5-mini             └── codellama
+</code></pre></div>
+<h3 id="api-protocols-the-languages-ai-brains-speak">API Protocols — The Languages AI Brains Speak<a class="headerlink" href="#api-protocols-the-languages-ai-brains-speak" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/config/types.models.ts</code></strong></p>
+<p>Not all AI brains speak the same language. OpenClaw supports <strong>8 different API protocols</strong>:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">MODEL_APIS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;openai-completions&quot;</span><span class="p">,</span><span class="w">       </span><span class="c1">// The most common — OpenAI&#39;s chat/completions format</span>
+<span class="w">  </span><span class="s2">&quot;openai-responses&quot;</span><span class="p">,</span><span class="w">         </span><span class="c1">// OpenAI&#39;s newer responses API</span>
+<span class="w">  </span><span class="s2">&quot;openai-codex-responses&quot;</span><span class="p">,</span><span class="w">   </span><span class="c1">// ChatGPT/Codex backend API</span>
+<span class="w">  </span><span class="s2">&quot;anthropic-messages&quot;</span><span class="p">,</span><span class="w">       </span><span class="c1">// Anthropic&#39;s native Messages API</span>
+<span class="w">  </span><span class="s2">&quot;google-generative-ai&quot;</span><span class="p">,</span><span class="w">     </span><span class="c1">// Google&#39;s Generative AI API</span>
+<span class="w">  </span><span class="s2">&quot;github-copilot&quot;</span><span class="p">,</span><span class="w">           </span><span class="c1">// GitHub Copilot&#39;s API</span>
+<span class="w">  </span><span class="s2">&quot;bedrock-converse-stream&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// AWS Bedrock&#39;s streaming API</span>
+<span class="w">  </span><span class="s2">&quot;ollama&quot;</span><span class="p">,</span><span class="w">                   </span><span class="c1">// Ollama&#39;s native /api/chat API</span>
+<span class="p">]</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
+</code></pre></div>
+<p><strong>Why so many?</strong> Because each AI company designed their API differently. OpenAI was first, so many others copied their format (that's why <code>openai-completions</code> is the most common). But Anthropic, Google, and AWS each have their own formats with unique features. Ollama even has its own native protocol that's more efficient for local models.</p>
+<p>Most providers fall into one of two camps:
+- <strong>OpenAI-compatible</strong> (<code>openai-completions</code>): Ollama, vLLM, SGLang, Moonshot, Together, HuggingFace, OpenRouter, NVIDIA, and many more
+- <strong>Anthropic-compatible</strong> (<code>anthropic-messages</code>): MiniMax, Kimi Coding, Xiaomi, and others that adopted Anthropic's format</p>
+<h3 id="model-definition-what-describes-a-single-ai-brain">Model Definition — What Describes a Single AI Brain<a class="headerlink" href="#model-definition-what-describes-a-single-ai-brain" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ModelDefinitionConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                       </span><span class="c1">// &quot;claude-opus-4-6&quot;</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                     </span><span class="c1">// &quot;Claude Opus 4.6&quot;</span>
+<span class="w">  </span><span class="nx">api?</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelApi</span><span class="p">;</span><span class="w">                   </span><span class="c1">// Override provider&#39;s default protocol</span>
+<span class="w">  </span><span class="nx">reasoning</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">               </span><span class="c1">// Can it &quot;think out loud&quot;? (chain-of-thought)</span>
+<span class="w">  </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">Array</span><span class="o">&lt;</span><span class="s2">&quot;text&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;image&quot;</span><span class="o">&gt;</span><span class="p">;</span><span class="w">   </span><span class="c1">// What can it accept?</span>
+<span class="w">  </span><span class="nx">cost</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">                  </span><span class="c1">// $/million input tokens</span>
+<span class="w">    </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">                 </span><span class="c1">// $/million output tokens</span>
+<span class="w">    </span><span class="nx">cacheRead</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">              </span><span class="c1">// $/million cached input tokens</span>
+<span class="w">    </span><span class="nx">cacheWrite</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">             </span><span class="c1">// $/million cache creation tokens</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="w">  </span><span class="nx">contextWindow</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">            </span><span class="c1">// Max tokens it can &quot;see&quot; at once</span>
+<span class="w">  </span><span class="nx">maxTokens</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">                </span><span class="c1">// Max tokens it can generate</span>
+<span class="w">  </span><span class="nx">headers?</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Custom HTTP headers</span>
+<span class="w">  </span><span class="nx">compat?</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelCompatConfig</span><span class="p">;</span><span class="w">       </span><span class="c1">// Quirks and compatibility flags</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><strong>Context window</strong> is like the AI's short-term memory. A 200,000-token context window means the AI can "see" about 150,000 words of conversation at once. Bigger is better (but more expensive).</p>
+<p><strong>Cost</strong> is measured per million tokens. A token is roughly 3/4 of a word. So if a model costs $3/million input tokens, processing a 1,000-word message costs about $0.004 (less than half a cent).</p>
+<h3 id="provider-configuration-where-to-find-an-ai-brain">Provider Configuration — Where to Find an AI Brain<a class="headerlink" href="#provider-configuration-where-to-find-an-ai-brain" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ModelProviderConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">baseUrl</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                          </span><span class="c1">// &quot;https://api.anthropic.com&quot;</span>
+<span class="w">  </span><span class="nx">apiKey?</span><span class="o">:</span><span class="w"> </span><span class="kt">SecretInput</span><span class="p">;</span><span class="w">                     </span><span class="c1">// The password/key</span>
+<span class="w">  </span><span class="nx">auth</span><span class="o">?:</span><span class="w"> </span><span class="s2">&quot;api-key&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;aws-sdk&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;oauth&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;token&quot;</span><span class="p">;</span><span class="w">  </span><span class="c1">// How to authenticate</span>
+<span class="w">  </span><span class="nx">api?</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelApi</span><span class="p">;</span><span class="w">                           </span><span class="c1">// Default protocol for all models</span>
+<span class="w">  </span><span class="nx">injectNumCtxForOpenAICompat?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">    </span><span class="c1">// Ollama-specific: inject context window</span>
+<span class="w">  </span><span class="nx">headers?</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">SecretInput</span><span class="o">&gt;</span><span class="p">;</span><span class="w">    </span><span class="c1">// Custom HTTP headers</span>
+<span class="w">  </span><span class="nx">authHeader?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">                     </span><span class="c1">// Use Authorization header?</span>
+<span class="w">  </span><span class="nx">models</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelDefinitionConfig</span><span class="p">[];</span><span class="w">          </span><span class="c1">// Available models</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="model-compatibility-flags-handling-each-brains-quirks">Model Compatibility Flags — Handling Each Brain's Quirks<a class="headerlink" href="#model-compatibility-flags-handling-each-brains-quirks" title="Permanent link">&para;</a></h3>
+<p>This is where it gets interesting. Every AI provider has slightly different behavior, even when they use the same protocol. The compatibility flags handle these differences:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ModelCompatConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">supportsStore?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">                     </span><span class="c1">// Can store conversations?</span>
+<span class="w">  </span><span class="nx">supportsDeveloperRole?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">             </span><span class="c1">// Supports &quot;developer&quot; role?</span>
+<span class="w">  </span><span class="nx">supportsReasoningEffort?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">           </span><span class="c1">// Can adjust thinking depth?</span>
+<span class="w">  </span><span class="nx">supportsUsageInStreaming?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">           </span><span class="c1">// Reports token usage while streaming?</span>
+<span class="w">  </span><span class="nx">supportsTools?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">                      </span><span class="c1">// Can use tools/functions?</span>
+<span class="w">  </span><span class="nx">supportsStrictMode?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">                 </span><span class="c1">// Strict validation?</span>
+<span class="w">  </span><span class="nx">maxTokensField</span><span class="o">?:</span><span class="w"> </span><span class="s2">&quot;max_completion_tokens&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;max_tokens&quot;</span><span class="p">;</span><span class="w">  </span><span class="c1">// API field name differs!</span>
+<span class="w">  </span><span class="nx">thinkingFormat</span><span class="o">?:</span><span class="w"> </span><span class="s2">&quot;openai&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;zai&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;qwen&quot;</span><span class="p">;</span><span class="w">  </span><span class="c1">// How reasoning blocks are formatted</span>
+<span class="w">  </span><span class="nx">requiresToolResultName?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">             </span><span class="c1">// Mistral needs this</span>
+<span class="w">  </span><span class="nx">requiresAssistantAfterToolResult?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">   </span><span class="c1">// Some providers need filler messages</span>
+<span class="w">  </span><span class="nx">requiresMistralToolIds?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">             </span><span class="c1">// Mistral&#39;s tool IDs are max 9 chars</span>
+<span class="w">  </span><span class="nx">requiresThinkingAsText?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">             </span><span class="c1">// Some providers can&#39;t handle thinking blocks</span>
+<span class="w">  </span><span class="nx">requiresOpenAiAnthropicToolPayload?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w"> </span><span class="c1">// Need tool format conversion</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><strong>Real example:</strong> OpenAI uses the field name <code>max_completion_tokens</code> for the maximum output length. Anthropic uses <code>max_tokens</code>. Same concept, different name. The <code>maxTokensField</code> flag tells OpenClaw which name to use.</p>
+<p><strong>Another example:</strong> Mistral's API requires tool call IDs to be exactly 9 characters. Other providers allow longer IDs. The <code>requiresMistralToolIds</code> flag triggers special ID truncation.</p>
+<h3 id="top-level-models-configuration">Top-Level Models Configuration<a class="headerlink" href="#top-level-models-configuration" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ModelsConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">mode</span><span class="o">?:</span><span class="w"> </span><span class="s2">&quot;merge&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">;</span><span class="w">                         </span><span class="c1">// Merge with built-ins or replace entirely?</span>
+<span class="w">  </span><span class="nx">providers?</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">ModelProviderConfig</span><span class="o">&gt;</span><span class="p">;</span><span class="w">     </span><span class="c1">// Your custom providers</span>
+<span class="w">  </span><span class="nx">bedrockDiscovery?</span><span class="o">:</span><span class="w"> </span><span class="kt">BedrockDiscoveryConfig</span><span class="p">;</span><span class="w">           </span><span class="c1">// AWS auto-discovery settings</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>The <code>mode</code> field is important:
+- <strong><code>merge</code></strong> (default): Your providers are added on top of the built-in ones. If you define a model that already exists, yours wins.
+- <strong><code>replace</code></strong>: Throw away all built-in providers and use ONLY yours. For advanced users who want total control.</p>
+<hr />
+<h2 id="part-2-provider-discovery-finding-available-ai-brains">Part 2: Provider Discovery (Finding Available AI Brains)<a class="headerlink" href="#part-2-provider-discovery-finding-available-ai-brains" title="Permanent link">&para;</a></h2>
+<h3 id="the-discovery-problem">The Discovery Problem<a class="headerlink" href="#the-discovery-problem" title="Permanent link">&para;</a></h3>
+<p>OpenClaw can't just assume which providers you have. You might have an OpenAI API key. You might have Ollama running locally. You might have AWS Bedrock configured. OpenClaw needs to figure out what's available.</p>
+<h3 id="the-discovery-pipeline">The Discovery Pipeline<a class="headerlink" href="#the-discovery-pipeline" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/models-config.providers.ts</code> (~1,000 lines)</strong></p>
+<p>Discovery runs in <strong>7 ordered phases</strong>:</p>
+<div class="language-text highlight"><pre><span></span><code>Phase 1: Simple Loaders ──── API key providers (check env vars)
+    │    minimax, moonshot, kimi-coding, venice, xiaomi,
+    │    together, huggingface, qianfan, openrouter, nvidia, ...
+    │
+Phase 2: Plugin Loaders ──── Plugin-registered providers
+    │    (extensions like ollama, vllm, sglang)
+    │
+Phase 3: Profile Loaders ─── OAuth-based providers
+    │    minimax-portal, qwen-portal, openai-codex
+    │
+Phase 4: Paired Loaders ──── Multi-variant providers
+    │    volcengine + volcengine-plan (regular + coding)
+    │    byteplus + byteplus-plan
+    │
+Phase 5: Cloudflare AI Gateway ── Profile-based
+    │
+Phase 6: Plugin Late Loaders ──── Late-phase plugin discovery
+    │
+Phase 7: Special Providers ─── GitHub Copilot + Amazon Bedrock
+</code></pre></div>
+<h3 id="phase-1-simple-loaders-check-your-api-keys">Phase 1: Simple Loaders (Check Your API Keys)<a class="headerlink" href="#phase-1-simple-loaders-check-your-api-keys" title="Permanent link">&para;</a></h3>
+<p>The simplest discovery: "Do you have an API key for this provider?" Each provider has a known environment variable:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Environment Variable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td><code>OPENAI_API_KEY</code></td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>Google</td>
+<td><code>GOOGLE_API_KEY</code> or <code>GEMINI_API_KEY</code></td>
+</tr>
+<tr>
+<td>MiniMax</td>
+<td><code>MINIMAX_API_KEY</code></td>
+</tr>
+<tr>
+<td>Moonshot</td>
+<td><code>MOONSHOT_API_KEY</code></td>
+</tr>
+<tr>
+<td>Together</td>
+<td><code>TOGETHER_API_KEY</code></td>
+</tr>
+<tr>
+<td>HuggingFace</td>
+<td><code>HUGGINGFACE_API_KEY</code></td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td><code>OPENROUTER_API_KEY</code></td>
+</tr>
+</tbody>
+</table>
+<p>If the env var exists, the provider is added with its predefined models and base URL.</p>
+<h3 id="phase-2-plugin-discovery">Phase 2: Plugin Discovery<a class="headerlink" href="#phase-2-plugin-discovery" title="Permanent link">&para;</a></h3>
+<p>Provider plugins (like Ollama, vLLM, SGLang) register themselves through the plugin system. They can dynamically discover models at runtime.</p>
+<p><strong>Ollama Discovery Example:</strong>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">discoverOllamaModels</span><span class="p">(</span><span class="nx">baseUrl?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ModelDefinitionConfig</span><span class="p">[]</span><span class="o">&gt;</span>
+<span class="c1">// 1. Call GET /api/tags to list all pulled models</span>
+<span class="c1">// 2. For each model, call POST /api/show to get context window size</span>
+<span class="c1">// 3. Build ModelDefinitionConfig for each</span>
+<span class="c1">// Max 200 models, concurrent requests</span>
+</code></pre></div></p>
+<p><strong>vLLM/SGLang Discovery:</strong>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">discoverOpenAICompatibleLocalModels</span><span class="p">(</span><span class="nx">params</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">baseUrl</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">     </span><span class="c1">// &quot;http://127.0.0.1:8000/v1&quot;</span>
+<span class="w">  </span><span class="nx">apiKey?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">       </span><span class="c1">// &quot;vLLM&quot; or &quot;SGLang&quot;</span>
+<span class="p">})</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ModelDefinitionConfig</span><span class="p">[]</span><span class="o">&gt;</span>
+<span class="c1">// Call GET /v1/models (OpenAI-compatible endpoint)</span>
+<span class="c1">// Build model definitions from response</span>
+</code></pre></div></p>
+<h3 id="phase-7-special-providers">Phase 7: Special Providers<a class="headerlink" href="#phase-7-special-providers" title="Permanent link">&para;</a></h3>
+<p><strong>GitHub Copilot</strong> is discovered by checking for GitHub tokens (<code>COPILOT_GITHUB_TOKEN</code>, <code>GH_TOKEN</code>, <code>GITHUB_TOKEN</code>) and resolving the Copilot proxy URL.</p>
+<p><strong>Amazon Bedrock</strong> uses the AWS SDK to auto-discover available models:
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">BedrockDiscoveryConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">enabled?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">              </span><span class="c1">// Turn on auto-discovery</span>
+<span class="w">  </span><span class="nx">region?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                </span><span class="c1">// AWS region (default: us-east-1)</span>
+<span class="w">  </span><span class="nx">providerFilter?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">      </span><span class="c1">// Only show certain providers, e.g., [&quot;anthropic&quot;]</span>
+<span class="w">  </span><span class="nx">refreshInterval?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">       </span><span class="c1">// How often to re-scan</span>
+<span class="w">  </span><span class="nx">defaultContextWindow?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">defaultMaxTokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></p>
+<p>It calls the <code>ListFoundationModels</code> API to find all models available in your AWS account.</p>
+<hr />
+<h2 id="part-3-authentication-proving-youre-allowed">Part 3: Authentication (Proving You're Allowed)<a class="headerlink" href="#part-3-authentication-proving-youre-allowed" title="Permanent link">&para;</a></h2>
+<h3 id="the-auth-challenge">The Auth Challenge<a class="headerlink" href="#the-auth-challenge" title="Permanent link">&para;</a></h3>
+<p>Every AI provider requires authentication — you need to prove you're a paying customer. But different providers use different auth methods:</p>
+<ul>
+<li><strong>API Key</strong>: A static string (like a password). Most common.</li>
+<li><strong>OAuth</strong>: A web-based login flow with refresh tokens. More secure.</li>
+<li><strong>Device Code</strong>: You get a code, visit a URL, enter the code. Like pairing a TV.</li>
+<li><strong>AWS SDK</strong>: Uses your AWS credentials (environment variables or config files).</li>
+</ul>
+<h3 id="the-auth-resolution-waterfall">The Auth Resolution Waterfall<a class="headerlink" href="#the-auth-resolution-waterfall" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/model-auth.ts</code> (521 lines)</strong></p>
+<p>When OpenClaw needs to authenticate with a provider, it tries <strong>7 sources</strong> in order:</p>
+<div class="language-text highlight"><pre><span></span><code>1. Explicit profile ID ──── &quot;Use this specific auth profile&quot;
+       │ (not found)
+2. Auth override ──────── AWS SDK mode
+       │ (not found)
+3. Auth profile store ──── Saved credentials (ordered by preference)
+       │ (not found)
+4. Environment variable ── OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.
+       │ (not found)
+5. Custom provider key ── From models.json config
+       │ (not found)
+6. Synthetic local auth ── For localhost providers (Ollama, vLLM)
+       │ (not found)
+7. Amazon Bedrock default ── AWS SDK credential chain
+       │ (not found)
+       └──→ ERROR: No credentials found
+</code></pre></div>
+<p>The result is a <code>ResolvedProviderAuth</code>:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ResolvedProviderAuth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">apiKey?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">     </span><span class="c1">// The actual credential</span>
+<span class="w">  </span><span class="nx">profileId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">  </span><span class="c1">// Which profile it came from</span>
+<span class="w">  </span><span class="nx">source</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">      </span><span class="c1">// How it was found (e.g., &quot;env: OPENAI_API_KEY&quot;)</span>
+<span class="w">  </span><span class="nx">mode</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;api-key&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;oauth&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;token&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;aws-sdk&quot;</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="auth-profiles-saved-credentials-with-rotation">Auth Profiles — Saved Credentials with Rotation<a class="headerlink" href="#auth-profiles-saved-credentials-with-rotation" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/auth-profiles.ts</code></strong></p>
+<p>Auth profiles are like saved passwords in your browser, but smarter:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">AuthProfileStore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">profiles</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">AuthProfileCredential</span><span class="o">&gt;</span><span class="p">;</span><span class="w">  </span><span class="c1">// Saved credentials</span>
+<span class="w">  </span><span class="nx">order?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span><span class="w">                                  </span><span class="c1">// Preference order</span>
+<span class="w">  </span><span class="nx">usageStats?</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">ProfileUsageStats</span><span class="o">&gt;</span><span class="p">;</span><span class="w">    </span><span class="c1">// How often each is used</span>
+<span class="w">  </span><span class="nx">failures?</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">AuthProfileFailureReason</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// Which ones failed</span>
+<span class="w">  </span><span class="nx">cooldowns?</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">until</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">}</span><span class="o">&gt;</span><span class="p">;</span><span class="w">     </span><span class="c1">// Temporarily disabled</span>
+<span class="p">};</span>
+</code></pre></div>
+<p><strong>Why multiple profiles?</strong> Imagine you have two OpenAI API keys — one personal and one from work. If the personal one hits its rate limit, OpenClaw automatically switches to the work one. This is <strong>auth profile rotation</strong>.</p>
+<p>Profile ordering is smart:
+1. Explicitly configured order (if you set one)
+2. Round-robin based on last used
+3. Stored order from previous sessions
+4. Profile creation order (oldest first)</p>
+<p><strong>Cooldowns and failures:</strong> If a profile fails (bad key, billing issue, rate limit), it's put on cooldown. The system tries the next profile instead of hammering a broken one.</p>
+<h3 id="oauth-flows">OAuth Flows<a class="headerlink" href="#oauth-flows" title="Permanent link">&para;</a></h3>
+<p>Three provider extensions implement full OAuth:</p>
+<h4 id="google-gemini-cli-auth-pkce-localhost-callback">Google Gemini CLI Auth (PKCE + Localhost Callback)<a class="headerlink" href="#google-gemini-cli-auth-pkce-localhost-callback" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code>1. Generate PKCE code verifier + challenge
+2. Open browser to Google&#39;s auth page
+3. User logs in and grants permission
+4. Google redirects to http://localhost:8085/oauth2callback
+5. Exchange auth code for access + refresh tokens
+6. Store tokens in auth profile
+</code></pre></div>
+<h4 id="minimax-qwen-portal-auth-device-code-flow">MiniMax &amp; Qwen Portal Auth (Device Code Flow)<a class="headerlink" href="#minimax-qwen-portal-auth-device-code-flow" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code>1. Request a device code from the provider
+2. Show user: &quot;Go to https://... and enter code: ABCD-1234&quot;
+3. Poll the provider every 2-10 seconds: &quot;Did they enter the code yet?&quot;
+4. When they do, receive access + refresh tokens
+5. Store tokens in auth profile
+</code></pre></div>
+<h3 id="secret-management">Secret Management<a class="headerlink" href="#secret-management" title="Permanent link">&para;</a></h3>
+<p>OpenClaw never stores plaintext secrets in config files if it can help it:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// Environment reference (stored as-is)</span>
+<span class="nx">apiKey</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;env:OPENAI_API_KEY&quot;</span>
+
+<span class="c1">// Keychain reference (macOS Keychain, etc.)</span>
+<span class="nx">apiKey</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;keychain:openclaw-openai&quot;</span>
+
+<span class="c1">// Direct value (only if user explicitly sets it)</span>
+<span class="nx">apiKey</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;sk-abc123...&quot;</span>
+</code></pre></div>
+<p>When writing <code>models.json</code>, the system:
+- Preserves env references as-is
+- Replaces non-env secrets with placeholder markers
+- Never persists plaintext secrets from temporary sources</p>
+<hr />
+<h2 id="part-4-model-selection-routing-picking-the-right-brain">Part 4: Model Selection &amp; Routing (Picking the Right Brain)<a class="headerlink" href="#part-4-model-selection-routing-picking-the-right-brain" title="Permanent link">&para;</a></h2>
+<h3 id="the-model-reference">The Model Reference<a class="headerlink" href="#the-model-reference" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/model-selection.ts</code> (728 lines)</strong></p>
+<p>Every model is identified by a <strong>provider/model</strong> pair:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ModelRef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">provider</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">    </span><span class="c1">// &quot;anthropic&quot;</span>
+<span class="w">  </span><span class="nx">model</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">       </span><span class="c1">// &quot;claude-opus-4-6&quot;</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>In config, you write this as a string: <code>"anthropic/claude-opus-4-6"</code>.</p>
+<h3 id="provider-id-normalization">Provider ID Normalization<a class="headerlink" href="#provider-id-normalization" title="Permanent link">&para;</a></h3>
+<p>Users might type provider names in many ways. OpenClaw normalizes them:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="s2">&quot;z.ai&quot;</span><span class="w"> </span><span class="nx">or</span><span class="w"> </span><span class="s2">&quot;z-ai&quot;</span><span class="w">           </span><span class="err">→</span><span class="w"> </span><span class="s2">&quot;zai&quot;</span>
+<span class="s2">&quot;opencode-zen&quot;</span><span class="w">              </span><span class="err">→</span><span class="w"> </span><span class="s2">&quot;opencode&quot;</span>
+<span class="s2">&quot;qwen&quot;</span><span class="w">                      </span><span class="err">→</span><span class="w"> </span><span class="s2">&quot;qwen-portal&quot;</span>
+<span class="s2">&quot;kimi-code&quot;</span><span class="w">                 </span><span class="err">→</span><span class="w"> </span><span class="s2">&quot;kimi-coding&quot;</span>
+<span class="s2">&quot;bedrock&quot;</span><span class="w"> </span><span class="nx">or</span><span class="w"> </span><span class="s2">&quot;aws-bedrock&quot;</span><span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="s2">&quot;amazon-bedrock&quot;</span>
+<span class="s2">&quot;bytedance&quot;</span><span class="w"> </span><span class="nx">or</span><span class="w"> </span><span class="s2">&quot;doubao&quot;</span><span class="w">     </span><span class="err">→</span><span class="w"> </span><span class="s2">&quot;volcengine&quot;</span>
+</code></pre></div>
+<h3 id="model-id-normalization">Model ID Normalization<a class="headerlink" href="#model-id-normalization" title="Permanent link">&para;</a></h3>
+<p>Similarly, model names get normalized:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// Anthropic aliases</span>
+<span class="s2">&quot;opus-4.6&quot;</span><span class="w">                  </span><span class="err">→</span><span class="w"> </span><span class="s2">&quot;claude-opus-4-6&quot;</span>
+
+<span class="c1">// Google preview versions</span>
+<span class="s2">&quot;gemini-3-pro&quot;</span><span class="w">              </span><span class="err">→</span><span class="w"> </span><span class="s2">&quot;gemini-3-pro-preview&quot;</span>
+
+<span class="c1">// OpenRouter prefix</span>
+<span class="s2">&quot;aurora-alpha&quot;</span><span class="w">              </span><span class="err">→</span><span class="w"> </span><span class="s2">&quot;openrouter/aurora-alpha&quot;</span>
+</code></pre></div>
+<h3 id="the-default-model">The Default Model<a class="headerlink" href="#the-default-model" title="Permanent link">&para;</a></h3>
+<p>If you don't specify a model, OpenClaw has a hardcoded default:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">DEFAULT_MODEL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;claude-opus-4-6&quot;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">DEFAULT_PROVIDER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;anthropic&quot;</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="model-resolution-flow">Model Resolution Flow<a class="headerlink" href="#model-resolution-flow" title="Permanent link">&para;</a></h3>
+<p>When the system needs to pick a model:</p>
+<div class="language-text highlight"><pre><span></span><code>1. Check agent-specific model override
+   (each agent can have its own preferred model)
+       │
+2. Check configured default model
+   (from config.json5)
+       │
+3. Parse &quot;provider/model&quot; format
+       │
+4. Check model alias index
+   (case-insensitive lookup)
+       │
+5. Verify provider exists and has the model
+       │
+6. If provider unavailable, try fallback providers
+       │
+7. Ultimate fallback: anthropic/claude-opus-4-6
+</code></pre></div>
+<h3 id="model-allowlists">Model Allowlists<a class="headerlink" href="#model-allowlists" title="Permanent link">&para;</a></h3>
+<p>You can restrict which models are available:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">buildAllowedModelSet</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nb">Set</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span>
+<span class="c1">// If no allowlist configured: allow ALL catalog + fallback models</span>
+<span class="c1">// If allowlist configured: only allow those specific models</span>
+<span class="c1">// The default model is ALWAYS allowed (can&#39;t lock yourself out)</span>
+</code></pre></div>
+<h3 id="thinking-levels">Thinking Levels<a class="headerlink" href="#thinking-levels" title="Permanent link">&para;</a></h3>
+<p>For reasoning models (models that "think out loud"), you can control how much thinking they do:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ThinkLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;off&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;minimal&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;low&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;medium&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;high&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;xhigh&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;adaptive&quot;</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li><strong><code>off</code></strong>: No thinking, just answer immediately</li>
+<li><strong><code>minimal</code></strong> to <strong><code>xhigh</code></strong>: Increasing amounts of reasoning (more tokens, better answers, higher cost)</li>
+<li><strong><code>adaptive</code></strong>: Let the model decide how much thinking is needed</li>
+</ul>
+<p>Resolution order:
+1. Per-model override from config
+2. Global default setting
+3. Catalog recommendation for that model</p>
+<hr />
+<h2 id="part-5-the-inference-pipeline-actually-talking-to-the-brain">Part 5: The Inference Pipeline (Actually Talking to the Brain)<a class="headerlink" href="#part-5-the-inference-pipeline-actually-talking-to-the-brain" title="Permanent link">&para;</a></h2>
+<p>This is the heart of Layer 5 — the code that actually sends your message to an AI model and streams back the response.</p>
+<h3 id="the-core-runtime-pi-embedded-runner">The Core Runtime: pi-embedded-runner<a class="headerlink" href="#the-core-runtime-pi-embedded-runner" title="Permanent link">&para;</a></h3>
+<p><strong>Directory: <code>src/agents/pi-embedded-runner/</code></strong></p>
+<p>OpenClaw uses a library called <code>@mariozechner/pi-ai</code> (and related packages <code>pi-coding-agent</code>, <code>pi-agent-core</code>) as the foundation for AI inference. The <code>pi-embedded-runner</code> wraps this library with OpenClaw-specific logic.</p>
+<h3 id="the-run-loop">The Run Loop<a class="headerlink" href="#the-run-loop" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/pi-embedded-runner/run.ts</code></strong></p>
+<p>The run loop is the master controller. It handles retries, auth failover, context management, and error recovery.</p>
+<div class="language-text highlight"><pre><span></span><code>┌─────────────────────────────────────────────┐
+│                  RUN LOOP                    │
+│                                              │
+│  Retry Budget: 24 base + 8 per auth profile  │
+│  Max: 160 iterations                         │
+│                                              │
+│  For each attempt:                           │
+│    1. Resolve auth (pick profile)            │
+│    2. Check context window guard             │
+│    3. Build session + system prompt          │
+│    4. Construct tool schemas                 │
+│    5. Call streamSimple() ──────────────┐    │
+│    6. Process streaming response       │    │
+│    7. Accumulate usage tokens          │    │
+│                                        │    │
+│  On failure:                           │    │
+│    - Auth error? → next profile        │    │
+│    - Rate limit? → backoff + retry     │    │
+│    - Billing error? → next profile     │    │
+│    - Context overflow? → compact + retry│    │
+│    - Network error? → retry            │    │
+│                                        │    │
+│  Backoff for overload:                 │    │
+│    initial: 250ms                      │    │
+│    max: 1,500ms                        │    │
+│    factor: 2x                          │    │
+│    jitter: ±20%                        │    │
+└────────────────────────────────────────┘
+</code></pre></div>
+<p>Key constants:
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">BASE_RUN_RETRY_ITERATIONS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">24</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">RUN_RETRY_ITERATIONS_PER_PROFILE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">8</span><span class="p">;</span><span class="w">   </span><span class="c1">// 8 extra retries per auth profile</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">MAX_RUN_RETRY_ITERATIONS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">160</span><span class="p">;</span><span class="w">          </span><span class="c1">// Absolute ceiling</span>
+</code></pre></div></p>
+<h3 id="a-single-inference-attempt">A Single Inference Attempt<a class="headerlink" href="#a-single-inference-attempt" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/pi-embedded-runner/run/attempt.ts</code></strong></p>
+<p>Each attempt within the run loop does:</p>
+<ol>
+<li><strong>Create session</strong> from pi-coding-agent SDK</li>
+<li><strong>Build system prompt</strong> with agent personality, skills, context</li>
+<li><strong>Construct tool schemas</strong> — validate and transform for the target provider</li>
+<li><strong>Apply provider-specific transforms:</strong></li>
+<li>Google: sanitize tool schemas, fix turn ordering</li>
+<li>Anthropic: wrap payloads when going through OpenAI-format providers</li>
+<li>Mistral: truncate tool IDs to 9 characters</li>
+<li><strong>Map reasoning/thinking level</strong> to provider-specific format</li>
+<li><strong>Sanitize images</strong> — check dimensions, format</li>
+<li><strong>Set cache TTL</strong> for prompt caching (Anthropic, Google)</li>
+<li><strong>Load plugin extensions</strong> — pre/post hooks</li>
+<li><strong>Call <code>streamSimple()</code></strong> — the actual API call</li>
+</ol>
+<h3 id="the-core-streaming-call">The Core Streaming Call<a class="headerlink" href="#the-core-streaming-call" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">streamSimple</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@mariozechner/pi-ai&quot;</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">streamSimple</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">model</span><span class="o">:</span><span class="w"> </span><span class="kt">resolvedModel</span><span class="p">,</span><span class="w">           </span><span class="c1">// The AI model to use</span>
+<span class="w">  </span><span class="nx">messages</span><span class="o">:</span><span class="w"> </span><span class="kt">preparedMessages</span><span class="p">,</span><span class="w">     </span><span class="c1">// Conversation history</span>
+<span class="w">  </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="kt">sdkTools</span><span class="p">,</span><span class="w">                </span><span class="c1">// Available tool definitions</span>
+<span class="w">  </span><span class="nx">temperature?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span><span class="w">           </span><span class="c1">// Creativity (0 = deterministic, 1 = creative)</span>
+<span class="w">  </span><span class="nx">maxTokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span><span class="w">             </span><span class="c1">// Max response length</span>
+<span class="w">  </span><span class="nx">thinking</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span><span class="w">                    </span><span class="c1">// Reasoning configuration</span>
+<span class="w">    </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">budgetTokens</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w">          </span><span class="c1">// How many tokens for thinking</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">},</span><span class="w"> </span><span class="nx">onStream</span><span class="p">);</span><span class="w">  </span><span class="c1">// Callback for each streamed chunk</span>
+</code></pre></div>
+<h3 id="model-resolution-at-runtime">Model Resolution at Runtime<a class="headerlink" href="#model-resolution-at-runtime" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/pi-embedded-runner/model.ts</code></strong></p>
+<p>When resolving a model for actual use:</p>
+<div class="language-text highlight"><pre><span></span><code>1. Check Pi SDK registry (built-in models from the library)
+       │
+2. If not found, check configured inline models (from models.json)
+       │
+3. If OpenRouter, allow ANY model ID (pass-through)
+       │
+4. Apply forward-compatibility aliases
+       │
+5. Apply configured overrides (custom headers, cost, context window)
+       │
+6. Return Model&lt;Api&gt; object ready for streaming
+</code></pre></div>
+<h3 id="stream-wrappers-provider-specific-streaming">Stream Wrappers — Provider-Specific Streaming<a class="headerlink" href="#stream-wrappers-provider-specific-streaming" title="Permanent link">&para;</a></h3>
+<p>Different providers stream responses differently. OpenClaw has specialized stream wrappers:</p>
+<table>
+<thead>
+<tr>
+<th>Wrapper</th>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI HTTP</td>
+<td><code>openai-stream-wrappers.ts</code></td>
+<td>Standard SSE streaming</td>
+</tr>
+<tr>
+<td>OpenAI WebSocket</td>
+<td><code>openai-ws-stream.ts</code></td>
+<td>WebSocket-first (faster)</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td><code>anthropic-stream-wrappers.ts</code></td>
+<td>Anthropic's event stream</td>
+</tr>
+<tr>
+<td>Moonshot</td>
+<td><code>moonshot-stream-wrappers.ts</code></td>
+<td>Moonshot/Kimi-specific</td>
+</tr>
+<tr>
+<td>Proxy</td>
+<td><code>proxy-stream-wrappers.ts</code></td>
+<td>Generic proxy wrapper</td>
+</tr>
+</tbody>
+</table>
+<p>The OpenAI WebSocket streaming deserves special mention — it's <strong>WebSocket-first with HTTP fallback</strong>. WebSocket is faster because it reuses a persistent connection instead of creating a new HTTP connection for each request. If WebSocket fails, it automatically falls back to standard HTTP streaming.</p>
+<div class="language-text highlight"><pre><span></span><code>WebSocket (preferred, faster)
+    │ fails?
+    └──→ HTTP SSE (fallback, always works)
+</code></pre></div>
+<h3 id="context-window-guard">Context Window Guard<a class="headerlink" href="#context-window-guard" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/context-window-guard.ts</code></strong></p>
+<p>The context window guard prevents the "conversation too long" crash:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">CONTEXT_WINDOW_HARD_MIN_TOKENS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10</span><span class="nx">_000</span><span class="p">;</span><span class="w">    </span><span class="c1">// Absolute minimum</span>
+<span class="nx">CONTEXT_WINDOW_WARN_BELOW_TOKENS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">15</span><span class="nx">_000</span><span class="p">;</span><span class="w">  </span><span class="c1">// Warning threshold</span>
+</code></pre></div>
+<p>Before each attempt, it checks: "Is the conversation approaching the model's context limit?" If yes, it triggers <strong>compaction</strong> — summarizing older messages to free up space. This is done in collaboration with Layer 8 (Context Engine).</p>
+<p>The guard uses the <strong>last API call's cache fields</strong> (not accumulated totals) to avoid inflation from multi-turn tool calls. If the AI makes 5 tool calls in a row, each reports <code>cacheRead ≈ current_context_size</code>. Summing all 5 would give 5× the real context usage. The guard smartly uses only the most recent measurement.</p>
+<hr />
+<h2 id="part-6-usage-tracking-cost-counting-tokens-and-dollars">Part 6: Usage Tracking &amp; Cost (Counting Tokens and Dollars)<a class="headerlink" href="#part-6-usage-tracking-cost-counting-tokens-and-dollars" title="Permanent link">&para;</a></h2>
+<h3 id="the-token-counting-problem">The Token Counting Problem<a class="headerlink" href="#the-token-counting-problem" title="Permanent link">&para;</a></h3>
+<p>Every AI provider reports token usage differently. OpenClaw normalizes everything into a common format.</p>
+<p><strong>File: <code>src/agents/usage.ts</code> (191 lines)</strong></p>
+<h3 id="raw-provider-usage-the-babel-tower">Raw Provider Usage — The Babel Tower<a class="headerlink" href="#raw-provider-usage-the-babel-tower" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">UsageLike</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Standard fields</span>
+<span class="w">  </span><span class="nx">input?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">output?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">cacheRead?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">cacheWrite?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">total?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// OpenAI-style aliases</span>
+<span class="w">  </span><span class="nx">promptTokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">prompt_tokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">completionTokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">completion_tokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Anthropic-style aliases</span>
+<span class="w">  </span><span class="nx">inputTokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">outputTokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">cache_read_input_tokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">cache_creation_input_tokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Moonshot/Kimi-style</span>
+<span class="w">  </span><span class="nx">cached_tokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">prompt_tokens_details</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">cached_tokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">};</span><span class="w">  </span><span class="c1">// Kimi K2</span>
+
+<span class="w">  </span><span class="c1">// Generic aliases</span>
+<span class="w">  </span><span class="nx">totalTokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">total_tokens?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>That's <strong>20+ different field names</strong> for basically 4 numbers: input tokens, output tokens, cache reads, cache writes. Every provider picked different names.</p>
+<h3 id="normalized-usage-the-common-language">Normalized Usage — The Common Language<a class="headerlink" href="#normalized-usage-the-common-language" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">NormalizedUsage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">input?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">       </span><span class="c1">// Tokens the AI &quot;read&quot;</span>
+<span class="w">  </span><span class="nx">output?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">      </span><span class="c1">// Tokens the AI &quot;wrote&quot;</span>
+<span class="w">  </span><span class="nx">cacheRead?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">   </span><span class="c1">// Tokens read from cache (cheaper!)</span>
+<span class="w">  </span><span class="nx">cacheWrite?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">  </span><span class="c1">// Tokens written to cache (for future savings)</span>
+<span class="w">  </span><span class="nx">total?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>The <code>normalizeUsage()</code> function handles all the conversions, including edge cases:
+- <strong>Negative input tokens</strong>: When Moonshot reports <code>cached_tokens &gt; prompt_tokens</code>, input goes negative. The normalizer clamps to 0.
+- <strong>Missing totals</strong>: Computed as <code>input + output + cacheRead + cacheWrite</code>.</p>
+<h3 id="full-usage-snapshot-with-costs">Full Usage Snapshot with Costs<a class="headerlink" href="#full-usage-snapshot-with-costs" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">AssistantUsageSnapshot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">cacheRead</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">cacheWrite</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">totalTokens</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">cost</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">       </span><span class="c1">// Dollars spent on input</span>
+<span class="w">    </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">      </span><span class="c1">// Dollars spent on output</span>
+<span class="w">    </span><span class="nx">cacheRead</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">   </span><span class="c1">// Dollars saved via cache reads</span>
+<span class="w">    </span><span class="nx">cacheWrite</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">  </span><span class="c1">// Dollars spent on cache creation</span>
+<span class="w">    </span><span class="nx">total</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">       </span><span class="c1">// Total dollars</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>Cost is calculated by multiplying token counts by the model's per-million-token prices from the <code>ModelDefinitionConfig.cost</code> field.</p>
+<h3 id="cost-tracking-fixes-a-story-of-getting-it-right">Cost Tracking Fixes (A Story of Getting It Right)<a class="headerlink" href="#cost-tracking-fixes-a-story-of-getting-it-right" title="Permanent link">&para;</a></h3>
+<p>The git history reveals how tricky cost tracking was:
+- <strong>Feb 21</strong>: "drop stale pre-compaction usage snapshots" — old usage data was contaminating totals
+- <strong>Feb 26</strong>: "clamp negative input token counts to zero" — Moonshot bug
+- <strong>Mar 4</strong>: "parse Kimi K2 cached_tokens from prompt_tokens_details" — Kimi changed their format
+- <strong>Mar 12</strong>: "stop guessing session model costs" — removed speculative cost estimation that was inaccurate
+- <strong>Mar 12</strong>: "correct MiniMax M2.5 pricing (was ~50x too high)" — a decimal point error
+- <strong>Mar 13</strong>: "cache OpenRouter pricing for configured models" — OpenRouter's dynamic pricing</p>
+<hr />
+<h2 id="part-7-provider-capabilities-compatibility-handling-quirks">Part 7: Provider Capabilities &amp; Compatibility (Handling Quirks)<a class="headerlink" href="#part-7-provider-capabilities-compatibility-handling-quirks" title="Permanent link">&para;</a></h2>
+<h3 id="the-provider-capabilities-system">The Provider Capabilities System<a class="headerlink" href="#the-provider-capabilities-system" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/provider-capabilities.ts</code> (169 lines)</strong></p>
+<p>Each provider has unique behaviors. The capabilities system tracks these:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ProviderCapabilities</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Tool schema format</span>
+<span class="w">  </span><span class="nx">anthropicToolSchemaMode</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;native&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;openai-functions&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">anthropicToolChoiceMode</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;native&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;openai-string-modes&quot;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Provider family (affects many behaviors)</span>
+<span class="w">  </span><span class="nx">providerFamily</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;openai&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;anthropic&quot;</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Reasoning/thinking block handling</span>
+<span class="w">  </span><span class="nx">preserveAnthropicThinkingSignatures</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">geminiThoughtSignatureSanitization</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">dropThinkingBlockModelHints</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span>
+
+<span class="w">  </span><span class="c1">// Turn validation (message ordering rules)</span>
+<span class="w">  </span><span class="nx">openAiCompatTurnValidation</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Tool call ID format</span>
+<span class="w">  </span><span class="nx">transcriptToolCallIdMode</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;default&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">&quot;strict9&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">transcriptToolCallIdModelHints</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span>
+<span class="p">};</span>
+</code></pre></div>
+<h3 id="provider-specific-quirks">Provider-Specific Quirks<a class="headerlink" href="#provider-specific-quirks" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Quirk</th>
+<th>How OpenClaw Handles It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mistral</strong></td>
+<td>Tool call IDs must be ≤9 characters</td>
+<td><code>transcriptToolCallIdMode: "strict9"</code> — truncates IDs</td>
+</tr>
+<tr>
+<td><strong>Anthropic/Bedrock</strong></td>
+<td>Thinking blocks must be dropped on replay</td>
+<td><code>dropThinkingBlockModelHints: ["claude"]</code></td>
+</tr>
+<tr>
+<td><strong>Kimi Coding</strong></td>
+<td>Preserves Anthropic thinking signatures</td>
+<td><code>preserveAnthropicThinkingSignatures: true</code></td>
+</tr>
+<tr>
+<td><strong>OpenRouter</strong></td>
+<td>Gemini models have thought signature artifacts</td>
+<td><code>geminiThoughtSignatureSanitization: true</code></td>
+</tr>
+<tr>
+<td><strong>OpenAI</strong></td>
+<td>Requires specific turn ordering</td>
+<td><code>openAiCompatTurnValidation: true</code></td>
+</tr>
+<tr>
+<td><strong>Google</strong></td>
+<td>Tool schemas need sanitization</td>
+<td>Special transforms in attempt.ts</td>
+</tr>
+</tbody>
+</table>
+<h3 id="transcript-hygiene-cleaning-up-conversation-history">Transcript Hygiene — Cleaning Up Conversation History<a class="headerlink" href="#transcript-hygiene-cleaning-up-conversation-history" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/pi-embedded-runner/transcript-hygiene.ts</code> (470 lines)</strong></p>
+<p>When replaying conversation history to the AI, different providers have different rules about what's valid. Transcript hygiene cleans up the history:</p>
+<ul>
+<li><strong>Drop orphaned reasoning blocks</strong> — If a previous response had thinking blocks, some providers can't handle them on replay</li>
+<li><strong>Sanitize Gemini thought signatures</strong> — Google's models leave artifacts that confuse other providers</li>
+<li><strong>Self-heal Anthropic replay thinking</strong> — Fix broken thinking block structure</li>
+<li><strong>Ensure proper turn ordering</strong> — Some providers require strict assistant→user→assistant alternation</li>
+</ul>
+<hr />
+<h2 id="part-8-the-complete-provider-ecosystem-all-50-providers">Part 8: The Complete Provider Ecosystem (All 50+ Providers)<a class="headerlink" href="#part-8-the-complete-provider-ecosystem-all-50-providers" title="Permanent link">&para;</a></h2>
+<h3 id="tier-1-major-cloud-providers">Tier 1: Major Cloud Providers<a class="headerlink" href="#tier-1-major-cloud-providers" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Protocol</th>
+<th>Auth</th>
+<th>Key Models</th>
+<th>Context</th>
+<th>Special Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Anthropic</strong></td>
+<td>anthropic-messages</td>
+<td>API key</td>
+<td>Claude Opus 4.6, Sonnet 4.5, Haiku 4.5</td>
+<td>200K</td>
+<td>Prompt caching, thinking blocks</td>
+</tr>
+<tr>
+<td><strong>OpenAI</strong></td>
+<td>openai-completions</td>
+<td>API key</td>
+<td>GPT-5.4, GPT-5.2, GPT-5-mini</td>
+<td>128K</td>
+<td>WebSocket streaming, function calling</td>
+</tr>
+<tr>
+<td><strong>Google</strong></td>
+<td>google-generative-ai</td>
+<td>API key / OAuth</td>
+<td>Gemini 3 Pro, Gemini 3 Flash</td>
+<td>1M+</td>
+<td>Massive context, multimodal</td>
+</tr>
+<tr>
+<td><strong>AWS Bedrock</strong></td>
+<td>bedrock-converse-stream</td>
+<td>AWS SDK</td>
+<td>All hosted models</td>
+<td>Varies</td>
+<td>Auto-discovery, multi-model</td>
+</tr>
+<tr>
+<td><strong>GitHub Copilot</strong></td>
+<td>github-copilot</td>
+<td>GitHub token</td>
+<td>Copilot models</td>
+<td>Varies</td>
+<td>Code-focused</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-2-regionalspecialized-cloud-providers">Tier 2: Regional/Specialized Cloud Providers<a class="headerlink" href="#tier-2-regionalspecialized-cloud-providers" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Protocol</th>
+<th>Region</th>
+<th>Key Models</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MiniMax</strong></td>
+<td>anthropic-messages</td>
+<td>China/Global</td>
+<td>MiniMax-M2.5 (reasoning)</td>
+</tr>
+<tr>
+<td><strong>Moonshot/Kimi</strong></td>
+<td>openai-completions</td>
+<td>China</td>
+<td>Kimi K2.5 (256K context!)</td>
+</tr>
+<tr>
+<td><strong>Kimi Coding</strong></td>
+<td>anthropic-messages</td>
+<td>China</td>
+<td>K2P5 (coding-focused, reasoning)</td>
+</tr>
+<tr>
+<td><strong>Qwen Portal</strong></td>
+<td>openai-completions</td>
+<td>China (Aliyun)</td>
+<td>Coder model, Vision model</td>
+</tr>
+<tr>
+<td><strong>Qianfan (Baidu)</strong></td>
+<td>openai-completions</td>
+<td>China</td>
+<td>DeepSeek-v3.2, Ernie 5.0</td>
+</tr>
+<tr>
+<td><strong>ModelStudio (Aliyun)</strong></td>
+<td>openai-completions</td>
+<td>China</td>
+<td>Qwen 3.5 Plus (1M context!)</td>
+</tr>
+<tr>
+<td><strong>Volcengine/Doubao</strong></td>
+<td>openai-completions</td>
+<td>China (ByteDance)</td>
+<td>Doubao models</td>
+</tr>
+<tr>
+<td><strong>BytePlus</strong></td>
+<td>openai-completions</td>
+<td>Global (ByteDance)</td>
+<td>BytePlus models</td>
+</tr>
+<tr>
+<td><strong>Xiaomi</strong></td>
+<td>anthropic-messages</td>
+<td>China</td>
+<td>MiMo v2 Flash</td>
+</tr>
+<tr>
+<td><strong>NVIDIA</strong></td>
+<td>openai-completions</td>
+<td>Global</td>
+<td>Nemotron 70B</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-3-aggregatorproxy-providers">Tier 3: Aggregator/Proxy Providers<a class="headerlink" href="#tier-3-aggregatorproxy-providers" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Protocol</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OpenRouter</strong></td>
+<td>openai-completions</td>
+<td>Routes to 100+ models from various providers</td>
+</tr>
+<tr>
+<td><strong>Together</strong></td>
+<td>openai-completions</td>
+<td>Hosts open-source models (Llama, Mixtral, etc.)</td>
+</tr>
+<tr>
+<td><strong>HuggingFace</strong></td>
+<td>openai-completions</td>
+<td>Text generation inference</td>
+</tr>
+<tr>
+<td><strong>Vercel AI Gateway</strong></td>
+<td>openai-completions</td>
+<td>Edge-deployed AI proxy</td>
+</tr>
+<tr>
+<td><strong>Cloudflare AI Gateway</strong></td>
+<td>openai-completions</td>
+<td>CDN-level AI proxy</td>
+</tr>
+<tr>
+<td><strong>Kilocode</strong></td>
+<td>openai-completions</td>
+<td>Unified gateway</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-4-self-hostedlocal-providers">Tier 4: Self-Hosted/Local Providers<a class="headerlink" href="#tier-4-self-hostedlocal-providers" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Protocol</th>
+<th>Extension</th>
+<th>How It Works</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ollama</strong></td>
+<td>ollama (native)</td>
+<td><code>extensions/ollama/</code></td>
+<td>Run models on your machine. Discovery via <code>/api/tags</code></td>
+</tr>
+<tr>
+<td><strong>vLLM</strong></td>
+<td>openai-completions</td>
+<td><code>extensions/vllm/</code></td>
+<td>High-performance model serving. Discovery via <code>/v1/models</code></td>
+</tr>
+<tr>
+<td><strong>SGLang</strong></td>
+<td>openai-completions</td>
+<td><code>extensions/sglang/</code></td>
+<td>Fast inference server. Discovery via <code>/v1/models</code></td>
+</tr>
+<tr>
+<td><strong>Copilot Proxy</strong></td>
+<td>openai-completions</td>
+<td><code>extensions/copilot-proxy/</code></td>
+<td>Local proxy for Copilot models</td>
+</tr>
+<tr>
+<td><strong>LocalAI</strong></td>
+<td>openai-completions</td>
+<td>(built-in)</td>
+<td>OpenAI-compatible local server</td>
+</tr>
+</tbody>
+</table>
+<h3 id="provider-auth-flow-summary">Provider Auth Flow Summary<a class="headerlink" href="#provider-auth-flow-summary" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Auth Type</th>
+<th>Providers</th>
+<th>How It Works</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API Key</strong></td>
+<td>Most providers</td>
+<td>Set env var or paste key in config</td>
+</tr>
+<tr>
+<td><strong>OAuth (PKCE)</strong></td>
+<td>Google Gemini CLI</td>
+<td>Browser login → localhost callback</td>
+</tr>
+<tr>
+<td><strong>Device Code</strong></td>
+<td>MiniMax Portal, Qwen Portal</td>
+<td>Get code → visit URL → enter code</td>
+</tr>
+<tr>
+<td><strong>AWS SDK</strong></td>
+<td>Amazon Bedrock</td>
+<td>AWS credentials from env/profile</td>
+</tr>
+<tr>
+<td><strong>GitHub Token</strong></td>
+<td>GitHub Copilot</td>
+<td><code>GH_TOKEN</code> or <code>GITHUB_TOKEN</code></td>
+</tr>
+<tr>
+<td><strong>Local/None</strong></td>
+<td>Ollama, vLLM, SGLang</td>
+<td>Just needs the base URL</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="part-9-the-modelsjson-file-persistence">Part 9: The models.json File (Persistence)<a class="headerlink" href="#part-9-the-modelsjson-file-persistence" title="Permanent link">&para;</a></h2>
+<h3 id="how-provider-config-is-saved">How Provider Config Is Saved<a class="headerlink" href="#how-provider-config-is-saved" title="Permanent link">&para;</a></h3>
+<p><strong>File: <code>src/agents/models-config.ts</code></strong></p>
+<p>All discovered and configured providers are written to <code>~/.openclaw/agents/&lt;agentId&gt;/models.json</code>. This file is the "cache" of provider configuration.</p>
+<h3 id="the-write-lock">The Write Lock<a class="headerlink" href="#the-write-lock" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">MODELS_JSON_WRITE_LOCKS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+</code></pre></div>
+<p>Only one write at a time. If two processes try to write <code>models.json</code> simultaneously, the second waits for the first to finish. This prevents file corruption.</p>
+<h3 id="the-planning-system">The Planning System<a class="headerlink" href="#the-planning-system" title="Permanent link">&para;</a></h3>
+<p>Before writing, OpenClaw creates a "plan":</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ModelsJsonPlan</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;skip&quot;</span><span class="w"> </span><span class="p">}</span><span class="w">     </span><span class="c1">// No providers configured at all</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;noop&quot;</span><span class="w"> </span><span class="p">}</span><span class="w">     </span><span class="c1">// File already matches what we&#39;d write</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;write&quot;</span><span class="p">;</span><span class="w"> </span><span class="nx">contents</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">};</span><span class="w"> </span><span class="c1">// Write new content</span>
+</code></pre></div>
+<p>Planning steps:
+1. Resolve implicit providers (auto-discovered)
+2. Merge with explicit providers (from config)
+3. Normalize everything
+4. Apply mode (<code>merge</code> vs <code>replace</code>)
+5. Merge with existing file (if <code>merge</code> mode)
+6. Enforce secret management (no plaintext leaks)
+7. Compare with existing file
+8. Return plan</p>
+<p>If the plan is <code>noop</code>, no disk write happens. This avoids unnecessary filesystem churn.</p>
+<hr />
+<h2 id="how-layer-5-evolved-git-history">How Layer 5 Evolved (Git History)<a class="headerlink" href="#how-layer-5-evolved-git-history" title="Permanent link">&para;</a></h2>
+<h3 id="era-1-single-embedded-runtime-december-2025">Era 1: Single Embedded Runtime (December 2025)<a class="headerlink" href="#era-1-single-embedded-runtime-december-2025" title="Permanent link">&para;</a></h3>
+<p>OpenClaw started with a <strong>single AI provider</strong> — whatever the <code>pi</code> agent runtime supported.</p>
+<p><strong>December 17, 2025 — <code>fece42ce0</code></strong> — <code>feat: embed pi agent runtime</code></p>
+<p>This was the foundational commit. Before this, OpenClaw spawned a separate CLI process to run AI inference. This commit <strong>embedded</strong> the AI runtime directly into the Node.js process. The file <code>src/agents/pi-embedded.ts</code> (507 lines) handled:
+- System prompt construction
+- OAuth token management
+- Direct model interaction</p>
+<p>There was no concept of "providers" or "model selection." It was hardcoded to one model.</p>
+<p><strong>December 23, 2025 — <code>082c87246</code></strong> — <code>feat: support custom model providers</code></p>
+<p>Created <code>src/agents/models-config.ts</code> (64 lines). For the first time, users could configure custom providers with different base URLs and API keys. But it was basic — no discovery, no auth profiles, no protocol translation.</p>
+<h3 id="era-2-the-provider-explosion-january-2026">Era 2: The Provider Explosion (January 2026)<a class="headerlink" href="#era-2-the-provider-explosion-january-2026" title="Permanent link">&para;</a></h3>
+<p>January was when OpenClaw went from 1 provider to 10+ in three weeks.</p>
+<p><strong>January 6</strong> — <code>dbfa316d1</code> — Multi-agent routing + multi-account providers. The system could now route different conversations to different AI models.</p>
+<p><strong>January 11</strong> — <code>3da1afed6</code> — <strong>GitHub Copilot</strong> added as the first third-party provider. This required solving the "GitHub token resolution" problem.</p>
+<p><strong>January 12</strong> — <code>05ac67c52</code> — <code>models-config.providers.ts</code> split from <code>models-config.ts</code>. The provider code was already outgrowing its original file.</p>
+<p><strong>January 13</strong> — <code>8b5cd97ce</code> — <strong>Synthetic provider</strong> added for testing. 22 files, +937 lines. This let developers test the provider system without burning real API credits.</p>
+<p><strong>January 17</strong> — Three major additions in one day:
+- <code>e93a1d813</code> — <strong>Kimi Code provider</strong> (Moonshot)
+- <code>8eb80ee40</code> — <strong>Qwen Portal with OAuth</strong> — first OAuth provider! +945 lines including the full <code>extensions/qwen-portal-auth/</code> with device code flow
+- <code>a6deb0d9d</code> — <strong>Bundled provider auth plugins</strong> — Created the extensions: <code>copilot-proxy/</code>, <code>google-antigravity-auth/</code>, <code>google-gemini-cli-auth/</code></p>
+<p><strong>January 20</strong> — Two landmarks:
+- <code>7f25523d8</code> — <strong><code>bedrock-converse-stream</code></strong> added to <code>MODEL_APIS</code>. AWS Bedrock got its own protocol.
+- <code>a5adedea9</code> — <strong><code>aws-sdk</code> auth mode</strong> added. Now providers could authenticate via AWS credentials instead of API keys.</p>
+<p><strong>January 23</strong> — <code>8effb557d</code> — <strong>Dynamic Bedrock model discovery</strong>. +944 lines. Added <code>@aws-sdk/client-bedrock</code> to discover all available models in your AWS account automatically.</p>
+<p><strong>January 24</strong> — <code>51e3d16be</code> — <strong>Ollama with automatic model discovery</strong>. Called <code>/api/tags</code> and <code>/api/show</code> to find all locally pulled models. This made <code>resolveImplicitProviders</code> async (it now needed to make network calls).</p>
+<h3 id="era-3-protocol-diversification-february-2026">Era 3: Protocol Diversification (February 2026)<a class="headerlink" href="#era-3-protocol-diversification-february-2026" title="Permanent link">&para;</a></h3>
+<p>Up until now, most providers pretended to be OpenAI-compatible. February changed that.</p>
+<p><strong>February 14</strong> — <code>11702290f</code> — <strong>Native Ollama streaming</strong>. Created <code>src/agents/ollama-stream.ts</code> (+760 lines). Ollama was no longer forced through the OpenAI-compatible path — it got its own native <code>/api/chat</code> handler with proper tool calling support. This was a major milestone: the system could now handle truly different API protocols, not just "everything pretends to be OpenAI."</p>
+<p><strong>February 22</strong> — <code>ded9a59f7</code> — <strong>OpenRouter: allow any model ID</strong>. Previously, OpenRouter models had to be in a static catalog. Now any model ID was passed through directly. This was important because OpenRouter aggregates hundreds of models from dozens of providers.</p>
+<p><strong>February 23</strong> — <code>382fe8009</code> — <strong>Removed google-antigravity provider</strong>. First provider deprecation. Not all experiments succeed.</p>
+<p><strong>February 26</strong> — <code>861b90f79</code> — <strong><code>openai-codex-responses</code></strong> added as a distinct ModelApi type.</p>
+<h3 id="era-4-websocket-first-streaming-march-1-2026">Era 4: WebSocket-First Streaming (March 1, 2026)<a class="headerlink" href="#era-4-websocket-first-streaming-march-1-2026" title="Permanent link">&para;</a></h3>
+<p>A single day brought a transformative change.</p>
+<p><strong>March 1</strong> — <code>7ced38b5e</code> — <strong>OpenAI WebSocket-first streaming with HTTP fallback</strong>.</p>
+<p>This was a massive 1,260-line addition:
+- <code>src/agents/openai-ws-connection.ts</code> (528 lines) — WebSocket connection manager
+- <code>src/agents/openai-ws-stream.ts</code> (680 lines) — WebSocket streaming handler</p>
+<p>Why WebSocket? HTTP SSE (Server-Sent Events) creates a new connection for every request. WebSocket keeps one connection open and reuses it. For rapid back-and-forth conversations (especially with tool calls), this is dramatically faster.</p>
+<p>The implementation is smart: it tries WebSocket first, and if that fails (corporate firewall, proxy issues), it silently falls back to HTTP SSE. Users don't even notice the switch.</p>
+<p>Same day: WebSocket warm-up was added — pre-establishing the connection before it's needed, so the first request doesn't pay the connection setup cost.</p>
+<h3 id="era-5-reasoning-model-support-ongoing-jan-mar-2026">Era 5: Reasoning Model Support (Ongoing, Jan-Mar 2026)<a class="headerlink" href="#era-5-reasoning-model-support-ongoing-jan-mar-2026" title="Permanent link">&para;</a></h3>
+<p>Reasoning models (AI that "thinks out loud" before answering) were supported incrementally:</p>
+<ul>
+<li><strong>Early January</strong> — <code>b05981ef2</code> — "add reasoning tag hint for local providers" — basic reasoning tag parsing</li>
+<li><strong>February 16</strong> — <code>46bf210e0</code> — "always drop orphaned OpenAI reasoning blocks in session history" — cleanup</li>
+<li><strong>February 20</strong> — <code>feccac672</code> — "sanitize thinking blocks for GitHub Copilot Claude models" — Copilot-specific</li>
+<li><strong>March 8</strong> — <code>d6d04f361</code> — "preserve local limits and native thinking fallback" for Ollama</li>
+<li><strong>March 13</strong> — <code>de35fba9b</code> — <strong>The big split</strong>: Created dedicated <code>transcript-hygiene.ts</code> (470 lines) and <code>thinking.ts</code> for proper reasoning block management. This was the "we need to do this properly" moment.</li>
+<li><strong>March 13</strong> — <code>0f15cfe21</code> — "self-heal anthropic replay thinking history" — automatic repair of corrupted thinking blocks</li>
+</ul>
+<h3 id="era-6-architecture-maturity-march-8-13-2026">Era 6: Architecture Maturity (March 8-13, 2026)<a class="headerlink" href="#era-6-architecture-maturity-march-8-13-2026" title="Permanent link">&para;</a></h3>
+<p>The final week before our snapshot saw massive architectural cleanup:</p>
+<p><strong>March 8</strong> — Four refactoring commits in one day:
+- <code>609403505</code> — <strong>Split static provider builders</strong> into <code>models-config.providers.static.ts</code> (440 lines)
+- <code>52bc80914</code> — <strong>Extract stream wrappers</strong> from a 696-line monolith into <code>anthropic-stream-wrappers.ts</code>, <code>moonshot-stream-wrappers.ts</code>, <code>proxy-stream-wrappers.ts</code>
+- <code>f66bd105a</code> — Decompose implicit provider resolution
+- <code>65623e155</code> — Split provider discovery helpers</p>
+<p><strong>March 12</strong> — <code>d83491e75</code> — <strong>Provider plugin architecture</strong>. The biggest milestone:
+- Created <code>src/plugins/provider-discovery.ts</code> — plugin-based provider discovery
+- Created <code>src/plugins/provider-wizard.ts</code> (243 lines) — onboarding wizard for providers
+- Extracted Ollama, SGLang, vLLM into proper extensions
+- 41 files, +1,731 lines</p>
+<p>Before this commit, all provider discovery was hardcoded in <code>models-config.providers.ts</code>. After this commit, providers could be <strong>plugins</strong> just like channels. Any extension could register a provider with custom auth flows and model discovery.</p>
+<p><strong>March 12-13</strong> — Fast Mode / Service Tiers:
+- <code>35aafd7ca</code> — <strong>Anthropic fast mode support</strong> — <code>src/agents/fast-mode.ts</code>
+- <code>d5bffcdea</code> — Fast mode for OpenAI models
+- <code>2bcef8405</code> — Explicit Anthropic service tier wrapper
+- <code>5c7a640f8</code> — Wire service tiers into the runner</p>
+<hr />
+<h2 id="architecture-summary">Architecture Summary<a class="headerlink" href="#architecture-summary" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│                    User&#39;s Config (config.json5)              │
+│  models:                                                     │
+│    mode: &quot;merge&quot;                                             │
+│    providers:                                                │
+│      my-ollama: { baseUrl: &quot;http://localhost:11434&quot; }        │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │    Provider Discovery      │
+         │    (7-phase pipeline)      │
+         │                            │
+         │  Phase 1: Check env vars   │
+         │  Phase 2: Plugin providers │
+         │  Phase 3: OAuth profiles   │
+         │  Phase 4: Paired providers │
+         │  Phase 5: Cloudflare       │
+         │  Phase 6: Late plugins     │
+         │  Phase 7: Copilot/Bedrock  │
+         └─────────────┬─────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │     Auth Resolution        │
+         │  (7-source waterfall)      │
+         │                            │
+         │  1. Explicit profile       │
+         │  2. AWS SDK override       │
+         │  3. Auth profile store     │
+         │  4. Environment variable   │
+         │  5. Config API key         │
+         │  6. Synthetic local auth   │
+         │  7. Bedrock default        │
+         └─────────────┬─────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │     Model Selection        │
+         │                            │
+         │  Normalize provider ID     │
+         │  Normalize model ID        │
+         │  Check alias index         │
+         │  Verify availability       │
+         │  Apply thinking level      │
+         │  Fallback: claude-opus-4-6 │
+         └─────────────┬─────────────┘
+                       │
+         ┌─────────────┴──────────────────────────┐
+         │         Inference Pipeline               │
+         │                                          │
+         │  ┌──────────────────────────────────┐   │
+         │  │          Run Loop                 │   │
+         │  │  (24-160 retry iterations)        │   │
+         │  │                                    │   │
+         │  │  ┌────────────────────────────┐   │   │
+         │  │  │    Single Attempt           │   │   │
+         │  │  │                              │   │   │
+         │  │  │  1. Build system prompt      │   │   │
+         │  │  │  2. Construct tool schemas   │   │   │
+         │  │  │  3. Provider transforms      │   │   │
+         │  │  │  4. streamSimple() ──────┐   │   │   │
+         │  │  │  5. Process stream       │   │   │   │
+         │  │  │  6. Accumulate usage     │   │   │   │
+         │  │  └──────────────────────────┘   │   │   │
+         │  │                                    │   │
+         │  │  On failure → next profile/retry   │   │
+         │  └──────────────────────────────────┘   │
+         │                                          │
+         │  Stream Wrappers:                        │
+         │   ├── OpenAI WebSocket (preferred)       │
+         │   ├── OpenAI HTTP SSE (fallback)         │
+         │   ├── Anthropic Messages stream          │
+         │   ├── Ollama native /api/chat            │
+         │   ├── Moonshot-specific                  │
+         │   └── Generic proxy                      │
+         └─────────────┬──────────────────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │     Usage &amp; Cost           │
+         │                            │
+         │  Normalize 20+ field names │
+         │  into 4: input, output,    │
+         │  cacheRead, cacheWrite     │
+         │                            │
+         │  Cost = tokens × $/1M      │
+         └────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="key-files-reference">Key Files Reference<a class="headerlink" href="#key-files-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/config/types.models.ts</code></td>
+<td>76</td>
+<td>Core type definitions (ModelApi, ModelDefinitionConfig, ModelProviderConfig)</td>
+</tr>
+<tr>
+<td><code>src/agents/models-config.providers.ts</code></td>
+<td>~1,000</td>
+<td>Provider discovery pipeline (7 phases)</td>
+</tr>
+<tr>
+<td><code>src/agents/models-config.providers.static.ts</code></td>
+<td>~550</td>
+<td>Static provider builder functions</td>
+</tr>
+<tr>
+<td><code>src/agents/models-config.providers.discovery.ts</code></td>
+<td>~240</td>
+<td>Dynamic model discovery (Ollama, vLLM, etc.)</td>
+</tr>
+<tr>
+<td><code>src/agents/models-config.ts</code></td>
+<td>~400</td>
+<td>models.json read/write/merge logic</td>
+</tr>
+<tr>
+<td><code>src/agents/model-auth.ts</code></td>
+<td>521</td>
+<td>Auth resolution waterfall (7 sources)</td>
+</tr>
+<tr>
+<td><code>src/agents/model-selection.ts</code></td>
+<td>728</td>
+<td>Model routing, normalization, aliases</td>
+</tr>
+<tr>
+<td><code>src/agents/model-catalog.ts</code></td>
+<td>~200</td>
+<td>Model catalog management</td>
+</tr>
+<tr>
+<td><code>src/agents/usage.ts</code></td>
+<td>191</td>
+<td>Token usage normalization and cost</td>
+</tr>
+<tr>
+<td><code>src/agents/provider-capabilities.ts</code></td>
+<td>169</td>
+<td>Provider-specific quirks and capabilities</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-embedded-runner/run.ts</code></td>
+<td>~500</td>
+<td>Main retry/failover run loop</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-embedded-runner/run/attempt.ts</code></td>
+<td>~400</td>
+<td>Single inference attempt</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-embedded-runner/model.ts</code></td>
+<td>~300</td>
+<td>Runtime model resolution</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-embedded-runner/transcript-hygiene.ts</code></td>
+<td>470</td>
+<td>Conversation history sanitization</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-embedded-runner/thinking.ts</code></td>
+<td>~200</td>
+<td>Reasoning/thinking block handling</td>
+</tr>
+<tr>
+<td><code>src/agents/openai-ws-connection.ts</code></td>
+<td>528</td>
+<td>OpenAI WebSocket connection manager</td>
+</tr>
+<tr>
+<td><code>src/agents/openai-ws-stream.ts</code></td>
+<td>680</td>
+<td>OpenAI WebSocket streaming</td>
+</tr>
+<tr>
+<td><code>src/agents/ollama-stream.ts</code></td>
+<td>760</td>
+<td>Native Ollama streaming</td>
+</tr>
+<tr>
+<td><code>src/agents/fast-mode.ts</code></td>
+<td>~100</td>
+<td>Anthropic/OpenAI fast mode</td>
+</tr>
+<tr>
+<td><code>src/plugins/provider-discovery.ts</code></td>
+<td>~150</td>
+<td>Plugin-based provider discovery</td>
+</tr>
+<tr>
+<td><code>src/plugins/provider-wizard.ts</code></td>
+<td>243</td>
+<td>Provider onboarding wizard</td>
+</tr>
+<tr>
+<td><code>extensions/ollama/index.ts</code></td>
+<td>115</td>
+<td>Ollama provider plugin</td>
+</tr>
+<tr>
+<td><code>extensions/vllm/index.ts</code></td>
+<td>92</td>
+<td>vLLM provider plugin</td>
+</tr>
+<tr>
+<td><code>extensions/sglang/index.ts</code></td>
+<td>92</td>
+<td>SGLang provider plugin</td>
+</tr>
+<tr>
+<td><code>extensions/google-gemini-cli-auth/</code></td>
+<td>~400</td>
+<td>Google OAuth (PKCE)</td>
+</tr>
+<tr>
+<td><code>extensions/minimax-portal-auth/</code></td>
+<td>~300</td>
+<td>MiniMax device code OAuth</td>
+</tr>
+<tr>
+<td><code>extensions/qwen-portal-auth/</code></td>
+<td>~300</td>
+<td>Qwen device code OAuth</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

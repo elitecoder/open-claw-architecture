@@ -1,0 +1,3011 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant">
+      
+      
+        <meta name="author" content="elitecoder">
+      
+      
+      
+        <link rel="prev" href="../layer-9-voice-tts/">
+      
+      
+        <link rel="next" href="../layer-11-companion-apps/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Layer 10: Canvas & A2UI - OpenClaw Architecture Deep Dive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#layer-10-canvas-a2ui-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-header__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenClaw Architecture Deep Dive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Layer 10: Canvas & A2UI
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenClaw Architecture Deep Dive" class="md-nav__button md-logo" aria-label="OpenClaw Architecture Deep Dive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenClaw Architecture Deep Dive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Layers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-1-core-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 1: Core Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-2-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 2: Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-3-plugin-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 3: Plugin System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-4-channel-integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 4: Channel Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-5-ai-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 5: AI Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-6-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 6: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-7-memory-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 7: Memory System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-8-context-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 8: Context Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-9-voice-tts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 9: Voice / TTS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 10: Canvas & A2UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-canvas-a2ui-the-simple-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Canvas &amp; A2UI? (The Simple Version)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-canvas-host-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The Canvas Host Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The Canvas Host Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-handler-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Handler Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-file-serving-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How File Serving Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-default-test-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Default Test Page
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-reload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live Reload
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-file-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: File Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: File Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#path-traversal-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Traversal Protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#url-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        URL Normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-a2ui-the-declarative-ui-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: A2UI — The Declarative UI Language
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: A2UI — The Declarative UI Language">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a2ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is A2UI?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-component-catalog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Component Catalog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#json-protocol-server-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON Protocol (Server → Client)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-binding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Binding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#template-based-dynamic-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template-Based Dynamic Lists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-action-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Action System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#renderers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renderers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#theming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theming
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-the-a2ui-handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: The A2UI Handler
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: The A2UI Handler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Constants
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a2ui-root-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A2UI Root Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bridge-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bridge Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-request-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP Request Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-canvas-security-the-capability-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Canvas Security — The Capability System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Canvas Security — The Capability System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-solution-capability-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Solution: Capability Tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authorization-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authorization Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capability-refresh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capability Refresh
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canvas-url-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canvas URL Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-gateway-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Gateway Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Gateway Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#startup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Startup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-request-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP Request Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#websocket-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WebSocket Upgrade
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-connection-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Node Connection Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-the-canvas-agent-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: The Canvas Agent Tool
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: The Canvas Agent Tool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#canvas-skill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canvas Skill
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-discord-a2ui-activities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: Discord A2UI — Activities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-9-url-paths-and-ports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 9: URL Paths and Ports
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 9: URL Paths and Ports">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-url-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Default URL Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-10-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 10: Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git-history-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git History Evolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Git History Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-canvas-on-native-platforms-dec-1214-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Canvas on Native Platforms (Dec 12–14, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-a2ui-arrives-dec-17-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: A2UI Arrives (Dec 17, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-protocol-rename-and-canvas-host-dec-18-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Protocol Rename and Canvas Host (Dec 18, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-architecture-consolidation-dec-1921-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Architecture Consolidation (Dec 19–21, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-live-reload-and-stability-jan-46-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Live Reload and Stability (Jan 4–6, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-canvas-skill-and-documentation-jan-18-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Canvas Skill and Documentation (Jan 18, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-security-hardening-feb-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: Security Hardening (Feb 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-8-discord-a2ui-and-android-polish-febmar-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 8: Discord A2UI and Android Polish (Feb–Mar 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-evolution-in-four-sentences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Evolution in Four Sentences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-11-companion-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 11: Companion Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layer-12-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layer 12: Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-canvas-a2ui-the-simple-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Canvas &amp; A2UI? (The Simple Version)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-1-the-canvas-host-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: The Canvas Host Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 1: The Canvas Host Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-handler-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Handler Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-file-serving-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How File Serving Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-default-test-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Default Test Page
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-reload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live Reload
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-2-file-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 2: File Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 2: File Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#path-traversal-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Traversal Protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#url-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        URL Normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-3-a2ui-the-declarative-ui-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 3: A2UI — The Declarative UI Language
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 3: A2UI — The Declarative UI Language">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a2ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is A2UI?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-component-catalog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Component Catalog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#json-protocol-server-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON Protocol (Server → Client)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-binding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Binding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#template-based-dynamic-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template-Based Dynamic Lists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-action-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Action System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#renderers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renderers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#theming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theming
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-4-the-a2ui-handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 4: The A2UI Handler
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 4: The A2UI Handler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Constants
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a2ui-root-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A2UI Root Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bridge-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bridge Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-request-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP Request Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-5-canvas-security-the-capability-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: Canvas Security — The Capability System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: Canvas Security — The Capability System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-solution-capability-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Solution: Capability Tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authorization-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authorization Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capability-refresh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capability Refresh
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canvas-url-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canvas URL Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-6-gateway-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 6: Gateway Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 6: Gateway Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#startup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Startup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-request-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP Request Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#websocket-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WebSocket Upgrade
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-connection-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Node Connection Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-the-canvas-agent-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: The Canvas Agent Tool
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: The Canvas Agent Tool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#canvas-skill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canvas Skill
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-8-discord-a2ui-activities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 8: Discord A2UI — Activities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-9-url-paths-and-ports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 9: URL Paths and Ports
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 9: URL Paths and Ports">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-url-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Default URL Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-10-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 10: Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git-history-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git History Evolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Git History Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-canvas-on-native-platforms-dec-1214-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Canvas on Native Platforms (Dec 12–14, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-a2ui-arrives-dec-17-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: A2UI Arrives (Dec 17, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-protocol-rename-and-canvas-host-dec-18-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Protocol Rename and Canvas Host (Dec 18, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-architecture-consolidation-dec-1921-2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Architecture Consolidation (Dec 19–21, 2025)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-live-reload-and-stability-jan-46-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Live Reload and Stability (Jan 4–6, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-canvas-skill-and-documentation-jan-18-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: Canvas Skill and Documentation (Jan 18, 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-security-hardening-feb-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 7: Security Hardening (Feb 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-8-discord-a2ui-and-android-polish-febmar-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 8: Discord A2UI and Android Polish (Feb–Mar 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-evolution-in-four-sentences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Evolution in Four Sentences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-files-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="layer-10-canvas-a2ui-deep-dive">Layer 10: Canvas &amp; A2UI — Deep Dive<a class="headerlink" href="#layer-10-canvas-a2ui-deep-dive" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Explained like you're 12 years old, with full git history evolution.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-canvas-a2ui-the-simple-version">What Is Canvas &amp; A2UI? (The Simple Version)<a class="headerlink" href="#what-is-canvas-a2ui-the-simple-version" title="Permanent link">&para;</a></h2>
+<p>Imagine you're texting with a super-smart friend, but sometimes text isn't enough. You want them to show you something visual — a chart, a form to fill out, a photo gallery, or an interactive map. In a normal chat, you'd just get a link to a website. But what if your friend could create a <strong>mini app right inside your conversation</strong> that you could see and interact with?</p>
+<p>That's what the Canvas and A2UI systems do:</p>
+<ul>
+<li>
+<p><strong>Canvas</strong> is like a tiny web browser built into your chat. The AI can create an HTML page and show it to you — on your Mac, iPhone, Android, or even in Discord. The AI can also take screenshots of it, run JavaScript in it, and update it on the fly.</p>
+</li>
+<li>
+<p><strong>A2UI</strong> (Agent-to-UI) is a special language for describing user interfaces using JSON — no HTML needed. The AI sends a JSON description like "show a button labeled 'Submit' next to a text field", and the client renders it natively. It's like the AI is an architect drawing blueprints, and each platform builds the actual building using its own materials.</p>
+</li>
+</ul>
+<p>Think of Canvas as a <strong>whiteboard</strong> the AI can draw on, and A2UI as a <strong>blueprint language</strong> for building interactive forms and dashboards.</p>
+<hr />
+<h2 id="part-1-the-canvas-host-server">Part 1: The Canvas Host Server<a class="headerlink" href="#part-1-the-canvas-host-server" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/canvas-host/server.ts</code> (479 lines)</p>
+<p>The Canvas Host is an HTTP server that serves web content the AI creates. It's like a tiny web server running on your machine, just for the AI's visual outputs.</p>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">CanvasHostOpts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">runtime</span><span class="o">:</span><span class="w"> </span><span class="kt">RuntimeEnv</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">rootDir?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">        </span><span class="c1">// Where canvas files live (default: ~/.openclaw/canvas)</span>
+<span class="w">  </span><span class="nx">port?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">           </span><span class="c1">// HTTP port (default: 18793)</span>
+<span class="w">  </span><span class="nx">listenHost?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">     </span><span class="c1">// Bind address (default: 127.0.0.1)</span>
+<span class="w">  </span><span class="nx">allowInTests?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">liveReload?</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">    </span><span class="c1">// Watch files and auto-refresh browser (default: true)</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The canvas host can run either standalone (on port 18793) or integrated into the gateway (on the gateway port 18789). In practice, it's almost always integrated — the gateway handles authentication and proxies requests to the canvas handler.</p>
+<h3 id="the-handler-interface">The Handler Interface<a class="headerlink" href="#the-handler-interface" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">CanvasHostHandler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">rootDir</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">          </span><span class="c1">// Real path to canvas root directory</span>
+<span class="w">  </span><span class="nx">basePath</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">         </span><span class="c1">// URL mount point (/__openclaw__/canvas)</span>
+<span class="w">  </span><span class="nx">handleHttpRequest</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">boolean</span><span class="o">&gt;</span><span class="p">;</span><span class="w">   </span><span class="c1">// Serve files</span>
+<span class="w">  </span><span class="nx">handleUpgrade</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">socket</span><span class="p">,</span><span class="w"> </span><span class="nx">head</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">        </span><span class="c1">// WebSocket upgrade</span>
+<span class="w">  </span><span class="nx">close</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span><span class="w">                           </span><span class="c1">// Cleanup</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="how-file-serving-works">How File Serving Works<a class="headerlink" href="#how-file-serving-works" title="Permanent link">&para;</a></h3>
+<p>When a request arrives at <code>/__openclaw__/canvas/mypage.html</code>:</p>
+<ol>
+<li><strong>Parse URL</strong> and extract the path</li>
+<li><strong>Strip base path</strong> (<code>/__openclaw__/canvas</code>) to get <code>mypage.html</code></li>
+<li><strong>Validate method</strong> — only GET and HEAD allowed</li>
+<li><strong>Resolve file safely</strong> — using <code>resolveFileWithinRoot()</code> with path traversal protection</li>
+<li><strong>Read file content</strong> from disk</li>
+<li><strong>Detect MIME type</strong> (html, js, css, png, etc.)</li>
+<li><strong>For HTML files</strong>: inject the live reload script</li>
+<li><strong>Send response</strong> with proper Content-Type header</li>
+</ol>
+<p>If no file exists at the requested path and it's a directory, <code>index.html</code> is automatically looked up inside it.</p>
+<h3 id="the-default-test-page">The Default Test Page<a class="headerlink" href="#the-default-test-page" title="Permanent link">&para;</a></h3>
+<p>When the canvas root directory is empty, the server creates a default <code>index.html</code> — an interactive test page with:
+- Action buttons (hello, time, photo, dalek) that send test actions
+- Bridge detection showing whether iOS (<code>window.webkit.messageHandlers</code>) or Android (<code>window.openclawCanvasA2UIAction</code>) bridges are available
+- Status display showing action delivery results</p>
+<p>This helps developers verify the canvas is working.</p>
+<h3 id="live-reload">Live Reload<a class="headerlink" href="#live-reload" title="Permanent link">&para;</a></h3>
+<p><strong>How it works:</strong></p>
+<ol>
+<li><strong>File watcher</strong>: Uses <code>chokidar</code> to monitor the canvas root directory</li>
+<li><strong>Debounce</strong>: File change events are debounced by 75ms (12ms in tests) to batch rapid saves</li>
+<li><strong>WebSocket server</strong>: Listens at <code>/__openclaw__/ws</code> for browser connections</li>
+<li><strong>Broadcast</strong>: On file change, sends <code>"reload"</code> message to all connected browsers</li>
+<li><strong>Browser reload</strong>: Injected script receives the message and calls <code>location.reload()</code></li>
+</ol>
+<p>The live reload script is <strong>injected into every HTML file</strong> served by the canvas host. This means you can edit a canvas file in your text editor, save it, and see the changes instantly in the app — no manual refresh needed.</p>
+<p>Dotfiles and <code>node_modules</code> directories are ignored by the watcher.</p>
+<hr />
+<h2 id="part-2-file-security">Part 2: File Security<a class="headerlink" href="#part-2-file-security" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/canvas-host/file-resolver.ts</code> (50 lines)</p>
+<p>Security is critical here — the canvas host serves files from disk, so it must prevent attackers from reading arbitrary files on your system.</p>
+<h3 id="path-traversal-protection">Path Traversal Protection<a class="headerlink" href="#path-traversal-protection" title="Permanent link">&para;</a></h3>
+<p>The <code>resolveFileWithinRoot()</code> function enforces:</p>
+<ol>
+<li><strong>No ".." in path components</strong> — rejects any attempt to escape the root directory</li>
+<li><strong>No symbolic links</strong> — symlinks could point outside the root</li>
+<li><strong>Directory → index.html</strong> — directories automatically serve their index file</li>
+<li><strong>SafeOpenResult wrapper</strong> — prevents information leaks in error responses</li>
+</ol>
+<p>Example attacks blocked:
+- <code>/__openclaw__/a2ui/%2e%2e%2fpackage.json</code> (URL-encoded <code>../</code>) → <strong>404</strong>
+- <code>/__openclaw__/a2ui/symlink-to-etc-passwd</code> → <strong>404</strong>
+- <code>/__openclaw__/canvas/../../../etc/shadow</code> → <strong>404</strong></p>
+<h3 id="url-normalization">URL Normalization<a class="headerlink" href="#url-normalization" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">normalizeUrlPath</span><span class="p">(</span><span class="nx">raw</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 1. Decode URI component (%2e → .)</span>
+<span class="w">  </span><span class="c1">// 2. Normalize with path.posix.normalize (resolves ../ and ./)</span>
+<span class="w">  </span><span class="c1">// 3. Ensure leading /</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="part-3-a2ui-the-declarative-ui-language">Part 3: A2UI — The Declarative UI Language<a class="headerlink" href="#part-3-a2ui-the-declarative-ui-language" title="Permanent link">&para;</a></h2>
+<h3 id="what-is-a2ui">What Is A2UI?<a class="headerlink" href="#what-is-a2ui" title="Permanent link">&para;</a></h3>
+<p><strong>A2UI</strong> stands for <strong>Agent-to-UI</strong> — it's an open standard created by Google (Apache 2.0 license, vendored at <code>vendor/a2ui/</code>) that lets AI agents generate rich, interactive user interfaces using declarative JSON.</p>
+<p>The key insight is <strong>security through declarative data</strong>: instead of the AI sending HTML/JavaScript (which could be malicious), it sends JSON describing a UI. The client has a pre-approved "catalog" of components and only renders those. The AI can't inject arbitrary code — it can only request components from the trusted catalog.</p>
+<h3 id="architecture-flow">Architecture Flow<a class="headerlink" href="#architecture-flow" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>1. AI Agent generates A2UI JSON payload
+2. Transport: sent via gateway WebSocket to client
+3. Client&#39;s A2UI Renderer parses JSON
+4. Renderer maps abstract components → concrete native widgets
+5. User interacts → actions sent back to AI
+</code></pre></div>
+<h3 id="the-component-catalog">The Component Catalog<a class="headerlink" href="#the-component-catalog" title="Permanent link">&para;</a></h3>
+<p>A2UI v0.8 includes these components:</p>
+<p><strong>Leaf/Display Components:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+<th>Key Props</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Text</strong></td>
+<td>Display text</td>
+<td>usage (h1-h5, caption, body), markdown support</td>
+</tr>
+<tr>
+<td><strong>Image</strong></td>
+<td>Display images</td>
+<td>fit (contain, cover, fill, scale-down), usage hints (icon, avatar, feature, header)</td>
+</tr>
+<tr>
+<td><strong>Icon</strong></td>
+<td>Material Design icons</td>
+<td>40+ predefined icons</td>
+</tr>
+<tr>
+<td><strong>Video</strong></td>
+<td>Play video</td>
+<td>URL source</td>
+</tr>
+<tr>
+<td><strong>AudioPlayer</strong></td>
+<td>Play audio</td>
+<td>description, title</td>
+</tr>
+<tr>
+<td><strong>Divider</strong></td>
+<td>Separator line</td>
+<td>orientation (horizontal/vertical), color, thickness</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Form/Input Components:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+<th>Key Props</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TextField</strong></td>
+<td>Text input</td>
+<td>validation regex, label, type hints (shortText, number, date, longText)</td>
+</tr>
+<tr>
+<td><strong>CheckBox</strong></td>
+<td>Boolean toggle</td>
+<td>label, data-bound value</td>
+</tr>
+<tr>
+<td><strong>Slider</strong></td>
+<td>Range picker</td>
+<td>min, max, data binding, label</td>
+</tr>
+<tr>
+<td><strong>DateTimeInput</strong></td>
+<td>Date/time picker</td>
+<td>format configuration</td>
+</tr>
+<tr>
+<td><strong>MultipleChoice</strong></td>
+<td>Multi-select</td>
+<td>options array, max selections</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Container/Layout Components:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+<th>Key Props</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Row</strong></td>
+<td>Horizontal flex</td>
+<td>distribution (start, center, end, spaceBetween, spaceAround, spaceEvenly), alignment</td>
+</tr>
+<tr>
+<td><strong>Column</strong></td>
+<td>Vertical flex</td>
+<td>same distribution/alignment options</td>
+</tr>
+<tr>
+<td><strong>List</strong></td>
+<td>Scrollable container</td>
+<td>direction (vertical/horizontal)</td>
+</tr>
+<tr>
+<td><strong>Card</strong></td>
+<td>Elevated box</td>
+<td>child content</td>
+</tr>
+<tr>
+<td><strong>Tabs</strong></td>
+<td>Tabbed interface</td>
+<td>title + content per tab</td>
+</tr>
+<tr>
+<td><strong>Modal</strong></td>
+<td>Dialog/popup</td>
+<td>entry point component, content component</td>
+</tr>
+<tr>
+<td><strong>Button</strong></td>
+<td>Interactive button</td>
+<td>action handler</td>
+</tr>
+</tbody>
+</table>
+<h3 id="json-protocol-server-client">JSON Protocol (Server → Client)<a class="headerlink" href="#json-protocol-server-client" title="Permanent link">&para;</a></h3>
+<p>The AI sends messages in these formats:</p>
+<p><strong>1. beginRendering</strong> — Initialize a new surface (UI container):
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;beginRendering&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;surfaceId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dashboard-1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;rootComponentId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;main-column&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;components&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;main-column&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;Column&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;children&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;explicitList&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;header-text&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;submit-btn&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;header-text&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;Text&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;literalString&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello!&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;usage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;h1&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;submit-btn&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;Button&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;literalString&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Submit&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;submit_form&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>2. surfaceUpdate</strong> — Update existing components
+<strong>3. dataModelUpdate</strong> — Modify data model values at a path
+<strong>4. deleteSurface</strong> — Remove a surface</p>
+<h3 id="data-binding">Data Binding<a class="headerlink" href="#data-binding" title="Permanent link">&para;</a></h3>
+<p>Components can reference data from a shared data model:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="c1">// Literal values</span>
+<span class="p">{</span><span class="w"> </span><span class="s2">&quot;literalString&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Hello&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">{</span><span class="w"> </span><span class="s2">&quot;literalNumber&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">42</span><span class="w"> </span><span class="p">}</span>
+<span class="p">{</span><span class="w"> </span><span class="s2">&quot;literalBoolean&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}</span>
+
+<span class="c1">// Data-bound values (resolved at runtime)</span>
+<span class="p">{</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/user/name&quot;</span><span class="w"> </span><span class="p">}</span><span class="w">           </span><span class="c1">// Absolute path</span>
+<span class="p">{</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;./item/description&quot;</span><span class="w"> </span><span class="p">}</span><span class="w">    </span><span class="c1">// Relative to component&#39;s data context</span>
+</code></pre></div>
+<p>Paths support dot notation (<code>object.property</code>), bracket notation (<code>array[0]</code>), and mixed notation. The model processor normalizes all formats.</p>
+<h3 id="template-based-dynamic-lists">Template-Based Dynamic Lists<a class="headerlink" href="#template-based-dynamic-lists" title="Permanent link">&para;</a></h3>
+<p>Components can generate children dynamically from data:</p>
+<div class="language-json highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;children&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;template&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;componentId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;item-template&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;dataBinding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/data/items&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This creates one instance of <code>item-template</code> for each entry in <code>/data/items</code>, with each instance's data context bound to its respective item.</p>
+<h3 id="the-action-system">The Action System<a class="headerlink" href="#the-action-system" title="Permanent link">&para;</a></h3>
+<p>When a user taps a button or interacts with a component:</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">interface</span><span class="w"> </span><span class="nx">ClientToServerMessage</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">userAction</span><span class="o">?:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">                    </span><span class="c1">// Action identifier</span>
+<span class="w">    </span><span class="nx">surfaceId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">               </span><span class="c1">// Which surface</span>
+<span class="w">    </span><span class="nx">sourceComponentId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w">       </span><span class="c1">// Which component triggered it</span>
+<span class="w">    </span><span class="nx">timestamp</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">context?</span><span class="o">:</span><span class="w"> </span><span class="kt">Array</span><span class="o">&lt;</span><span class="p">{</span><span class="w">                </span><span class="c1">// Dynamic context data</span>
+<span class="w">      </span><span class="nx">key</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">path?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">literalString?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The action flows through the bridge:
+1. Component fires action event
+2. Bridge script calls <code>window.openclawSendUserAction()</code>
+3. On iOS: forwards to <code>window.webkit.messageHandlers.openclawCanvasA2UIAction</code>
+4. On Android: forwards to <code>window.openclawCanvasA2UIAction.postMessage()</code>
+5. Native code relays to gateway → AI agent
+6. Status feedback via <code>CustomEvent("openclaw:a2ui-action-status")</code></p>
+<h3 id="renderers">Renderers<a class="headerlink" href="#renderers" title="Permanent link">&para;</a></h3>
+<p>A2UI has two renderer implementations in the vendor:</p>
+<p><strong>Lit Renderer</strong> (primary, used by OpenClaw):
+- Web Components using the Lit framework
+- Each A2UI component maps to a Lit custom element
+- CSS-in-JS with structural styles
+- Supports theming (component-level, element-level, markdown-level styles)
+- Component registry prevents duplicate registration</p>
+<p><strong>Angular Renderer</strong>:
+- Directive-based rendering (<code>ng-container[a2ui-renderer]</code>)
+- Signals-based reactivity
+- Dynamic component loading
+- Injection-based catalog configuration</p>
+<h3 id="theming">Theming<a class="headerlink" href="#theming" title="Permanent link">&para;</a></h3>
+<p>The theme system styles components at three levels:
+- <strong>Component level</strong>: AudioPlayer, Button, Card, Column, etc.
+- <strong>Element level</strong>: <code>a</code>, <code>audio</code>, <code>body</code>, <code>button</code>, <code>h1</code>–<code>h5</code>, <code>input</code>, <code>textarea</code>, etc.
+- <strong>Markdown level</strong>: Styled rendering for <code>p</code>, <code>h1</code>–<code>h5</code>, <code>ul</code>, <code>ol</code>, <code>li</code>, <code>a</code>, <code>strong</code>, <code>em</code></p>
+<hr />
+<h2 id="part-4-the-a2ui-handler">Part 4: The A2UI Handler<a class="headerlink" href="#part-4-the-a2ui-handler" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/canvas-host/a2ui.ts</code> (209 lines)</p>
+<p>This file bridges the vendored A2UI library into the canvas host.</p>
+<h3 id="key-constants">Key Constants<a class="headerlink" href="#key-constants" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><pre><span></span><code><span class="nx">A2UI_PATH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/__openclaw__/a2ui&quot;</span><span class="w">           </span><span class="c1">// A2UI asset URL prefix</span>
+<span class="nx">CANVAS_HOST_PATH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/__openclaw__/canvas&quot;</span><span class="w">   </span><span class="c1">// Canvas host URL prefix</span>
+<span class="nx">CANVAS_WS_PATH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/__openclaw__/ws&quot;</span><span class="w">         </span><span class="c1">// WebSocket path</span>
+<span class="nx">CANVAS_CAPABILITY_QUERY_PARAM</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;oc_cap&quot;</span><span class="w">    </span><span class="c1">// Capability token query param</span>
+</code></pre></div>
+<h3 id="a2ui-root-resolution">A2UI Root Resolution<a class="headerlink" href="#a2ui-root-resolution" title="Permanent link">&para;</a></h3>
+<p><code>resolveA2uiRoot()</code> searches for the bundled A2UI assets in order:
+1. Source build location (<code>src/canvas-host/a2ui</code>)
+2. Multiple dist locations
+3. <code>process.argv[1]</code> entry directory fallbacks
+4. Repository root fallback</p>
+<p>It validates by checking for <code>index.html</code> and <code>a2ui.bundle.js</code>. The result is cached, with a 10-second negative cache for "not found" to avoid repeated filesystem scans.</p>
+<h3 id="bridge-injection">Bridge Injection<a class="headerlink" href="#bridge-injection" title="Permanent link">&para;</a></h3>
+<p><code>injectCanvasLiveReload()</code> injects a script into every HTML page that:</p>
+<ol>
+<li><strong>Detects native bridges</strong>: iOS WebKit message handler or Android bridge object</li>
+<li><strong>Defines <code>window.OpenClaw.postMessage()</code></strong>: Universal messaging function</li>
+<li><strong>Defines <code>window.openclawSendUserAction()</code></strong>: Action dispatch function</li>
+<li><strong>Opens WebSocket</strong> to <code>ws://host/__openclaw__/ws?oc_cap={capability}</code> for live reload</li>
+<li><strong>Handles reload messages</strong>: Calls <code>location.reload()</code> on "reload" events</li>
+</ol>
+<h3 id="http-request-handling">HTTP Request Handling<a class="headerlink" href="#http-request-handling" title="Permanent link">&para;</a></h3>
+<p><code>handleA2uiHttpRequest()</code> serves A2UI assets at <code>/__openclaw__/a2ui/*</code>:
+1. Check if path matches the A2UI prefix
+2. Resolve A2UI root directory
+3. Extract relative path
+4. Use safe file resolution (same traversal protection as canvas)
+5. Detect MIME type and serve file
+6. Inject live reload for HTML files</p>
+<hr />
+<h2 id="part-5-canvas-security-the-capability-system">Part 5: Canvas Security — The Capability System<a class="headerlink" href="#part-5-canvas-security-the-capability-system" title="Permanent link">&para;</a></h2>
+<h3 id="the-problem">The Problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h3>
+<p>The canvas host serves web content that runs in a WebView on native apps. But the gateway is accessible from the network (especially with Tailscale). Without authentication, anyone who can reach the gateway could browse canvas files, which might contain sensitive data.</p>
+<h3 id="the-solution-capability-tokens">The Solution: Capability Tokens<a class="headerlink" href="#the-solution-capability-tokens" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/gateway/canvas-capability.ts</code> (88 lines)</p>
+<p>Each connected "node" (native app) gets a <strong>capability token</strong> — a random 18-byte base64url string that acts as a session key for canvas access.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">mintCanvasCapabilityToken</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">randomBytes</span><span class="p">(</span><span class="mf">18</span><span class="p">).</span><span class="nx">toString</span><span class="p">(</span><span class="s2">&quot;base64url&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Scoped URLs</strong>: The capability is embedded in the URL path:
+<div class="language-text highlight"><pre><span></span><code>/__openclaw__/cap/{capability}/__openclaw__/canvas/index.html
+</code></pre></div></p>
+<p>This means the URL itself carries the authorization — no cookies or headers needed. The token expires after 10 minutes (<code>CANVAS_CAPABILITY_TTL_MS = 10 * 60_000</code>) with a sliding window (refreshed on each valid request).</p>
+<h3 id="authorization-flow">Authorization Flow<a class="headerlink" href="#authorization-flow" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/gateway/server/http-auth.ts</code> (117 lines)</p>
+<p>When a canvas request arrives:</p>
+<ol>
+<li><strong>Check if it's a canvas path</strong> (<code>isCanvasPath()</code>)</li>
+<li><strong>Extract capability</strong> from scoped URL path or <code>?oc_cap=</code> query param</li>
+<li><strong>Authorization checks</strong> (in order):</li>
+<li>Reject if the scoped path is malformed</li>
+<li>Accept if it's a local/direct request</li>
+<li>Try bearer token auth</li>
+<li>Try node capability match — check if any connected WebSocket client has this capability and it hasn't expired</li>
+<li><strong>Deny</strong> if none of the above succeed (401 response)</li>
+</ol>
+<h3 id="capability-refresh">Capability Refresh<a class="headerlink" href="#capability-refresh" title="Permanent link">&para;</a></h3>
+<p>Nodes can refresh their expired capabilities via <code>node.canvas.capability.refresh</code>:
+1. Mint a new token
+2. Build a new scoped URL
+3. Update the client record
+4. Return the scoped URL to the node</p>
+<p>This is used by Android when re-opening the canvas after the app was backgrounded.</p>
+<h3 id="canvas-url-resolution">Canvas URL Resolution<a class="headerlink" href="#canvas-url-resolution" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/infra/canvas-host-url.ts</code> (93 lines)</p>
+<p>The gateway resolves the canvas host URL for each connected node:</p>
+<p><strong>Host resolution priority:</strong>
+1. <code>hostOverride</code> (if non-loopback)
+2. <code>requestHost</code> hostname from the HTTP upgrade request
+3. <code>localAddress</code> of the connection</p>
+<p><strong>Special cases:</strong>
+- IPv6 addresses wrapped in brackets (<code>[::1]:port</code>)
+- HTTPS scheme → default port 443
+- HTTP scheme → default port 80
+- Gateway port 18789 as the primary canvas port (since canvas is integrated into gateway)</p>
+<hr />
+<h2 id="part-6-gateway-integration">Part 6: Gateway Integration<a class="headerlink" href="#part-6-gateway-integration" title="Permanent link">&para;</a></h2>
+<h3 id="startup">Startup<a class="headerlink" href="#startup" title="Permanent link">&para;</a></h3>
+<p>When the gateway starts (<code>server-runtime-state.ts</code>):
+1. If <code>canvasHostEnabled</code> in config, create the canvas handler
+2. Mount it at <code>/__openclaw__/canvas/</code>
+3. Log: <code>canvas host mounted at http://127.0.0.1:18789/__openclaw__/canvas/ (root ~/.openclaw/canvas)</code></p>
+<h3 id="http-request-pipeline">HTTP Request Pipeline<a class="headerlink" href="#http-request-pipeline" title="Permanent link">&para;</a></h3>
+<p>In the gateway HTTP handler (<code>server-http.ts</code>), canvas requests go through:</p>
+<div class="language-text highlight"><pre><span></span><code>Stage 1: canvas-auth
+  → Is this a canvas path?
+  → Authorize via capability/bearer/local
+  → Reject with 401 if unauthorized
+
+Stage 2: a2ui
+  → handleA2uiHttpRequest() for /__openclaw__/a2ui/* paths
+
+Stage 3: canvas-http
+  → canvasHost.handleHttpRequest() for /__openclaw__/canvas/* paths
+</code></pre></div>
+<h3 id="websocket-upgrade">WebSocket Upgrade<a class="headerlink" href="#websocket-upgrade" title="Permanent link">&para;</a></h3>
+<p>For live reload WebSocket connections at <code>/__openclaw__/ws</code>:
+1. Extract capability from query params
+2. Authorize the request
+3. If authorized, pass to <code>canvasHost.handleUpgrade()</code></p>
+<h3 id="node-connection-setup">Node Connection Setup<a class="headerlink" href="#node-connection-setup" title="Permanent link">&para;</a></h3>
+<p>When a native app connects to the gateway WebSocket:
+1. Resolve the canvas host URL for this client
+2. Mint a capability token
+3. Build a scoped canvas URL
+4. Store on the client: <code>canvasHostUrl</code>, <code>canvasCapability</code>, <code>canvasCapabilityExpiresAtMs</code>
+5. Send the scoped URL in the hello-ok response</p>
+<hr />
+<h2 id="part-7-the-canvas-agent-tool">Part 7: The Canvas Agent Tool<a class="headerlink" href="#part-7-the-canvas-agent-tool" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/agents/tools/canvas-tool.ts</code> (215 lines)</p>
+<p>The AI interacts with the canvas through these tool actions:</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>present</strong></td>
+<td>Show canvas at a target URL with optional placement</td>
+</tr>
+<tr>
+<td><strong>hide</strong></td>
+<td>Hide the canvas</td>
+</tr>
+<tr>
+<td><strong>navigate</strong></td>
+<td>Load a new URL in the canvas</td>
+</tr>
+<tr>
+<td><strong>eval</strong></td>
+<td>Execute JavaScript in the canvas and return the result</td>
+</tr>
+<tr>
+<td><strong>snapshot</strong></td>
+<td>Capture the canvas as an image (PNG/JPEG)</td>
+</tr>
+<tr>
+<td><strong>a2ui_push</strong></td>
+<td>Push A2UI JSON-L data to update the UI</td>
+</tr>
+<tr>
+<td><strong>a2ui_reset</strong></td>
+<td>Reset the A2UI surface to blank</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Snapshot flow:</strong>
+1. AI calls the <code>snapshot</code> action
+2. Gateway invokes <code>canvas.snapshot</code> on the connected node
+3. Node captures the WebView as a base64 image
+4. Gateway writes to a temp file
+5. Returns image data to the AI (which can then analyze it)</p>
+<p><strong>A2UI push flow:</strong>
+1. AI generates A2UI JSON describing a UI
+2. Calls <code>a2ui_push</code> with the JSON payload
+3. Gateway forwards to the node as <code>canvas.a2ui</code> command
+4. Node's A2UI renderer processes the JSON and renders native components
+5. User interacts → actions sent back through the bridge → AI receives them</p>
+<h3 id="canvas-skill">Canvas Skill<a class="headerlink" href="#canvas-skill" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>skills/canvas/SKILL.md</code> (158 lines)</p>
+<p>The canvas skill documentation teaches the AI how to use the canvas system, including:
+- HTML/CSS/JS canvas creation
+- A2UI JSON generation
+- Tailscale integration for remote access
+- Architecture overview
+- Available tool actions</p>
+<hr />
+<h2 id="part-8-discord-a2ui-activities">Part 8: Discord A2UI — Activities<a class="headerlink" href="#part-8-discord-a2ui-activities" title="Permanent link">&para;</a></h2>
+<p>Discord has a special feature called <strong>Activities</strong> — interactive embedded experiences within Discord. OpenClaw uses this to render A2UI inside Discord:</p>
+<p><strong>File created by Shadow:</strong> <code>a2ui-activity.ts</code> (120 lines)</p>
+<p>This creates a Discord Activity that hosts the A2UI renderer, allowing A2UI surfaces to render directly inside Discord channels. The Activity HTML loads the bundled A2UI renderer and connects to the gateway for data.</p>
+<hr />
+<h2 id="part-9-url-paths-and-ports">Part 9: URL Paths and Ports<a class="headerlink" href="#part-9-url-paths-and-ports" title="Permanent link">&para;</a></h2>
+<h3 id="default-url-structure">Default URL Structure<a class="headerlink" href="#default-url-structure" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/__openclaw__/canvas/</code></td>
+<td>Canvas file serving</td>
+</tr>
+<tr>
+<td><code>/__openclaw__/a2ui/</code></td>
+<td>A2UI bundled assets</td>
+</tr>
+<tr>
+<td><code>/__openclaw__/ws</code></td>
+<td>Live reload WebSocket</td>
+</tr>
+<tr>
+<td><code>/__openclaw__/cap/{token}/...</code></td>
+<td>Capability-scoped access</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ports">Ports<a class="headerlink" href="#ports" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>18789</td>
+<td>Gateway (canvas integrated here)</td>
+</tr>
+<tr>
+<td>18793</td>
+<td>Canvas standalone (when not using gateway)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OPENCLAW_SKIP_CANVAS_HOST</code></td>
+<td>Disable canvas host entirely</td>
+</tr>
+<tr>
+<td><code>OPENCLAW_STATE_DIR</code></td>
+<td>Override state directory (canvas root at <code>$STATE_DIR/canvas</code>)</td>
+</tr>
+<tr>
+<td><code>NODE_ENV=test</code> / <code>VITEST</code></td>
+<td>Auto-disable canvas in test environments</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="part-10-configuration">Part 10: Configuration<a class="headerlink" href="#part-10-configuration" title="Permanent link">&para;</a></h2>
+<p><strong>In <code>config.json5</code>:</strong></p>
+<div class="language-json5 highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nv">canvasHost</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nv">enabled</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w">              </span><span class="c1">// Enable/disable canvas host</span>
+<span class="w">    </span><span class="nv">root</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;~/.openclaw/canvas&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Canvas file directory</span>
+<span class="w">    </span><span class="nv">port</span><span class="p">:</span><span class="w"> </span><span class="mf">18793</span><span class="p">,</span><span class="w">                </span><span class="c1">// Standalone port (when not on gateway)</span>
+<span class="w">    </span><span class="nv">liveReload</span><span class="p">:</span><span class="w"> </span><span class="k">true</span><span class="w">            </span><span class="c1">// File watching + auto-refresh</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="git-history-evolution">Git History Evolution<a class="headerlink" href="#git-history-evolution" title="Permanent link">&para;</a></h2>
+<h3 id="phase-1-canvas-on-native-platforms-dec-1214-2025">Phase 1: Canvas on Native Platforms (Dec 12–14, 2025)<a class="headerlink" href="#phase-1-canvas-on-native-platforms-dec-1214-2025" title="Permanent link">&para;</a></h3>
+<p>The Canvas system was born as a <strong>native WebView</strong> feature on macOS. On <strong>December 12, 2025</strong>, Peter Steinberger fixed voice overlay z-ordering above the canvas window — implying a canvas WebView already existed in the macOS app.</p>
+<p>The next day (<strong>Dec 13</strong>), he created <code>RootCanvas.swift</code> for iOS — a full-screen canvas WebView — and wired <code>node.invoke</code> commands through the gateway. On <strong>Dec 14</strong>, a massive 2,518-line commit created the entire Android node app with <code>CanvasController.kt</code>, establishing canvas on all three platforms in just three days.</p>
+<p>At this point, canvas was just a WebView that the server could command — no A2UI, no file serving, no security.</p>
+<h3 id="phase-2-a2ui-arrives-dec-17-2025">Phase 2: A2UI Arrives (Dec 17, 2025)<a class="headerlink" href="#phase-2-a2ui-arrives-dec-17-2025" title="Permanent link">&para;</a></h3>
+<p>On <strong>December 17</strong>, Peter Steinberger added the entire A2UI vendor library in a single commit (<code>cdb5ddb2d</code> — 73,598 lines): the v0.8/v0.9 JSON schemas, the Lit web-component renderer with the full component catalog (audio, button, card, checkbox, column, datetime-input, divider, icon, image, list, modal, multiple-choice, row, slider, surface, tabs, text-field, text, video), the Angular renderer, and <code>CanvasA2UI</code> bundle resources for macOS.</p>
+<p>This was followed by seven more commits on the same day: fixing A2UI v0.8 rendering, push rendering, action forwarding, click handling, macOS forwarding, multi-display panel anchoring, and canvas toggle behavior. A2UI went from zero to functional in a single day.</p>
+<h3 id="phase-3-protocol-rename-and-canvas-host-dec-18-2025">Phase 3: Protocol Rename and Canvas Host (Dec 18, 2025)<a class="headerlink" href="#phase-3-protocol-rename-and-canvas-host-dec-18-2025" title="Permanent link">&para;</a></h3>
+<p>December 18 was another massive day with <strong>16+ commits</strong>:</p>
+<ol>
+<li><strong>Protocol rename</strong>: All commands renamed from <code>screen.*</code> to <code>canvas.*</code> across gateway, CLI, iOS, and Android</li>
+<li><strong>Canvas Host creation</strong>: <code>src/canvas-host/server.ts</code> (247 lines) — an HTTP/WebSocket server for serving canvas files from the filesystem</li>
+<li><strong>Action bridge injection</strong>: Bidirectional communication between canvas UI and the gateway/agent</li>
+<li><strong>Cross-platform A2UI</strong>: iOS and Android both got <code>canvas.a2ui</code> push/reset commands</li>
+<li><strong>A2UI bundle sharing</strong>: Moved from per-platform copies to shared ClawdisKit framework, deleting 18,655 lines of duplication</li>
+<li><strong>Canvas snapshots</strong>: JPEG/PNG capture support on iOS and Android</li>
+</ol>
+<h3 id="phase-4-architecture-consolidation-dec-1921-2025">Phase 4: Architecture Consolidation (Dec 19–21, 2025)<a class="headerlink" href="#phase-4-architecture-consolidation-dec-1921-2025" title="Permanent link">&para;</a></h3>
+<p>The canvas host was quickly refined:
+- <strong>Dec 20</strong>: A2UI now served through the gateway rather than a separate endpoint
+- <strong>Dec 20</strong>: <code>a2ui.ts</code> extracted as its own module
+- <strong>Dec 20</strong>: Canvas host consolidated onto the gateway port (eliminating the separate port 18793 for most users)
+- <strong>Dec 20</strong>: Better MIME type detection using <code>file-type</code> library
+- <strong>Dec 21</strong>: CSS custom properties for safe area insets, debug overlay behind feature flag</p>
+<h3 id="phase-5-live-reload-and-stability-jan-46-2026">Phase 5: Live Reload and Stability (Jan 4–6, 2026)<a class="headerlink" href="#phase-5-live-reload-and-stability-jan-46-2026" title="Permanent link">&para;</a></h3>
+<p><strong>January 4</strong>: The live reload feature was added — <code>chokidar</code> file watching triggers WebSocket-based browser refresh. This made canvas development much more pleasant: edit a file, save, see changes instantly.</p>
+<p>January also saw build pipeline work for A2UI bundling, requiring Bun for TypeScript execution.</p>
+<h3 id="phase-6-canvas-skill-and-documentation-jan-18-2026">Phase 6: Canvas Skill and Documentation (Jan 18, 2026)<a class="headerlink" href="#phase-6-canvas-skill-and-documentation-jan-18-2026" title="Permanent link">&para;</a></h3>
+<p>Peter Steinberger created <code>skills/canvas/SKILL.md</code> (158 lines) — documentation teaching the AI how to use the canvas system, including HTML/CSS/JS canvas creation, A2UI JSON generation, and Tailscale integration.</p>
+<h3 id="phase-7-security-hardening-feb-2026">Phase 7: Security Hardening (Feb 2026)<a class="headerlink" href="#phase-7-security-hardening-feb-2026" title="Permanent link">&para;</a></h3>
+<p>February brought a wave of critical security fixes:</p>
+<ul>
+<li><strong>Feb 5</strong>: <strong>Coy Geek</strong> reported that the canvas host served files without authentication. <strong>George Pickett</strong> fixed it the same day (#9518) — adding auth requirements for canvas and A2UI routes, plus a 212-line test suite.</li>
+<li><strong>Feb 13</strong>: <strong>Abdel Fane</strong> added path traversal prevention using <code>openFileWithinRoot()</code> (#10525) — closing the directory escape vector</li>
+<li><strong>Feb 14</strong>: <strong>David Rudduck</strong> changed the default bind from <code>0.0.0.0</code> to <code>127.0.0.1</code> (#13184) — loopback only</li>
+<li><strong>Feb 14</strong>: <strong>Yi Liu</strong> restricted canvas IP-based auth to private networks (#14661)</li>
+<li><strong>Feb 14</strong>: Peter Steinberger extracted <code>file-resolver.ts</code> to share safe file resolution</li>
+<li><strong>Feb 19</strong>: Peter Steinberger added <strong>canvas capability tokens</strong> (<code>canvas-capability.ts</code>, 87 lines) — the scoped-URL session token system with 10-minute sliding expiration. 354 lines of auth hardening.</li>
+<li><strong>Feb 19</strong>: Abdel Fane added baseline security headers to all gateway HTTP responses (#10526)</li>
+<li><strong>Feb 20</strong>: Shadow restricted canvas file reads by jsonlPath</li>
+</ul>
+<h3 id="phase-8-discord-a2ui-and-android-polish-febmar-2026">Phase 8: Discord A2UI and Android Polish (Feb–Mar 2026)<a class="headerlink" href="#phase-8-discord-a2ui-and-android-polish-febmar-2026" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Feb 17</strong>: <strong>Shadow</strong> added A2UI rendering inside Discord Activities — the AI can now show interactive UI directly inside Discord channels</li>
+<li><strong>Feb 25</strong>: <strong>Ayaan Zaidi</strong> submitted 7 commits in one day polishing Android canvas: TLS URL normalization, screen-tab restore, mobile viewport, narrow-screen A2UI layout overrides, and scoped URL suffix preservation</li>
+<li><strong>Feb 27</strong>: Ayaan Zaidi added runtime canvas capability refresh for Android</li>
+<li><strong>Mar 8–10</strong>: <strong>Mariano</strong> and <strong>Nimrod Gutman</strong> added iOS auto-loading of scoped gateway canvas, welcome home canvas, and toolbar refresh</li>
+<li><strong>Mar 13</strong>: Peter Steinberger added test coverage for JSON file handling and canvas host helpers (most recent canvas commit)</li>
+</ul>
+<h3 id="the-evolution-in-four-sentences">The Evolution in Four Sentences<a class="headerlink" href="#the-evolution-in-four-sentences" title="Permanent link">&para;</a></h3>
+<p>Canvas started as a native WebView on macOS/iOS/Android in December 2025, with all three platforms up in just three days. A2UI — Google's declarative UI protocol — was vendored and integrated on December 17, giving the AI the ability to generate rich interactive UIs via JSON. The canvas-host HTTP server was created the next day, evolving from a separate port to an integrated gateway handler with live reload within a week. A major security hardening push in February 2026 added capability tokens, path traversal protection, auth requirements, and loopback-only defaults — transforming canvas from a development convenience into a production-safe feature.</p>
+<hr />
+<h2 id="architecture-diagram">Architecture Diagram<a class="headerlink" href="#architecture-diagram" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────────┐
+│                       Canvas &amp; A2UI Layer                            │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │                  AI Agent (tools)                               │  │
+│  │                                                                 │  │
+│  │  canvas.present  │ canvas.navigate │ canvas.eval               │  │
+│  │  canvas.snapshot │ canvas.a2ui_push │ canvas.a2ui_reset        │  │
+│  │  canvas.hide                                                    │  │
+│  └─────────────────────────────┬──────────────────────────────────┘  │
+│                                │                                     │
+│                                ▼                                     │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │               Gateway (port 18789)                              │  │
+│  │                                                                 │  │
+│  │  HTTP Pipeline:                                                 │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────────────┐  │  │
+│  │  │ canvas-auth   │→│ a2ui handler  │→│ canvas-host handler  │  │  │
+│  │  │               │  │              │  │                      │  │  │
+│  │  │ Capability    │  │ Serves from  │  │ Serves from          │  │  │
+│  │  │ token check   │  │ vendor/a2ui/ │  │ ~/.openclaw/canvas/  │  │  │
+│  │  │ 10-min TTL    │  │              │  │                      │  │  │
+│  │  │ Sliding window│  │ Path: /a2ui  │  │ Path: /canvas        │  │  │
+│  │  └──────────────┘  └──────────────┘  └─────────────────────┘  │  │
+│  │                                                                 │  │
+│  │  WebSocket:                                                     │  │
+│  │  ┌──────────────────────────────────────────────────────────┐  │  │
+│  │  │ /__openclaw__/ws  — Live reload broadcast               │  │  │
+│  │  │ chokidar watcher → 75ms debounce → &quot;reload&quot; message     │  │  │
+│  │  └──────────────────────────────────────────────────────────┘  │  │
+│  │                                                                 │  │
+│  │  Capability URLs:                                               │  │
+│  │  /__openclaw__/cap/{18-byte-token}/__openclaw__/canvas/...     │  │
+│  │  Token minted on node connect, refreshable via RPC             │  │
+│  └───────────────────────────┬────────────────────────────────────┘  │
+│                              │                                       │
+│            ┌─────────────────┼─────────────────┐                    │
+│            ▼                 ▼                  ▼                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐      │
+│  │ macOS App    │  │ iOS App      │  │ Android App          │      │
+│  │              │  │              │  │                       │      │
+│  │ WKWebView    │  │ WKWebView    │  │ Android WebView      │      │
+│  │ canvas.swift │  │ canvas.swift │  │ CanvasController.kt  │      │
+│  │              │  │              │  │                       │      │
+│  │ webkit.msg   │  │ webkit.msg   │  │ openclawCanvas       │      │
+│  │ Handlers     │  │ Handlers     │  │ A2UIAction           │      │
+│  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘      │
+│         │                  │                      │                  │
+│         └──────────────────┼──────────────────────┘                  │
+│                            ▼                                         │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │                   A2UI Renderer (Lit)                           │  │
+│  │                                                                 │  │
+│  │  Component Catalog:                                             │  │
+│  │  ┌────────┐ ┌──────┐ ┌──────┐ ┌────────┐ ┌───────┐ ┌──────┐ │  │
+│  │  │ Text   │ │Button│ │ Card │ │TextField│ │Slider │ │Image │ │  │
+│  │  └────────┘ └──────┘ └──────┘ └────────┘ └───────┘ └──────┘ │  │
+│  │  ┌────────┐ ┌──────┐ ┌──────┐ ┌────────┐ ┌───────┐ ┌──────┐ │  │
+│  │  │ Row    │ │Column│ │ List │ │CheckBox │ │ Tabs  │ │Modal │ │  │
+│  │  └────────┘ └──────┘ └──────┘ └────────┘ └───────┘ └──────┘ │  │
+│  │  ┌────────┐ ┌──────┐ ┌────────────┐ ┌───────────────┐       │  │
+│  │  │Divider │ │ Icon │ │AudioPlayer │ │MultipleChoice │       │  │
+│  │  └────────┘ └──────┘ └────────────┘ └───────────────┘       │  │
+│  │                                                                 │  │
+│  │  Data Binding: path-based resolution, literals, templates       │  │
+│  │  Events: userAction → bridge → gateway → AI agent              │  │
+│  │  Themes: component / element / markdown level styling          │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │              Discord Activities (A2UI)                          │  │
+│  │              Renders A2UI inside Discord channels               │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+│                                                                      │
+│  Security: Path traversal protection │ Symlink rejection │           │
+│  Capability tokens (18-byte random) │ Loopback-only default │        │
+│  Private network IP restriction │ No arbitrary code execution        │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="key-files-reference">Key Files Reference<a class="headerlink" href="#key-files-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/canvas-host/server.ts</code></td>
+<td>479</td>
+<td>Canvas host HTTP server, live reload, file serving</td>
+</tr>
+<tr>
+<td><code>src/canvas-host/a2ui.ts</code></td>
+<td>209</td>
+<td>A2UI asset serving, bridge injection, root resolution</td>
+</tr>
+<tr>
+<td><code>src/canvas-host/file-resolver.ts</code></td>
+<td>50</td>
+<td>Safe file resolution with traversal protection</td>
+</tr>
+<tr>
+<td><code>src/canvas-host/server.test.ts</code></td>
+<td>314</td>
+<td>Canvas host tests (serving, reload, security)</td>
+</tr>
+<tr>
+<td><code>src/canvas-host/server.state-dir.test.ts</code></td>
+<td>28</td>
+<td>State directory default tests</td>
+</tr>
+<tr>
+<td><code>src/gateway/canvas-capability.ts</code></td>
+<td>88</td>
+<td>Capability token minting, scoped URLs</td>
+</tr>
+<tr>
+<td><code>src/gateway/server/http-auth.ts</code></td>
+<td>117</td>
+<td>Canvas authorization (capability/bearer/local)</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-runtime-state.ts</code></td>
+<td>237</td>
+<td>Canvas host initialization on gateway startup</td>
+</tr>
+<tr>
+<td><code>src/gateway/server-http.ts</code></td>
+<td>866+</td>
+<td>HTTP pipeline (auth → a2ui → canvas)</td>
+</tr>
+<tr>
+<td><code>src/gateway/server/ws-connection.ts</code></td>
+<td>319</td>
+<td>Canvas URL resolution, capability assignment</td>
+</tr>
+<tr>
+<td><code>src/infra/canvas-host-url.ts</code></td>
+<td>93</td>
+<td>Canvas URL resolution (host, port, scheme)</td>
+</tr>
+<tr>
+<td><code>src/agents/tools/canvas-tool.ts</code></td>
+<td>215</td>
+<td>Agent tool (present, eval, snapshot, a2ui_push)</td>
+</tr>
+<tr>
+<td><code>src/config/types.gateway.ts</code></td>
+<td>49</td>
+<td>CanvasHostConfig type definition</td>
+</tr>
+<tr>
+<td><code>vendor/a2ui/README.md</code></td>
+<td>—</td>
+<td>A2UI overview and philosophy</td>
+</tr>
+<tr>
+<td><code>vendor/a2ui/renderers/lit/src/0.8/</code></td>
+<td>—</td>
+<td>Lit renderer (core, types, components, events)</td>
+</tr>
+<tr>
+<td><code>vendor/a2ui/renderers/angular/</code></td>
+<td>—</td>
+<td>Angular renderer</td>
+</tr>
+<tr>
+<td><code>skills/canvas/SKILL.md</code></td>
+<td>158</td>
+<td>Canvas skill documentation for the AI</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
