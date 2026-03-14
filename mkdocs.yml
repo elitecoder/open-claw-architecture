@@ -1,0 +1,62 @@
+site_name: OpenClaw Architecture Deep Dive
+site_description: A comprehensive, layer-by-layer technical deep dive into the OpenClaw self-hosted AI assistant
+site_author: elitecoder
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - pymdownx.highlight:
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - admonition
+  - pymdownx.details
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+nav:
+  - Home: index.md
+  - Architecture Reference: architecture-reference.md
+  - Layers:
+    - "Layer 1: Core Runtime": layers/layer-1-core-runtime.md
+    - "Layer 2: Gateway": layers/layer-2-gateway.md
+    - "Layer 3: Plugin System": layers/layer-3-plugin-system.md
+    - "Layer 4: Channel Integrations": layers/layer-4-channel-integrations.md
+    - "Layer 5: AI Providers": layers/layer-5-ai-providers.md
+    - "Layer 6: Skills": layers/layer-6-skills.md
+    - "Layer 7: Memory System": layers/layer-7-memory-system.md
+    - "Layer 8: Context Engine": layers/layer-8-context-engine.md
+    - "Layer 9: Voice / TTS": layers/layer-9-voice-tts.md
+    - "Layer 10: Canvas & A2UI": layers/layer-10-canvas-a2ui.md
+    - "Layer 11: Companion Apps": layers/layer-11-companion-apps.md
+    - "Layer 12: Infrastructure": layers/layer-12-infrastructure.md
