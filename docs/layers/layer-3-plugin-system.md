@@ -677,6 +677,215 @@ The plugin system uses three layers of caching for performance:
 
 ---
 
+## Part 9: Plugin Installation & Capability Expansion
+
+### How Plugins Are Installed
+
+Plugins are npm packages installed via the CLI:
+
+```bash
+openclaw plugin install @openclaw/feishu
+```
+
+The installer (`src/plugins/install.ts`):
+1. Resolves the npm spec (registry, file path, or tarball)
+2. Downloads and extracts to `~/.openclaw/extensions/<plugin-id>/`
+3. Validates `openclaw.extensions` field exists in `package.json`
+4. Validates plugin ID (no path separators, no reserved names)
+5. Runs `npm install --omit=dev` for the plugin's own dependencies
+
+Plugins are discovered from four roots (highest priority first):
+1. **Config paths** — `plugins.load.paths` in `openclaw.json`
+2. **Workspace** — `<workspace>/.openclaw/extensions/`
+3. **Global** — `~/.openclaw/extensions/`
+4. **Bundled** — `dist/extensions/` (shipped with OpenClaw)
+
+### How Plugins Become Tool Calls
+
+When the Gateway starts:
+
+```mermaid
+flowchart TB
+    D["Discovery\n(scan 4 roots)"] --> V["Validate\n(security, permissions,\nmanifest checks)"]
+    V --> I["Dynamic Import\n(jiti loads entry point)"]
+    I --> R["Registration\n(plugin calls api.registerTool(),\napi.registerHook(), etc.)"]
+    R --> REG["Plugin Registry\n(tools, hooks, channels,\nproviders, commands, routes)"]
+    REG --> AT["Agent Run\n resolvePluginTools()\nmerges into tool list"]
+```
+
+Plugin tools are indistinguishable from built-in tools once registered. The LLM
+sees them in the tool schema and can call them like any other tool.
+
+### What a Plugin Can Register
+
+| Method | Capability |
+|---|---|
+| `api.registerTool(tool)` | Agent-callable tool (LLM can invoke) |
+| `api.registerHook(events, handler)` | Lifecycle callbacks (24 hook points) |
+| `api.registerChannel(plugin)` | Messaging channel (Feishu, Matrix, etc.) |
+| `api.registerProvider(provider)` | LLM provider integration |
+| `api.registerCommand(command)` | Gateway command (bypasses LLM) |
+| `api.registerContextEngine(id, factory)` | Context engine (exclusive slot) |
+| `api.registerHttpRoute(params)` | Custom HTTP endpoint |
+| `api.registerService(service)` | Long-running background service |
+| `api.registerCli(registrar)` | CLI subcommands |
+
+### Plugin Kinds (Exclusive Slots)
+
+Two plugin kinds occupy exclusive slots — only one can be active:
+
+| Kind | Config slot | Purpose |
+|---|---|---|
+| `"memory"` | `plugins.slots.memory` | Memory storage backend (e.g., LanceDB) |
+| `"context-engine"` | `plugins.slots.contextEngine` | Context management engine |
+
+All other plugins are additive — unlimited concurrent plugins.
+
+### Hot Reload: What Can and Can't Change Live
+
+Plugin changes require a **full gateway restart**. The config reload system
+explicitly marks plugin config as restart-required:
+
+```typescript
+{ prefix: "plugins", kind: "restart" }
+```
+
+However, other things reload live:
+- Hook scripts (`hooks.*`) — hot reload
+- Model config — hot reload with heartbeat restart
+- Channel-specific config — per-channel reload rules
+
+### Security Model
+
+- Path ownership validation (no world-writable directories)
+- Symlink escape prevention
+- Reserved name blocking (can't shadow core commands)
+- Tool name conflict detection (plugins can't shadow built-in tools)
+- Per-plugin `hooks.allowPromptInjection` gate for prompt-modifying hooks
+- Config-driven allow/deny lists (`plugins.allow`, `plugins.deny`)
+
+---
+
+## Part 10: Skills — Markdown Instructions for the LLM
+
+Skills are fundamentally different from plugins. They are **markdown files with
+YAML frontmatter** — not code. They tell the LLM *how* to use external tools
+and APIs.
+
+### What a Skill Looks Like
+
+A skill is a directory containing a `SKILL.md`:
+
+```
+skills/github/SKILL.md
+```
+
+With frontmatter like:
+```yaml
+name: github
+description: "GitHub operations via gh CLI"
+metadata:
+  openclaw:
+    emoji: "🐙"
+    requires:
+      bins: [gh]
+    install:
+      - id: brew
+        kind: brew
+        formula: gh
+        bins: [gh]
+```
+
+### How Skills Enter Context (The Key Question)
+
+Skills use a **two-phase approach** — metadata in the prompt, content on demand:
+
+**Phase 1: Skill list in system prompt (every turn)**
+
+The system prompt includes a `## Skills (mandatory)` section with a compact list
+of all available skills — name, description, and file path. This costs real
+tokens but is small (~30K chars max, configurable).
+
+The instruction tells the LLM:
+
+> Before replying: scan available skills descriptions.
+> If exactly one skill clearly applies: read its SKILL.md, then follow it.
+> If multiple could apply: choose the most specific one.
+> If none clearly apply: do not read any SKILL.md.
+> Never read more than one skill up front.
+
+**Phase 2: LLM reads SKILL.md on demand**
+
+The LLM decides to read a skill by calling the `read` tool on the SKILL.md
+path. This is a normal tool call — the SKILL.md content enters context as a
+`toolResult` message, just like any file read.
+
+**The system never injects SKILL.md content into context automatically.** The
+LLM must actively choose to read it. This keeps the context window lean — only
+the skill metadata (name + description + path) is always present, not the full
+instructions.
+
+### How Skill Content Leaves Context
+
+Once the LLM reads a SKILL.md, the content is a regular `toolResult` in the
+conversation history. It's subject to all the standard context management:
+
+1. **Budget guard** (Layer 8, Layer 4) — if the SKILL.md is huge, it gets
+   truncated like any tool result
+2. **Cache-TTL pruning** — after 5 minutes of inactivity, the read result can
+   be soft-trimmed or hard-cleared
+3. **Compaction** — when context is summarized, the skill content is summarized
+   along with everything else. The compaction summary may note "used the github
+   skill" but won't preserve the full SKILL.md text
+4. **Session reset** — `/new` or `/reset` clears everything
+
+There's no special "unload skill" mechanism. The skill content is just another
+tool result that ages out through the normal context lifecycle.
+
+### Skills from Plugins
+
+Plugins can contribute skills by declaring skill directories in their manifest:
+
+```json
+{
+  "id": "my-plugin",
+  "skills": ["./skills"]
+}
+```
+
+The skill discovery system scans plugin skill directories alongside bundled and
+workspace skills. Plugin-contributed skills appear in the same skill list the
+LLM sees.
+
+### Skill Env Overrides
+
+Skills can declare environment variables they need (e.g., API keys). When a
+skill is in the active snapshot, OpenClaw injects these into `process.env`
+before the agent run and **reverts them after**:
+
+```yaml
+metadata:
+  openclaw:
+    primaryEnv: GITHUB_TOKEN
+    requires:
+      env: [GITHUB_TOKEN]
+```
+
+The env injection is reference-counted (multiple skills can share a key) and
+security-sanitized (dangerous keys like `OPENSSL_CONF` are always blocked).
+
+### Skill Limits
+
+| Limit | Default |
+|---|---|
+| Max skills in prompt | 150 |
+| Max skill prompt chars | 30,000 |
+| Max skill file size | 256 KB |
+| Max candidates per root | 300 |
+| Max skills loaded per source | 200 |
+
+---
+
 ## How Layer 3 Evolved: The Git History
 
 ### Pre-Plugin Era (November 24, 2025 — January 10, 2026)
