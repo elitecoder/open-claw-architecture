@@ -606,6 +606,118 @@ The system started in early January 2026 with Peter Steinberger adding a simple 
 
 ---
 
+## The 7-Layer Context Management Pipeline
+
+The context engine is part of a broader **7-layer pipeline** that manages everything the model sees. Understanding the full pipeline shows how context flows from session start through to overflow recovery — and why each layer exists.
+
+### Pipeline Diagram
+
+```mermaid
+flowchart TB
+    subgraph L1["Layer 1: Bootstrap — session start"]
+        direction LR
+        BP["Bootstrap files\n(AGENTS.md, SOUL.md, ...)"]
+        SP["System prompt builder\n(tools, skills, runtime info)"]
+        BC["Bootstrap budget cap\n(bootstrapMaxChars,\nbootstrapTotalMaxChars)"]
+        BP --> BC --> SP
+    end
+
+    subgraph L2["Layer 2: Session history pipeline — before each prompt"]
+        direction LR
+        SH["sanitizeSessionHistory()\n(provider-specific cleanup)"]
+        VT["validateAnthropicTurns()\nvalidateGeminiTurns()\n(role ordering)"]
+        LH["limitHistoryTurns()\n(per-channel/DM turn cap)"]
+        RP["sanitizeToolUseResultPairing()\n(orphan repair)"]
+        SH --> VT --> LH --> RP
+    end
+
+    subgraph L3["Layer 3: Context engine assembly"]
+        direction LR
+        CE["contextEngine.assemble()\n(pluggable: legacy or plugin)"]
+        SPA["systemPromptAddition\n(engine-injected context)"]
+        CE --> SPA
+    end
+
+    subgraph L4["Layer 4: Real-time budget guard — every API call"]
+        direction LR
+        TG["transformContext()\ntool-result-context-guard"]
+        SC["Single result cap\n(50% of window)"]
+        TE["Total context budget\n(75% of window)"]
+        EV["Oldest-first eviction\n(replace with placeholder)"]
+        TG --> SC --> TE --> EV
+    end
+
+    subgraph L5["Layer 5: Prompt caching — provider-specific"]
+        direction LR
+        AC["Anthropic direct\ncacheRetention: short (5m TTL)"]
+        OR["OpenRouter Anthropic\ncache_control on system msgs"]
+        OA["OpenAI Responses\nserver-side (store + context_management)"]
+    end
+
+    subgraph L6["Layer 6: Proactive maintenance — between turns"]
+        direction LR
+        AT["contextEngine.afterTurn()\n(post-turn lifecycle)"]
+        PR["Cache-TTL pruning\n(expire tool results > 5m)"]
+        MF["Memory flush\n(pre-compaction durable writes)"]
+        SDK["Pi SDK auto-compaction\n(threshold: window - reserveTokens)"]
+        AT --> PR
+        MF --> SDK
+    end
+
+    subgraph L7["Layer 7: Overflow recovery — on API error"]
+        direction LR
+        DET["Detect overflow\n(isLikelyContextOverflowError)"]
+        TOK["Extract token count\nfrom error message"]
+        CMP["contextEngine.compact()\n(summarize + prune)"]
+        TRT["truncateOversizedToolResults()\n(head+tail strategy)"]
+        GU["Give up after 3 attempts\n(suggest /reset)"]
+        DET --> TOK --> CMP -->|"still over"| TRT -->|"still over"| GU
+    end
+
+    L1 --> L2 --> L3 --> L4 --> L5
+    L6 -.->|"runs between turns"| L2
+    L5 -->|"API call"| L7
+    L7 -->|"retry"| L2
+```
+
+### How the Layers Interact
+
+Think of it like layers of defense in a castle:
+
+- **Layers 1–5 run sequentially** for every prompt sent to the LLM. Bootstrap context is built, history is sanitized and trimmed, the context engine assembles messages, the real-time guard enforces budgets, and caching hints are applied before the API call goes out.
+- **Layer 6 runs between turns** as proactive maintenance. The Pi SDK auto-compaction fires when the session approaches `contextWindow - reserveTokens`. Cache-TTL pruning expires stale tool results. Memory flush writes durable state before compaction erases it.
+- **Layer 7 is reactive** — the safety net that only fires when the provider returns a context overflow error. It retries up to 3 times with progressively aggressive compaction before giving up.
+
+### Why OpenClaw Needs All 7 Layers
+
+Because OpenClaw calls LLM provider APIs directly (not through Claude Code or Codex CLI), it must handle everything itself. Different providers handle different parts:
+
+| Capability | Anthropic (direct) | OpenRouter | OpenAI Responses |
+|---|---|---|---|
+| Prompt caching | Client-side (`cacheRetention`) | Client-side (system msgs only) | Server-side (automatic) |
+| Compaction | Client-side (all 7 layers) | Client-side (all 7 layers) | Server-side (`context_management`) + client layers |
+| Token counting | Client-side estimate | Client-side estimate | Server-side |
+| Overflow recovery | Client-side retry loop | Client-side retry loop | Rarely needed (server compacts first) |
+
+For OpenAI, the server handles compaction at 70% of context window — OpenClaw just sends `context_management: [{ type: "compaction", compact_threshold }]`. For Anthropic and OpenRouter, OpenClaw must do all the work: token estimation, proactive pruning, reactive overflow recovery, and everything in between.
+
+### Evolution Summary
+
+The pipeline grew layer by layer as real-world usage revealed gaps:
+
+| Phase | When | What changed |
+|---|---|---|
+| **Foundation** | Jan 2026 | Basic `/compact` command and session pruning |
+| **Pruning strategies** | Jan 2026 | Cache-TTL pruning mode, auth-aware cache defaults |
+| **Overflow recovery** | Feb 2026 | 3-tier overflow recovery, head+tail truncation |
+| **Real-time guard** | Feb 2026 | `transformContext` hook enforcing budgets every API call |
+| **Pluggable engine** | Mar 6, 2026 | `ContextEngine` interface, plugin system integration |
+| **Engine maturation** | Mar 2026 | Compaction model override, session key plumbing |
+
+The pattern: **reactive** (catch overflow errors) → **proactive** (prune before overflow) → **pluggable** (let engines own the full lifecycle). Each layer was added to cover gaps the previous layers couldn't handle.
+
+---
+
 ## Architecture Diagram
 
 ```
