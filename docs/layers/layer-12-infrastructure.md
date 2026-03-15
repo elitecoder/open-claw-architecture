@@ -595,6 +595,171 @@ Added in March 2026 with full manifests, Kind scripts, and setup guide (852 line
 
 ---
 
+## Part 7: Testing & Quality Assurance
+
+OpenClaw has extensive testing for deterministic code but no formal eval
+framework for LLM decision quality. Understanding what's tested — and what
+isn't — is important for assessing reliability.
+
+### Testing Pyramid
+
+```mermaid
+flowchart TB
+    subgraph L1["Unit Tests (fast, deterministic)"]
+        direction LR
+        CT["Context management\n(compaction, truncation,\nbudget guard, overflow)"]
+        CE["Context engine\n(registry, legacy engine,\nSymbol.for isolation)"]
+        QU["Queue system\n(lanes, modes,\ndebounce, overflow)"]
+        TL["Tool pipeline\n(policy, wrapping,\nprofiles, catalog)"]
+    end
+
+    subgraph L2["Integration Tests"]
+        direction LR
+        GW["Gateway agent loop\n(mock LLM + real tools)"]
+        PL["Plugin loading\n(discovery, registry,\ntool resolution)"]
+        SM["Session management\n(routing, persistence,\ntranscript repair)"]
+    end
+
+    subgraph L3["E2E Tests (real infra)"]
+        direction LR
+        CLI["CLI e2e\n(multi-instance gateway,\nWebSocket, HTTP)"]
+        NET["Network e2e\n(two-container WS auth,\nhealth probes)"]
+    end
+
+    subgraph L4["Live Tests (real API keys)"]
+        direction LR
+        MOD["Model completion\n(GPT-5, Claude, Gemini,\nGrok, MiniMax)"]
+        AGT["Agent smoke probes\n(read nonce, exec+read,\nimage OCR)"]
+        PRV["Provider-specific\n(setup tokens, Z.AI,\naudio transcription)"]
+    end
+
+    subgraph L5["Platform Smoke (VMs)"]
+        direction LR
+        MAC["macOS (Parallels)\nfresh install + upgrade"]
+        WIN["Windows (Parallels)\nPowerShell + .cmd shims"]
+        LIN["Linux (Parallels)\napt bootstrap + agent"]
+    end
+
+    L1 --> L2 --> L3 --> L4 --> L5
+```
+
+### Unit Tests: Context Management (Extensive)
+
+The context pipeline has the deepest test coverage:
+
+| Area | What's tested |
+|---|---|
+| **Overflow compaction** | 3-tier retry loop with mocked LLM, overflow detection routing, compaction-then-truncation fallback |
+| **Tool result truncation** | Head+tail strategy, 400K hard cap, 2K min-keep, newline boundary cuts, important-tail detection |
+| **Context budget guard** | Per-result 50% cap, total 75% budget, oldest-first eviction, placeholder replacement |
+| **Compaction quality** | Identifier preservation (hex IDs, URLs, paths), token sanitization, required summary sections |
+| **Compaction safeguard** | Quality auditing, retry on failed audit, workspace critical rules injection |
+| **Context engine** | Registry Symbol.for isolation, cross-chunk visibility, legacy engine parity, bundle chunk tests |
+
+Coverage threshold: **70% lines/branches/functions/statements** (V8, enforced in CI).
+
+### Live Tests: Real API Calls
+
+```bash
+LIVE=1 pnpm test:live              # All live tests
+OPENCLAW_LIVE_MODELS=modern        # Direct model completion
+OPENCLAW_LIVE_GATEWAY_MODELS=all   # Full gateway + agent pipeline
+```
+
+**Three-layer live testing:**
+
+**Layer 1 — Direct model completion (no gateway):**
+Real API calls to verify provider connectivity. Tests GPT-5.x, Claude Opus/Sonnet/Haiku,
+Gemini 3, GLM 4.7, MiniMax M2.5, Grok 4. No tool calls — just "can we reach the provider?"
+
+**Layer 2 — Gateway + agent smoke (full pipeline):**
+Full agent loop with real LLM, validated via probes:
+
+- **Read probe**: Agent reads a nonce file and echoes it back — validates tool calling works end-to-end
+- **Exec+read probe**: Agent writes a temp file, reads it, verifies content — validates multi-tool sequencing
+- **Image probe**: Agent processes a PNG with embedded code, returns OCR result — validates multimodal
+
+**Layer 3 — Provider-specific:**
+Anthropic setup tokens, MiniMax streaming, Z.AI tool streaming, Android node capabilities,
+Deepgram audio transcription.
+
+### Docker Tests
+
+```bash
+pnpm test:docker:live-models       # Model tests in container
+pnpm test:docker:live-gateway      # Full gateway + agent smoke
+pnpm test:docker:onboard           # Onboarding wizard TTY flow
+pnpm test:docker:gateway-network   # Two-container WS auth + health
+pnpm test:docker:plugins           # Extension loading + registry
+```
+
+Validates that the full stack works in containerized environments — not just on
+the developer's Mac.
+
+### Cross-Platform Smoke Tests (Parallels VMs)
+
+Automated VM testing on macOS, Windows, and Linux:
+
+```bash
+pnpm test:parallels:macos          # Restore fresh snapshot → install → smoke
+pnpm test:parallels:windows        # PowerShell .cmd shim execution
+pnpm test:parallels:linux          # apt bootstrap → direct gateway run
+```
+
+Each test:
+1. Restores a fresh VM snapshot
+2. Installs OpenClaw from a host-served tarball
+3. Runs onboarding
+4. Starts the gateway
+5. Validates with `openclaw gateway status --deep --require-rpc`
+
+### CI Pipeline (~800-line workflow)
+
+`.github/workflows/ci.yml` runs on every push:
+
+| Job | What it checks |
+|---|---|
+| Unit tests (2 shards) | `pnpm test` with vmForks pool |
+| Extension tests | `pnpm test:extensions` |
+| Type/lint/format | `pnpm check`, `pnpm build:strict-smoke` |
+| Protocol checks | `pnpm protocol:check` |
+| Bun compatibility | `bunx vitest run` (push only) |
+| Node 22 compat | `pnpm build && pnpm test` |
+| Windows tests (6 shards) | Single worker, 6GB heap |
+| Python skills | `ruff check skills` + `pytest skills` |
+| Security audits | `detect-private-key`, `zizmor`, `pnpm-audit-prod` |
+| Docs validation | `pnpm check:docs` (when docs changed) |
+
+### Benchmarking (Latency Only)
+
+```bash
+bun scripts/bench-model.ts         # Model latency (median/min/max, 10 runs)
+bun scripts/bench-cli-startup.ts   # CLI startup (avg, p50, p95)
+```
+
+No throughput or accuracy benchmarks — just latency measurement.
+
+### What's NOT Tested (Known Gaps)
+
+| Gap | What it means |
+|---|---|
+| **No agent decision evals** | Can't measure "did the agent pick the right skill?" or "was the response helpful?" |
+| **No compaction faithfulness scoring** | Can't verify summaries preserve critical information at scale |
+| **No skill compliance testing** | Can't verify "did the agent follow SKILL.md instructions correctly?" |
+| **No continuous production monitoring** | No dashboards or alerts for live agent performance |
+| **No A/B testing infrastructure** | Can't compare context management strategies or prompt variations |
+| **No multi-turn workflow evals** | Can't validate complex tool-call sequences against expected outcomes |
+
+The testing philosophy: **the plumbing is well-tested** (context fits, compaction
+fires, tools execute, overflow recovers), but **LLM decision quality is not
+systematically evaluated**. The live smoke probes verify the pipeline works
+end-to-end, but they don't score the quality of agent responses.
+
+The docs (`docs/help/testing.md`) acknowledge these gaps and note future eval
+work as missing.
+
+---
+
 ## Git History Evolution
 
 ### Phase 1: Cloud Deployment Foundation (Jan 24–30, 2026)
