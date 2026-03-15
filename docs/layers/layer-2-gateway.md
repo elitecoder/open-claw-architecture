@@ -864,6 +864,190 @@ Unknown methods → error response. Unauthorized methods → error with missing 
 
 ---
 
+## Part 13: Message Queueing (Traffic Control)
+
+When users send messages faster than the LLM can respond, the Gateway needs a
+strategy. This is handled by a two-level queueing system.
+
+### Level 1: Command Lanes (Serialization)
+
+**File:** `src/process/command-queue.ts`
+
+Every agent run is serialized through a **lane** — a named, single-concurrency
+queue. The fundamental rule: **only one agent run per session at a time**.
+
+```
+Lane: "session:agent:main:telegram:dm:12345"  →  maxConcurrent: 1
+
+Message 1: [running] ████████████████░░░░░
+Message 2:           [queued] ░░░░░░░░░░░░
+Message 3:                    [queued] ░░░░
+```
+
+Lanes are stored on `globalThis` via `Symbol.for("openclaw.commandQueueState")`
+so they survive bundling across chunks. Each lane tracks:
+- A queue of pending tasks
+- A set of active task IDs
+- A max concurrency (default 1)
+- A generation counter (for safe restart recovery)
+
+Different types of work run in different lanes:
+- User messages → session lane (serialized per session)
+- Subagent runs → `AGENT_LANE_SUBAGENT` (parallel to parent)
+- Cron jobs → cron lane (independent)
+- Auth probes → probe lane (independent)
+
+### Level 2: Followup Queue (What Happens to Waiting Messages)
+
+**Files:** `src/auto-reply/reply/queue/`
+
+Messages waiting in the queue aren't blindly held — six **queue modes** control
+how they're processed when the current run finishes:
+
+| Mode | Behavior |
+|---|---|
+| **`collect`** (default) | Batch all waiting messages into a single prompt for the next run |
+| **`followup`** | Run each queued message as a separate agent turn, sequentially |
+| **`steer`** | Replace with the newest message; drop older queued messages |
+| **`steer-backlog`** | Like steer, but preserve the backlog for after |
+| **`interrupt`** | Abort the running agent and start fresh with the new message |
+| **`queue`** | Simple FIFO — each message waits its turn |
+
+### Queue Mode Resolution (Priority Chain)
+
+The mode is a **session-level setting**, not per-message. It's resolved through:
+
+```
+1. Inline directive      →  /queue steer  (user types in their message)
+2. Session override      →  sessionEntry.queueMode  (sticky from prior /queue)
+3. Per-channel config    →  messages.queue.byChannel.telegram: "followup"
+4. Global config         →  messages.queue.mode: "collect"
+5. Default               →  "collect"
+```
+
+The `/queue` directive is stripped from the message before the LLM sees it — it's
+a Gateway-level instruction.
+
+### Overflow Protection
+
+When messages pile up faster than the LLM can process:
+
+- **Cap**: Max 20 queued messages (configurable)
+- **Debounce**: 1-second window to collect rapid bursts before starting the next run
+- **Drop policy** when cap is hit:
+  - `"old"` — drop oldest messages
+  - `"new"` — reject incoming messages
+  - `"summarize"` (default) — drop but keep a one-line summary prepended to the
+    next run: *"While you were working, 3 messages were dropped: ..."*
+
+Debounce is configurable per-channel:
+```json
+{
+  "messages": {
+    "queue": {
+      "debounceMs": 1000,
+      "debounceMsByChannel": { "telegram": 2000, "whatsapp": 3000 }
+    }
+  }
+}
+```
+
+### Example: Collect Mode in Action
+
+```
+User: "Fix the login bug"            → [agent running]
+User: "Also check signup"            → [queued, debounce 1s]
+User: "And the reset flow"           → [queued, debounce resets]
+                                        ... 1s passes, no new messages ...
+                                        Agent finishes run 1
+                                        → Batch prompt: "Also check signup\nAnd the reset flow"
+                                        → Single agent run for the batch
+```
+
+---
+
+## Part 14: Subagent Spawning (Parallel Workers)
+
+When the LLM needs to delegate work, it can spawn **subagents** — isolated
+sessions that run their own full agent loop with a fresh context.
+
+### How Spawning Works
+
+```mermaid
+sequenceDiagram
+    participant Parent as Parent Agent
+    participant GW as Gateway
+    participant Child as Child Agent
+    participant LLM as LLM Provider
+
+    Parent->>GW: sessions_spawn({ task: "review PR", mode: "run" })
+    GW->>GW: Generate childSessionKey
+    GW->>GW: Create fresh session + transcript
+    GW->>GW: Enqueue on AGENT_LANE_SUBAGENT
+
+    Note over GW: Child runs in parallel<br/>(different lane from parent)
+
+    GW->>Child: agent RPC (same pipeline as user messages)
+    Child->>LLM: Fresh context: system prompt + task
+    LLM-->>Child: Response + tool calls
+    Child->>Child: Execute tools, loop
+    Child-->>GW: Run complete
+
+    GW-->>Parent: Completion event as user message:<br/>"Subagent review-pr completed: ..."
+    Parent->>LLM: Sees completion, continues
+```
+
+### Key Details
+
+- **Not subprocesses** — child runs in the same Gateway process, on a different
+  lane. No OS-level isolation.
+- **Fresh context** — new session ID, new transcript, new system prompt. The
+  child starts with just the task description. It inherits the parent's workspace
+  directory but nothing from the parent's conversation history.
+- **Same LLM pipeline** — the child goes through the exact same agent loop:
+  context assembly, tool execution, compaction, overflow recovery. It can even
+  spawn its own children (up to a configurable depth limit, default 3).
+- **Push-based results** — the parent doesn't poll. Completion events are pushed
+  as user messages into the parent session. The parent can call `sessions_yield`
+  to pause its own turn and wait.
+
+### Two Spawn Modes
+
+| Mode | Behavior |
+|---|---|
+| `run` | One-shot. Child runs the task, returns result, session cleaned up. |
+| `session` | Persistent. Child session stays alive for follow-up messages (thread-bound). |
+
+### Two Runtimes
+
+| Runtime | What it spawns |
+|---|---|
+| `subagent` (default) | An OpenClaw agent session within the same Gateway |
+| `acp` | An external Agent Communication Protocol session (e.g., Codex) |
+
+### Context Engine Integration
+
+The context engine participates in subagent lifecycle:
+- `prepareSubagentSpawn(parentKey, childKey, ttlMs)` — set up isolated context,
+  returns a `rollback()` handle if spawn fails
+- `onSubagentEnded(childKey, reason)` — clean up when the child completes,
+  is deleted, swept, or released
+
+### Concurrency Model
+
+Parent and child run on **different lanes**, so they can execute concurrently:
+
+```
+Parent lane:  [running] ████████ [yield/wait] ░░░░░░░░ [resume] ████
+Child lane A:           [running] ██████████████████████████ [done]
+Child lane B:                [running] █████████████████████ [done]
+```
+
+The parent can spawn multiple children and they all run in parallel. But within
+each child's own lane, runs are serialized — just like user messages.
+
+---
+
 ## How Layer 2 Evolved: The Git History
 
 ### Phase 0: The Predecessor — Control Channel (December 8, 2025)
