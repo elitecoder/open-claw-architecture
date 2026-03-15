@@ -621,6 +621,154 @@ Agent IDs are cleaned up to be filesystem-safe:
 
 ---
 
+## Part 5: The Tool System (The Robot's Hands)
+
+The agent can think and talk, but without tools it can't **do** anything. The
+tool system gives the LLM a set of callable functions — read files, run
+commands, search the web, send messages, control a browser, and more.
+
+### Three Sources of Tools
+
+Tools come from three places, assembled in `src/agents/pi-tools.ts`:
+
+```mermaid
+flowchart LR
+    subgraph Pi["Pi SDK Tools (foundation)"]
+        read["read"]
+        write["write"]
+        edit["edit"]
+        exec["exec / bash"]
+        patch["apply_patch"]
+    end
+
+    subgraph OC["OpenClaw-Built Tools"]
+        direction TB
+        web["web_search\nweb_fetch"]
+        mem["memory_search\nmemory_get"]
+        sess["sessions_list\nsessions_history\nsessions_send\nsessions_spawn\nsessions_yield\nsubagents\nsession_status"]
+        ui["browser\ncanvas"]
+        msg["message"]
+        auto["cron\ngateway"]
+        nodes["nodes"]
+        agents["agents_list"]
+        media["image\ntts\npdf"]
+    end
+
+    subgraph Plug["Plugin Tools"]
+        custom["Any tool registered\nby plugins"]
+    end
+
+    Pi -->|"wrap with guards"| Final["Final Tool List"]
+    OC --> Final
+    Plug --> Final
+```
+
+#### Source 1: Pi SDK (`@mariozechner/pi-coding-agent`)
+
+The foundational file and shell tools. OpenClaw imports these and **wraps** each
+one with security guards:
+
+| Pi SDK Tool | OpenClaw Wraps With |
+|---|---|
+| `read` | Sandbox enforcement, workspace-only restriction, image sanitization |
+| `write` | Filesystem policy, workspace guards, append-only mode during memory flush |
+| `edit` | Sandbox enforcement, workspace-only restriction |
+| `exec` / `bash` | Safe-bin policy, elevated mode, timeout config |
+| `apply_patch` | OpenAI-compatible patch format |
+
+The Pi SDK provides the tool definitions and schemas. OpenClaw intercepts each
+tool call via wrapper functions that enforce policies before the actual execution
+runs.
+
+#### Source 2: OpenClaw-Built Tools (`src/agents/openclaw-tools.ts`)
+
+These tools don't exist in the Pi SDK — OpenClaw builds them entirely:
+
+| Section | Tools | Purpose |
+|---|---|---|
+| **Web** | `web_search`, `web_fetch` | Search the internet, fetch and parse pages |
+| **Memory** | `memory_search`, `memory_get` | RAG semantic search, targeted memory reads |
+| **Sessions** | `sessions_list`, `sessions_history`, `sessions_send`, `sessions_spawn`, `sessions_yield`, `subagents`, `session_status` | Multi-session orchestration, sub-agent spawning |
+| **UI** | `browser`, `canvas` | CDP browser control, HTML/CSS/JS canvases |
+| **Messaging** | `message` | Send to WhatsApp, Telegram, Slack, Discord, etc. |
+| **Automation** | `cron`, `gateway` | Scheduled tasks, gateway control |
+| **Nodes** | `nodes` | Interact with companion devices (iOS, Android, macOS) |
+| **Agents** | `agents_list` | List available agents |
+| **Media** | `image`, `tts`, `pdf` | Vision, text-to-speech, PDF reading |
+
+Each tool is created by a factory function (e.g., `createBrowserTool()`,
+`createCronTool()`) that receives the current session context, config, and
+security policies.
+
+#### Source 3: Plugin Tools
+
+Plugins register additional tools via the plugin SDK. These are resolved by
+`resolvePluginTools()` and appended to the tool list, subject to an optional
+allowlist (`pluginToolAllowlist`).
+
+### Tool Assembly Pipeline
+
+The final tool list is assembled in `createOpenClawCodingTools()`:
+
+```
+1. Import Pi SDK codingTools (read, write, edit, bash)
+2. Wrap each with OpenClaw guards:
+   - Sandbox enforcement (sandboxed sessions)
+   - Workspace-only restrictions (fs policy)
+   - Image sanitization on read results
+   - Memory-flush append-only write mode
+3. Replace bash with OpenClaw's exec tool (safe-bin policy, elevated mode)
+4. Add all OpenClaw-built tools from createOpenClawTools()
+5. Add plugin tools from resolvePluginTools()
+6. Apply tool policy pipeline:
+   - Profile-based allow/deny (minimal, coding, messaging, full)
+   - Per-agent tool restrictions
+   - Sandbox tool filtering
+   - Subagent tool inheritance rules
+```
+
+### Tool Profiles
+
+Not every session gets every tool. Profiles control which tools are available:
+
+| Profile | What's included | When used |
+|---|---|---|
+| `minimal` | `session_status` only | Lightweight/restricted sessions |
+| `coding` | File ops, exec, process, web, memory, sessions, cron, image | Default for agent sessions |
+| `messaging` | Message, sessions (list/history/send), session_status | Messaging-only contexts |
+| `full` | Everything (no restrictions) | Explicitly configured |
+
+Profiles are defined in `src/agents/tool-catalog.ts`. The catalog also groups
+tools into sections (Files, Runtime, Web, Memory, Sessions, UI, Messaging,
+Automation, Nodes, Agents, Media) for display in `/context detail` and the
+Control UI.
+
+### How Tool Results Enter Context
+
+Tool results flow through the standard agent loop:
+
+1. LLM generates a `tool_call` in its response (e.g., `read({ path: "src/index.ts" })`)
+2. Pi SDK agent loop intercepts the tool call
+3. OpenClaw executes the tool locally (file read, shell command, API call, etc.)
+4. Result returns as a `toolResult` message in conversation history
+5. The context management pipeline (Layer 8) manages the result:
+   - Budget guard caps oversized results (50% of window per result)
+   - Cache-TTL pruning expires old results after 5 minutes
+   - Compaction summarizes them if the session gets long
+
+### Key Files
+
+| File | Purpose |
+|---|---|
+| `src/agents/pi-tools.ts` | Tool assembly pipeline, wrapping, policy |
+| `src/agents/openclaw-tools.ts` | OpenClaw-built tool creation |
+| `src/agents/tool-catalog.ts` | Tool catalog, profiles, sections |
+| `src/agents/tools/*.ts` | Individual tool implementations |
+| `src/agents/pi-tools.policy.ts` | Tool policy resolution (allow/deny) |
+| `src/agents/tool-fs-policy.ts` | Filesystem policy for read/write/edit |
+
+---
+
 ## How Layer 1 Evolved: The Git History
 
 ### Phase 1: Genesis — "Warelay" (November 24, 2025)
