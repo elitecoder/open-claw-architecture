@@ -1014,6 +1014,173 @@ Alternative Backends:
 
 ---
 
+## How Memory Results Enter the LLM Context
+
+The memory system doesn't passively sit in the background — it's woven into the
+agent loop at multiple points. Here's the complete flow:
+
+### The Memory Recall Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Agent as Agent Loop
+    participant SP as System Prompt
+    participant LLM as LLM Provider
+    participant MS as memory_search tool
+    participant MG as memory_get tool
+    participant SQLite as SQLite (vectors + BM25)
+    participant Files as Memory Files<br/>(MEMORY.md, memory/*.md)
+
+    Note over SP: Session start
+    Files-->>SP: Bootstrap injects MEMORY.md,<br/>SOUL.md, USER.md, IDENTITY.md<br/>into system prompt
+    SP-->>SP: Adds "## Memory Recall" section:<br/>"Before answering about prior work,<br/>run memory_search first"
+
+    User->>Agent: "What was the server IP<br/>we discussed last week?"
+    Agent->>LLM: System prompt + conversation history
+    LLM->>MS: tool_call: memory_search("server IP")
+
+    MS->>SQLite: Hybrid search (BM25 + vector)
+    SQLite-->>MS: Raw results
+    MS->>MS: Temporal decay (boost recent)
+    MS->>MS: MMR re-ranking (diversity)
+    MS->>MS: Decorate citations
+    MS-->>LLM: tool_result: [{snippet, path, score}]
+
+    Note over LLM: Sees snippets in context,<br/>may want more detail
+
+    LLM->>MG: tool_call: memory_get("memory/2026-03-10.md", from=12, lines=5)
+    MG->>Files: Read specific lines
+    Files-->>MG: Text content
+    MG-->>LLM: tool_result: {text, path}
+
+    LLM-->>Agent: "The server IP is 10.0.0.5,<br/>discussed on Mar 10.<br/>Source: memory/2026-03-10.md#L12-L16"
+    Agent-->>User: Reply with citation
+```
+
+### Where Memory Touches Context (5 Integration Points)
+
+**1. Bootstrap injection (session start)**
+
+At the start of every session, bootstrap files are loaded into the system prompt:
+
+- `MEMORY.md` — long-term curated facts (only in direct/private sessions, never groups)
+- `SOUL.md` — agent persona and boundaries
+- `USER.md` — user profile (name, timezone, projects)
+- `IDENTITY.md` — agent self-definition
+- `AGENTS.md` — available subagents
+
+These consume context tokens directly — they're part of the system prompt that
+the LLM sees on every turn. Large files are truncated via `bootstrapMaxChars`
+(default 20K chars per file, 150K total).
+
+**2. System prompt instruction (every turn)**
+
+When `memory_search` or `memory_get` tools are available, the system prompt
+includes a `## Memory Recall` section:
+
+> Before answering anything about prior work, decisions, dates, people,
+> preferences, or todos: run memory_search on MEMORY.md + memory/*.md;
+> then use memory_get to pull only the needed lines.
+
+This instructs the LLM to **proactively call memory tools** before answering
+from its own (possibly outdated or compacted) context.
+
+**3. Tool call results (during a turn)**
+
+When the LLM calls `memory_search`, the results are returned as a standard
+`toolResult` message — JSON with snippets, file paths, line ranges, and scores.
+This enters the conversation history just like any other tool result, and is
+subject to all the context management layers (budget guard, pruning, compaction).
+
+Key details:
+- Results are capped at ~700 chars per snippet
+- QMD backend has an additional `maxInjectedChars` budget
+- Citations (`Source: path#L5-L7`) are appended when enabled
+- The LLM can follow up with `memory_get` for targeted reads
+
+**4. Pre-compaction memory flush (before compaction)**
+
+When the session nears auto-compaction, a **silent agentic turn** runs:
+
+1. System detects context is approaching `contextWindow - reserveTokens - 4000`
+2. Fires a silent turn with prompt: "Pre-compaction memory flush. Store durable
+   memories to `memory/YYYY-MM-DD.md`"
+3. Agent writes important facts/decisions to disk
+4. Uses `NO_REPLY` so the user sees nothing
+5. Bootstrap files (SOUL.md, MEMORY.md, etc.) are marked read-only during flush
+
+This ensures memories survive compaction — they're written to files that will be
+indexed and retrievable via `memory_search` in future sessions.
+
+**5. Post-compaction re-indexing (after compaction)**
+
+After compaction summarizes old turns, the memory index may be stale (old
+transcript content was removed). The file watcher detects changes to
+`memory/*.md` files written during the flush and triggers re-indexing within
+1.5 seconds (debounce window).
+
+### The Complete Memory-to-Context Lifecycle
+
+```
+Session start:
+  MEMORY.md, SOUL.md, USER.md → injected into system prompt (Layer 1)
+
+Every turn:
+  "## Memory Recall" instruction → system prompt tells LLM to search first
+
+During a turn (LLM-initiated):
+  memory_search(query) → hybrid search → results as toolResult in context
+  memory_get(path, lines) → targeted read → results as toolResult in context
+
+Approaching compaction:
+  Memory flush → agent writes to memory/YYYY-MM-DD.md → files indexed
+
+After compaction:
+  Old turns summarized → memory files survive on disk → searchable next session
+
+Next session:
+  Bootstrap re-injects MEMORY.md → memory_search finds daily logs → cycle repeats
+```
+
+---
+
+## Personalization: Explicit and File-Based
+
+OpenClaw does **not** learn or adapt preferences dynamically at runtime. All
+personalization flows through explicit bootstrap files:
+
+| File | What It Personalizes | How It's Updated |
+|---|---|---|
+| `SOUL.md` | Agent persona, boundaries, communication style | User edits manually or agent writes on first run |
+| `USER.md` | User name, pronouns, timezone, projects, preferences | Agent updates over time as it learns about the user |
+| `IDENTITY.md` | Agent name, creature type, emoji, avatar | Agent fills in during first conversation |
+| `MEMORY.md` | Long-term curated facts, decisions, preferences | Agent writes; user can edit |
+| `memory/*.md` | Daily logs and topic files | Agent writes via memory flush and explicit saves |
+
+### What This Means in Practice
+
+- **Transparent**: You can read and edit any of these files directly
+- **Durable**: Files survive compaction, session resets, and restarts
+- **Retrievable**: All files are indexed by the RAG system and searchable
+- **Explicit**: The agent must actively write — nothing is learned implicitly
+- **No dynamic modeling**: No user preference learning, collaborative filtering,
+  or behavioral adaptation beyond what's written to disk
+
+### What's NOT Here
+
+- No session-to-session learning beyond explicit file writes
+- No user preference modeling or adaptive behavior
+- No collaborative filtering or recommendation
+- No dynamic persona adjustment based on usage patterns
+- No A/B testing or personalization experiments
+
+The design philosophy: **durability over learning**. Everything the agent "knows"
+about you must be written to a file where you can see it, edit it, and control
+it.
+
+---
+
 ## Key Files Reference
 
 | File | Lines | Purpose |
