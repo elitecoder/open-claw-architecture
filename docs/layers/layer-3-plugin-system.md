@@ -684,21 +684,125 @@ The plugin system uses three layers of caching for performance:
 Plugins are npm packages installed via the CLI:
 
 ```bash
-openclaw plugin install @openclaw/feishu
+openclaw plugins install @openclaw/feishu
 ```
 
-The installer (`src/plugins/install.ts`):
-1. Resolves the npm spec (registry, file path, or tarball)
-2. Downloads and extracts to `~/.openclaw/extensions/<plugin-id>/`
-3. Validates `openclaw.extensions` field exists in `package.json`
-4. Validates plugin ID (no path separators, no reserved names)
-5. Runs `npm install --omit=dev` for the plugin's own dependencies
+There are **three install modes**, all converging on the same atomic publish step:
 
-Plugins are discovered from four roots (highest priority first):
-1. **Config paths** — `plugins.load.paths` in `openclaw.json`
-2. **Workspace** — `<workspace>/.openclaw/extensions/`
-3. **Global** — `~/.openclaw/extensions/`
-4. **Bundled** — `dist/extensions/` (shipped with OpenClaw)
+| Mode | Command Example | What Happens |
+|------|----------------|-------------|
+| **npm spec** | `openclaw plugins install @openclaw/voice-call` | Downloads from npm registry, extracts tarball |
+| **Directory/path** | `openclaw plugins install ./my-plugin` | Reads package.json directly from disk |
+| **Archive** | `openclaw plugins install plugin.tgz` | Extracts .zip/.tgz/.tar, then follows directory flow |
+
+### The 9-Step Atomic Install Pipeline
+
+The installer (`src/plugins/install.ts`) uses a careful staging process to prevent corrupted installs:
+
+#### Step 1: Resolve
+Validate the install spec. For npm: registry-only (no git URLs, no semver ranges). For paths: verify the directory exists.
+
+#### Step 2: Download (npm only)
+Fetch the package tarball from the npm registry.
+
+#### Step 3: Extract
+Unpack to a temporary directory.
+
+#### Step 4: Validate
+Read `package.json` and confirm it has an `openclaw.extensions` array (e.g., `["./dist/index.js"]`). Without this, installation fails with `MISSING_OPENCLAW_EXTENSIONS`. Read `openclaw.plugin.json` for the canonical plugin ID. Validate plugin ID (no path separators, no reserved names like `.` or `..`).
+
+#### Step 5: Security Scan
+Run `skillScanner.scanDirectoryWithSummary()` on the extension entry points. This checks for dangerous patterns (eval, shell execution, etc.). Critical findings are logged as **warnings but do not block installation**.
+
+**Like:** An airport scanner that flags suspicious items but lets you through with a warning sticker, rather than confiscating everything.
+
+#### Step 6: Stage
+Copy the source to a `.openclaw-install-stage-*` temp directory inside the extensions root. Nothing touches the final location yet.
+
+#### Step 7: Dependency Install
+Run `npm install --omit=dev --ignore-scripts` in the staged directory (5-minute timeout). Dev dependencies are excluded. Scripts are disabled for safety (no `postinstall` bombs).
+
+**Like:** Assembling all the parts the new organ needs, in a clean room, before transplanting it.
+
+#### Step 8: Atomic Publish
+This is the critical step:
+
+```
+If updating an existing plugin:
+  → Back up existing install to .openclaw-install-backups/
+  → Rename staged directory → final target (~/.openclaw/extensions/<plugin-id>)
+  → If success: clean up backup
+  → If failure: restore backup
+If fresh install:
+  → Rename staged directory → final target
+```
+
+The rename is atomic on most filesystems — it either completes fully or doesn't happen at all. No half-installed plugins.
+
+**Like:** A heart transplant where you keep the old heart in a jar until you're 100% sure the new one is beating. If the new one fails, you put the old one back.
+
+#### Step 9: Record
+Write install metadata to `config.plugins.installs[pluginId]`.
+
+### Install Records (The Receipt)
+
+Every installed plugin gets a receipt stored in config:
+
+```json5
+{
+  plugins: {
+    installs: {
+      "voice-call": {
+        source: "npm",                          // Where it came from
+        spec: "@openclaw/voice-call",           // Original install command
+        installPath: "~/.openclaw/extensions/voice-call",
+        version: "2026.3.13",                   // package.json version
+        resolvedName: "@openclaw/voice-call",   // npm resolution
+        resolvedVersion: "2026.3.13",
+        resolvedSpec: "@openclaw/voice-call@2026.3.13",
+        integrity: "sha512-abc123...",          // SRI hash (tamper detection)
+        shasum: "def456...",                     // npm shasum
+        installedAt: "2026-03-17T10:30:00Z"
+      }
+    }
+  }
+}
+```
+
+**Like:** A medical record for the organ transplant — where the organ came from, when it was implanted, and a fingerprint to verify it hasn't been swapped.
+
+### Integrity Validation (Tamper Detection)
+
+For npm-installed plugins, the install record stores an **SRI integrity hash** of the package. When you run `openclaw plugins update`:
+
+1. Fetch the new package from npm
+2. Compare the new hash against the stored one
+3. If the hash changed (expected during updates), show the change and ask for confirmation
+4. If `--yes` is passed, skip the prompt (for CI)
+
+This catches npm package tampering or corruption.
+
+### Auto-Enable (Plugins That Turn Themselves On)
+
+After installation, OpenClaw automatically enables plugins when their corresponding config exists. This is handled by `src/config/plugin-auto-enable.ts`.
+
+| Trigger | Example | What Gets Enabled |
+|---------|---------|-------------------|
+| Channel config exists | `channels.slack.*` is configured | Slack channel plugin |
+| Provider auth profile | `auth.profiles` has a Google Gemini entry | `google-gemini-cli-auth` plugin |
+| ACP flag | `acp.enabled = true` | `acpx` plugin |
+| Environment variable | `IRC_HOST` is set | IRC plugin |
+
+**Like:** Plugging in a new USB device and the driver auto-installs.
+
+Auto-enable respects explicit overrides: `plugins.entries[id].enabled = false` blocks it, `plugins.deny` blocks it, `plugins.enabled = false` disables all. When multiple plugins declare the same channel, `preferOver` in `package.json` determines priority.
+
+### Custom Path Warnings (Stale Transplant Detection)
+
+Plugins installed from local paths (`source: "path"`) get flagged during `openclaw doctor` and upgrade checks (`src/infra/plugin-install-path-warnings.ts`):
+
+- **Missing source path**: "This plugin was installed from `~/dev/my-plugin` but that path is gone."
+- **Active custom path**: "This plugin won't be updated by `openclaw plugins update` because it came from a local path, not npm."
 
 ### How Plugins Become Tool Calls
 
@@ -712,6 +816,12 @@ flowchart TB
     R --> REG["Plugin Registry\n(tools, hooks, channels,\nproviders, commands, routes)"]
     REG --> AT["Agent Run\n resolvePluginTools()\nmerges into tool list"]
 ```
+
+Plugins are discovered from four roots (highest priority first):
+1. **Config paths** — `plugins.load.paths` in `openclaw.json`
+2. **Workspace** — `<workspace>/.openclaw/extensions/`
+3. **Global** — `~/.openclaw/extensions/`
+4. **Bundled** — `dist/extensions/` (shipped with OpenClaw)
 
 Plugin tools are indistinguishable from built-in tools once registered. The LLM
 sees them in the tool schema and can call them like any other tool.
@@ -741,7 +851,7 @@ Two plugin kinds occupy exclusive slots — only one can be active:
 
 All other plugins are additive — unlimited concurrent plugins.
 
-### Hot Reload: What Can and Can't Change Live
+### Hot Reload: Why Plugins Require a Gateway Restart
 
 Plugin changes require a **full gateway restart**. The config reload system
 explicitly marks plugin config as restart-required:
@@ -750,7 +860,15 @@ explicitly marks plugin config as restart-required:
 { prefix: "plugins", kind: "restart" }
 ```
 
-However, other things reload live:
+**Why?** Three reasons:
+
+1. **Module loading is one-shot.** Jiti compiles and caches TypeScript modules the first time they're imported. There's no "reimport" mechanism.
+2. **The registry is built at startup.** All plugins call `register(api)` during the 14-step loading pipeline. The resulting registry is a frozen data structure.
+3. **Discovery scans at startup.** New extensions in `~/.openclaw/extensions/` are only found when discovery runs.
+
+**The exception:** Plugin **config changes** (`plugins.entries[id].config`) are read dynamically at runtime and do not require restart.
+
+Other things that reload live without restart:
 - Hook scripts (`hooks.*`) — hot reload
 - Model config — hot reload with heartbeat restart
 - Channel-specific config — per-channel reload rules
@@ -763,6 +881,20 @@ However, other things reload live:
 - Tool name conflict detection (plugins can't shadow built-in tools)
 - Per-plugin `hooks.allowPromptInjection` gate for prompt-modifying hooks
 - Config-driven allow/deny lists (`plugins.allow`, `plugins.deny`)
+- SRI integrity validation on npm updates
+
+### Installation File Reference
+
+| File | Purpose |
+|------|---------|
+| `src/plugins/install.ts` | Main install logic for all source types |
+| `src/plugins/installs.ts` | Install record tracking and recording |
+| `src/plugins/update.ts` | Plugin update and version comparison |
+| `src/plugins/uninstall.ts` | Plugin removal from config and disk |
+| `src/infra/install-package-dir.ts` | Atomic stage → npm install → publish flow |
+| `src/infra/plugin-install-path-warnings.ts` | Custom path detection and warnings |
+| `src/config/plugin-auto-enable.ts` | Auto-enable logic for channels/providers |
+| `src/config/types.installs.ts` | Install record type definitions |
 
 ---
 

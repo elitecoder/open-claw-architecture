@@ -1048,6 +1048,244 @@ each child's own lane, runs are serialized — just like user messages.
 
 ---
 
+## Part 15: Resilience and Crash Recovery (Staying Alive)
+
+The gateway is designed to **keep running** through failures and recover gracefully from crashes. Think of it as a robot that trips, gets back up, dusts itself off, and keeps going — automatically.
+
+### Error Classification: Not All Errors Are Equal
+
+When something unexpected happens (an unhandled rejection or uncaught exception), the gateway doesn't just crash. It **classifies the error** first and decides what to do.
+
+There are three categories, defined in `src/infra/unhandled-rejections.ts`:
+
+#### Fatal Errors (Game Over — Exit and Let the Supervisor Restart)
+
+These mean the process is in an unrecoverable state. The gateway logs the error and exits with code 1.
+
+- Memory exhaustion: `ERR_OUT_OF_MEMORY`, `ERR_WORKER_OUT_OF_MEMORY`
+- Worker failures: `ERR_WORKER_UNCAUGHT_EXCEPTION`, `ERR_WORKER_INITIALIZATION_FAILED`
+- Script timeout: `ERR_SCRIPT_EXECUTION_TIMEOUT`
+- Config failures: `INVALID_CONFIG`, `MISSING_API_KEY`, `MISSING_CREDENTIALS`
+
+**Like:** The robot's battery died, or someone loaded it with the wrong instruction manual. It needs to fully power down and restart.
+
+#### Transient Network Errors (Keep Running — It'll Fix Itself)
+
+These are logged as warnings, but the gateway stays up. Per-subsystem retry logic handles recovery.
+
+- Connection issues: `ECONNRESET`, `ECONNREFUSED`, `ECONNABORTED`, `EPIPE`
+- DNS failures: `ENOTFOUND`, `EAI_AGAIN`
+- Timeouts: `ETIMEDOUT`, `ESOCKETTIMEDOUT`
+- TLS/SSL: `EPROTO`, `ERR_SSL_WRONG_VERSION_NUMBER`
+- HTTP client (undici): `UND_ERR_CONNECT_TIMEOUT`, `UND_ERR_HEADERS_TIMEOUT`, `UND_ERR_BODY_TIMEOUT`
+- Message patterns: `fetch failed`, `socket hang up`, `getaddrinfo`, `network error`
+
+**Like:** The robot's Wi-Fi flickered for a second. No need to reboot — just wait and try again.
+
+#### Abort Errors (Shh — Nothing to See Here)
+
+`AbortError` exceptions from graceful shutdown sequences are silently suppressed. These are expected during controlled teardown.
+
+#### Plugin Error Handlers
+
+Plugins can register custom handlers via `registerUnhandledRejectionHandler()`. If a plugin handler returns `true`, the default classification is bypassed for that error.
+
+### In-Process Restart (SIGUSR1 — The Gentle Reboot)
+
+Sometimes the gateway needs a clean restart without losing the process — for example, after a config reload that changes plugin settings. It uses a **SIGUSR1 self-signal** flow, defined in `src/infra/restart.ts`.
+
+#### How It Works
+
+```
+Config change detected
+  → scheduleGatewaySigusr1Restart()
+  → Wait for pending work to drain (poll every 500ms, max 90 seconds)
+  → Send SIGUSR1 to self
+  → Handler calls consumeGatewaySigusr1RestartAuthorization()
+  → Clean restart proceeds
+```
+
+**Like:** The robot finishes putting down whatever it's carrying, then reboots. It doesn't just drop everything on the floor.
+
+#### Safety Guards
+
+| Guard | What It Does |
+|-------|-------------|
+| **30-second cooldown** | Prevents restart storms — if another restart is requested during cooldown, it's deferred |
+| **Coalescing** | Multiple restart requests within the same window collapse into a single signal |
+| **Authorization** | SIGUSR1 must be pre-authorized via `authorizeGatewaySigusr1Restart()`. Random `kill -USR1` signals are ignored with a warning |
+
+### Supervisor Integration (The Babysitter)
+
+For production, the gateway should run under a process supervisor. OpenClaw detects the active supervisor automatically and uses it for restart operations.
+
+#### Supervisor Detection
+
+The gateway checks environment variables to determine which supervisor is managing it:
+
+| Platform | Environment Markers |
+|----------|-------------------|
+| macOS (launchd) | `LAUNCH_JOB_LABEL`, `LAUNCH_JOB_NAME`, `XPC_SERVICE_NAME`, `OPENCLAW_LAUNCHD_LABEL` |
+| Linux (systemd) | `OPENCLAW_SYSTEMD_UNIT`, `INVOCATION_ID`, `SYSTEMD_EXEC_PID`, `JOURNAL_STREAM` |
+| Windows | `OPENCLAW_WINDOWS_TASK_NAME`, `OPENCLAW_SERVICE_MARKER` |
+
+#### What Happens on Restart
+
+When `triggerOpenClawRestart()` is called:
+
+- **macOS**: `launchctl kickstart -k gui/<uid>/<label>`, falling back to `launchctl bootstrap` + `kickstart` if deregistered
+- **Linux**: `systemctl --user restart <unit>`, then `systemctl restart <unit>`
+- **Windows**: Triggers the registered scheduled task
+
+All methods use a 2-second timeout. If the supervisor restart fails, the current process keeps running and logs the failure.
+
+#### Process Respawn (No Supervisor? Spawn a Clone)
+
+When no supervisor is detected (`src/infra/process-respawn.ts`):
+
+1. The gateway spawns a **detached child process** with the same `argv`, `execArgv`, and environment
+2. The parent process exits
+3. The child takes over with a fresh PID
+
+This works on Linux without systemd and macOS without launchd. On Windows without a scheduled task, respawn is disabled — it's unsafe without a supervisor to guarantee cleanup.
+
+**Like:** The robot makes a copy of itself, hands it the same instruction manual, then powers down. The clone continues the job.
+
+### Channel Health Monitor (The Doctor Makes Rounds)
+
+The gateway runs an autonomous health monitor (`src/gateway/channel-health-monitor.ts`) that periodically checks each connected channel and restarts unhealthy ones.
+
+#### What Triggers a Channel Restart
+
+- Channel not responding to health probes
+- **"Stale socket"** — the connection is technically alive, but no events have arrived within a configurable threshold
+
+#### Rate Limiting (Don't Panic)
+
+| Rule | Value |
+|------|-------|
+| Startup grace period | 60 seconds (no restarts during initial connection setup) |
+| Per-channel cooldown | 10 minutes between restart attempts |
+| Hard cap | Max 10 restarts per channel/account per hour |
+
+If the cap is exceeded, the monitor skips the restart and logs a warning instead of hammering a broken service.
+
+**Like:** A nurse checking on patients. If someone keeps pulling out their IV, the nurse tries to reattach it — but after the 10th time in an hour, they call the doctor instead of doing it again.
+
+### Cron Missed-Job Recovery (Picking Up Where You Left Off)
+
+When the gateway starts after a crash, the cron scheduler (`src/cron/service/ops.ts`) recovers interrupted and missed jobs.
+
+#### Recovery Flow
+
+```
+Gateway starts after crash
+  → Scan all jobs for stale "runningAtMs" markers (left by crashed process)
+  → Clear the markers, record them as "startupInterruptedJobIds"
+  → Run runMissedJobs()
+  → At most 1 missed job runs immediately
+  → Additional missed jobs are staggered (default 500ms apart)
+```
+
+**Why stagger?** If the gateway was down for 2 hours and 50 cron jobs were missed, firing them all at once would overwhelm the system. The stagger spreads the load.
+
+**Like:** The robot was powered off during its chore schedule. When it boots back up, it checks which chores were missed and does them one at a time instead of trying to vacuum, mop, and do laundry simultaneously.
+
+### Outbound Delivery Recovery (No Lost Messages)
+
+On startup, the gateway calls `recoverPendingDeliveries()` to find messages that were **mid-send** when the previous process exited. These are re-queued for delivery through the normal outbound pipeline.
+
+**Like:** The robot was carrying a letter to the mailbox when it tripped. When it gets back up, it picks up the letter and finishes the delivery.
+
+### Heartbeat Isolation (One Bad Beat Doesn't Stop the Heart)
+
+The heartbeat runner (`src/infra/heartbeat-runner.ts`) operates on its own schedule, independent of the main gateway loop. If `runHeartbeatOnce()` throws:
+
+- The error is logged
+- The heartbeat is recorded with status `"failed"`
+- The schedule continues normally
+
+A heartbeat failure **never** crashes or destabilizes the gateway.
+
+### Bonjour Discovery Watchdog (Re-Announcing Yourself)
+
+The mDNS service advertisement (`src/infra/bonjour.ts`) includes a 60-second watchdog:
+
+- Checks if the service is still in `"announced"` or `"announcing"` state
+- If not, attempts to re-advertise
+- Re-attempts throttled to 30 seconds between tries
+- Failures don't affect gateway health
+
+### Retry and Backoff Primitives (The Patience Engine)
+
+Subsystems that make network calls share retry and backoff utilities from `src/infra/retry.ts` and `src/infra/backoff.ts`.
+
+#### Exponential Backoff
+
+```
+delay = base * factor^(attempt - 1)
+jitter applied: delay ± (delay × jitter × random())
+clamped to [initialMs, maxMs]
+```
+
+#### Retry Defaults
+
+| Setting | Default |
+|---------|---------|
+| Max attempts | 3 |
+| Delay range | 300ms — 30s |
+| Jitter | None (configurable) |
+
+Custom `shouldRetry(error)` callbacks let subsystems define which errors are retryable. `retryAfterMs(error)` supports server-suggested delays (HTTP 429 `Retry-After`).
+
+### Graceful Shutdown (The Polite Exit)
+
+When the gateway shuts down (via signal, CLI command, or supervisor stop), it runs a **5-step teardown** in `src/gateway/server-close.ts`:
+
+1. Stop Bonjour, Tailscale, channels, and plugins
+2. Stop cron and heartbeat services
+3. Close all WebSocket connections with a shutdown reason
+4. Clear all timers
+5. Broadcast a `shutdown` event to connected clients, optionally including `restartExpectedMs` so clients know when to reconnect
+
+**Like:** The robot announces "I'm going to sleep now, see you in 5 seconds!" before powering down. Everyone knows it's intentional and when to come back.
+
+### The Full Startup Recovery Sequence
+
+For reference, here's everything the gateway does on startup to recover from a previous crash:
+
+| Step | What Happens |
+|------|-------------|
+| 1 | Load and validate config |
+| 2 | Install unhandled-rejection handler (error classification) |
+| 3 | Authorize SIGUSR1 restart |
+| 4 | Initialize cron service (with missed-job recovery) |
+| 5 | Initialize heartbeat runner |
+| 6 | Start channel health monitor |
+| 7 | Start Bonjour discovery service |
+| 8 | **Recover pending outbound deliveries from previous crash** |
+| 9 | Set up WebSocket connection handler |
+| 10 | Set up graceful close handler |
+| 11 | Start maintenance timers (health checks, deduplication, media cleanup) |
+
+### Resilience File Reference
+
+| File | Purpose |
+|------|---------|
+| `src/infra/unhandled-rejections.ts` | Error classification (fatal / transient / abort) |
+| `src/infra/restart.ts` | SIGUSR1 restart, cooldown, deferral |
+| `src/infra/process-respawn.ts` | Fresh-PID spawning for non-supervised environments |
+| `src/gateway/server.impl.ts` | Main gateway loop, startup recovery sequence |
+| `src/gateway/server-close.ts` | Graceful shutdown handler |
+| `src/gateway/channel-health-monitor.ts` | Per-channel health monitoring and restart |
+| `src/cron/service/ops.ts` | Cron missed-job recovery |
+| `src/infra/heartbeat-runner.ts` | Heartbeat isolation |
+| `src/infra/bonjour.ts` | Bonjour watchdog |
+| `src/infra/retry.ts` | Retry utility |
+| `src/infra/backoff.ts` | Exponential backoff |
+
+---
+
 ## How Layer 2 Evolved: The Git History
 
 ### Phase 0: The Predecessor — Control Channel (December 8, 2025)
@@ -1200,3 +1438,10 @@ February was dominated by security:
 | `src/infra/bonjour.ts` | ~282 | mDNS/Bonjour service advertiser |
 | `src/infra/bonjour-discovery.ts` | ~591 | mDNS/Bonjour service discovery |
 | `src/infra/widearea-dns.ts` | ~200 | Wide-area DNS-SD zone generation |
+| `src/infra/unhandled-rejections.ts` | varies | Error classification (fatal / transient / abort) |
+| `src/infra/restart.ts` | varies | SIGUSR1 restart, cooldown, deferral |
+| `src/infra/process-respawn.ts` | varies | Fresh-PID spawning for non-supervised environments |
+| `src/gateway/server-close.ts` | varies | Graceful shutdown handler |
+| `src/gateway/channel-health-monitor.ts` | varies | Per-channel health monitoring and restart |
+| `src/infra/retry.ts` | varies | Retry utility |
+| `src/infra/backoff.ts` | varies | Exponential backoff |
