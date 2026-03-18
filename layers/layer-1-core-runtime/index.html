@@ -686,6 +686,78 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#part-5-the-tool-system-the-robots-hands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Tool System (The Robot's Hands)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Tool System (The Robot&#39;s Hands)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#three-sources-of-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three Sources of Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-assembly-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool Assembly Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool Profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-tool-results-enter-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Tool Results Enter Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-layer-1-evolved-the-git-history" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1418,6 +1490,78 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#part-5-the-tool-system-the-robots-hands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 5: The Tool System (The Robot's Hands)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 5: The Tool System (The Robot&#39;s Hands)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#three-sources-of-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three Sources of Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-assembly-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool Assembly Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tool Profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-tool-results-enter-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Tool Results Enter Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-layer-1-evolved-the-git-history" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1989,6 +2133,244 @@ Sometimes one agent needs to look up another agent's sessions (e.g., for handoff
 - Leading/trailing dashes removed
 - Max 64 characters
 - Empty → defaults to <code>"main"</code></p>
+<hr />
+<h2 id="part-5-the-tool-system-the-robots-hands">Part 5: The Tool System (The Robot's Hands)<a class="headerlink" href="#part-5-the-tool-system-the-robots-hands" title="Permanent link">&para;</a></h2>
+<p>The agent can think and talk, but without tools it can't <strong>do</strong> anything. The
+tool system gives the LLM a set of callable functions — read files, run
+commands, search the web, send messages, control a browser, and more.</p>
+<h3 id="three-sources-of-tools">Three Sources of Tools<a class="headerlink" href="#three-sources-of-tools" title="Permanent link">&para;</a></h3>
+<p>Tools come from three places, assembled in <code>src/agents/pi-tools.ts</code>:</p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph Pi["Pi SDK Tools (foundation)"]
+        read["read"]
+        write["write"]
+        edit["edit"]
+        exec["exec / bash"]
+        patch["apply_patch"]
+    end
+
+    subgraph OC["OpenClaw-Built Tools"]
+        direction TB
+        web["web_search\nweb_fetch"]
+        mem["memory_search\nmemory_get"]
+        sess["sessions_list\nsessions_history\nsessions_send\nsessions_spawn\nsessions_yield\nsubagents\nsession_status"]
+        ui["browser\ncanvas"]
+        msg["message"]
+        auto["cron\ngateway"]
+        nodes["nodes"]
+        agents["agents_list"]
+        media["image\ntts\npdf"]
+    end
+
+    subgraph Plug["Plugin Tools"]
+        custom["Any tool registered\nby plugins"]
+    end
+
+    Pi --&gt;|"wrap with guards"| Final["Final Tool List"]
+    OC --&gt; Final
+    Plug --&gt; Final</code></pre>
+<h4 id="source-1-pi-sdk-mariozechnerpi-coding-agent">Source 1: Pi SDK (<code>@mariozechner/pi-coding-agent</code>)<a class="headerlink" href="#source-1-pi-sdk-mariozechnerpi-coding-agent" title="Permanent link">&para;</a></h4>
+<p>The foundational file and shell tools. OpenClaw imports these and <strong>wraps</strong> each
+one with security guards:</p>
+<table>
+<thead>
+<tr>
+<th>Pi SDK Tool</th>
+<th>OpenClaw Wraps With</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read</code></td>
+<td>Sandbox enforcement, workspace-only restriction, image sanitization</td>
+</tr>
+<tr>
+<td><code>write</code></td>
+<td>Filesystem policy, workspace guards, append-only mode during memory flush</td>
+</tr>
+<tr>
+<td><code>edit</code></td>
+<td>Sandbox enforcement, workspace-only restriction</td>
+</tr>
+<tr>
+<td><code>exec</code> / <code>bash</code></td>
+<td>Safe-bin policy, elevated mode, timeout config</td>
+</tr>
+<tr>
+<td><code>apply_patch</code></td>
+<td>OpenAI-compatible patch format</td>
+</tr>
+</tbody>
+</table>
+<p>The Pi SDK provides the tool definitions and schemas. OpenClaw intercepts each
+tool call via wrapper functions that enforce policies before the actual execution
+runs.</p>
+<h4 id="source-2-openclaw-built-tools-srcagentsopenclaw-toolsts">Source 2: OpenClaw-Built Tools (<code>src/agents/openclaw-tools.ts</code>)<a class="headerlink" href="#source-2-openclaw-built-tools-srcagentsopenclaw-toolsts" title="Permanent link">&para;</a></h4>
+<p>These tools don't exist in the Pi SDK — OpenClaw builds them entirely:</p>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Tools</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Web</strong></td>
+<td><code>web_search</code>, <code>web_fetch</code></td>
+<td>Search the internet, fetch and parse pages</td>
+</tr>
+<tr>
+<td><strong>Memory</strong></td>
+<td><code>memory_search</code>, <code>memory_get</code></td>
+<td>RAG semantic search, targeted memory reads</td>
+</tr>
+<tr>
+<td><strong>Sessions</strong></td>
+<td><code>sessions_list</code>, <code>sessions_history</code>, <code>sessions_send</code>, <code>sessions_spawn</code>, <code>sessions_yield</code>, <code>subagents</code>, <code>session_status</code></td>
+<td>Multi-session orchestration, sub-agent spawning</td>
+</tr>
+<tr>
+<td><strong>UI</strong></td>
+<td><code>browser</code>, <code>canvas</code></td>
+<td>CDP browser control, HTML/CSS/JS canvases</td>
+</tr>
+<tr>
+<td><strong>Messaging</strong></td>
+<td><code>message</code></td>
+<td>Send to WhatsApp, Telegram, Slack, Discord, etc.</td>
+</tr>
+<tr>
+<td><strong>Automation</strong></td>
+<td><code>cron</code>, <code>gateway</code></td>
+<td>Scheduled tasks, gateway control</td>
+</tr>
+<tr>
+<td><strong>Nodes</strong></td>
+<td><code>nodes</code></td>
+<td>Interact with companion devices (iOS, Android, macOS)</td>
+</tr>
+<tr>
+<td><strong>Agents</strong></td>
+<td><code>agents_list</code></td>
+<td>List available agents</td>
+</tr>
+<tr>
+<td><strong>Media</strong></td>
+<td><code>image</code>, <code>tts</code>, <code>pdf</code></td>
+<td>Vision, text-to-speech, PDF reading</td>
+</tr>
+</tbody>
+</table>
+<p>Each tool is created by a factory function (e.g., <code>createBrowserTool()</code>,
+<code>createCronTool()</code>) that receives the current session context, config, and
+security policies.</p>
+<h4 id="source-3-plugin-tools">Source 3: Plugin Tools<a class="headerlink" href="#source-3-plugin-tools" title="Permanent link">&para;</a></h4>
+<p>Plugins register additional tools via the plugin SDK. These are resolved by
+<code>resolvePluginTools()</code> and appended to the tool list, subject to an optional
+allowlist (<code>pluginToolAllowlist</code>).</p>
+<h3 id="tool-assembly-pipeline">Tool Assembly Pipeline<a class="headerlink" href="#tool-assembly-pipeline" title="Permanent link">&para;</a></h3>
+<p>The final tool list is assembled in <code>createOpenClawCodingTools()</code>:</p>
+<div class="language-text highlight"><pre><span></span><code>1. Import Pi SDK codingTools (read, write, edit, bash)
+2. Wrap each with OpenClaw guards:
+   - Sandbox enforcement (sandboxed sessions)
+   - Workspace-only restrictions (fs policy)
+   - Image sanitization on read results
+   - Memory-flush append-only write mode
+3. Replace bash with OpenClaw&#39;s exec tool (safe-bin policy, elevated mode)
+4. Add all OpenClaw-built tools from createOpenClawTools()
+5. Add plugin tools from resolvePluginTools()
+6. Apply tool policy pipeline:
+   - Profile-based allow/deny (minimal, coding, messaging, full)
+   - Per-agent tool restrictions
+   - Sandbox tool filtering
+   - Subagent tool inheritance rules
+</code></pre></div>
+<h3 id="tool-profiles">Tool Profiles<a class="headerlink" href="#tool-profiles" title="Permanent link">&para;</a></h3>
+<p>Not every session gets every tool. Profiles control which tools are available:</p>
+<table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>What's included</th>
+<th>When used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>minimal</code></td>
+<td><code>session_status</code> only</td>
+<td>Lightweight/restricted sessions</td>
+</tr>
+<tr>
+<td><code>coding</code></td>
+<td>File ops, exec, process, web, memory, sessions, cron, image</td>
+<td>Default for agent sessions</td>
+</tr>
+<tr>
+<td><code>messaging</code></td>
+<td>Message, sessions (list/history/send), session_status</td>
+<td>Messaging-only contexts</td>
+</tr>
+<tr>
+<td><code>full</code></td>
+<td>Everything (no restrictions)</td>
+<td>Explicitly configured</td>
+</tr>
+</tbody>
+</table>
+<p>Profiles are defined in <code>src/agents/tool-catalog.ts</code>. The catalog also groups
+tools into sections (Files, Runtime, Web, Memory, Sessions, UI, Messaging,
+Automation, Nodes, Agents, Media) for display in <code>/context detail</code> and the
+Control UI.</p>
+<h3 id="how-tool-results-enter-context">How Tool Results Enter Context<a class="headerlink" href="#how-tool-results-enter-context" title="Permanent link">&para;</a></h3>
+<p>Tool results flow through the standard agent loop:</p>
+<ol>
+<li>LLM generates a <code>tool_call</code> in its response (e.g., <code>read({ path: "src/index.ts" })</code>)</li>
+<li>Pi SDK agent loop intercepts the tool call</li>
+<li>OpenClaw executes the tool locally (file read, shell command, API call, etc.)</li>
+<li>Result returns as a <code>toolResult</code> message in conversation history</li>
+<li>The context management pipeline (Layer 8) manages the result:</li>
+<li>Budget guard caps oversized results (50% of window per result)</li>
+<li>Cache-TTL pruning expires old results after 5 minutes</li>
+<li>Compaction summarizes them if the session gets long</li>
+</ol>
+<h3 id="key-files">Key Files<a class="headerlink" href="#key-files" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/agents/pi-tools.ts</code></td>
+<td>Tool assembly pipeline, wrapping, policy</td>
+</tr>
+<tr>
+<td><code>src/agents/openclaw-tools.ts</code></td>
+<td>OpenClaw-built tool creation</td>
+</tr>
+<tr>
+<td><code>src/agents/tool-catalog.ts</code></td>
+<td>Tool catalog, profiles, sections</td>
+</tr>
+<tr>
+<td><code>src/agents/tools/*.ts</code></td>
+<td>Individual tool implementations</td>
+</tr>
+<tr>
+<td><code>src/agents/pi-tools.policy.ts</code></td>
+<td>Tool policy resolution (allow/deny)</td>
+</tr>
+<tr>
+<td><code>src/agents/tool-fs-policy.ts</code></td>
+<td>Filesystem policy for read/write/edit</td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h2 id="how-layer-1-evolved-the-git-history">How Layer 1 Evolved: The Git History<a class="headerlink" href="#how-layer-1-evolved-the-git-history" title="Permanent link">&para;</a></h2>
 <h3 id="phase-1-genesis-warelay-november-24-2025">Phase 1: Genesis — "Warelay" (November 24, 2025)<a class="headerlink" href="#phase-1-genesis-warelay-november-24-2025" title="Permanent link">&para;</a></h3>

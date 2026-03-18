@@ -1152,6 +1152,111 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#part-7-testing-quality-assurance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Testing &amp; Quality Assurance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Testing &amp; Quality Assurance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#testing-pyramid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Pyramid
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-context-management-extensive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Tests: Context Management (Extensive)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-tests-real-api-calls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live Tests: Real API Calls
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-platform-smoke-tests-parallels-vms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Platform Smoke Tests (Parallels VMs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci-pipeline-800-line-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI Pipeline (~800-line workflow)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-latency-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benchmarking (Latency Only)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-not-tested-known-gaps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's NOT Tested (Known Gaps)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#git-history-evolution" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1771,6 +1876,111 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-7-testing-quality-assurance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 7: Testing &amp; Quality Assurance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Part 7: Testing &amp; Quality Assurance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#testing-pyramid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Pyramid
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-context-management-extensive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Tests: Context Management (Extensive)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-tests-real-api-calls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live Tests: Real API Calls
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-platform-smoke-tests-parallels-vms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Platform Smoke Tests (Parallels VMs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci-pipeline-800-line-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI Pipeline (~800-line workflow)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-latency-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benchmarking (Latency Only)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-not-tested-known-gaps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's NOT Tested (Known Gaps)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2402,6 +2612,224 @@ node dist\index.js gateway --port 18789
 <li><strong>Manifest merging:</strong> Creates multi-arch manifests for seamless <code>docker pull</code></li>
 <li><strong>OCI metadata:</strong> Git SHA revision, version, creation timestamp</li>
 </ul>
+<hr />
+<h2 id="part-7-testing-quality-assurance">Part 7: Testing &amp; Quality Assurance<a class="headerlink" href="#part-7-testing-quality-assurance" title="Permanent link">&para;</a></h2>
+<p>OpenClaw has extensive testing for deterministic code but no formal eval
+framework for LLM decision quality. Understanding what's tested — and what
+isn't — is important for assessing reliability.</p>
+<h3 id="testing-pyramid">Testing Pyramid<a class="headerlink" href="#testing-pyramid" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TB
+    subgraph L1["Unit Tests (fast, deterministic)"]
+        direction LR
+        CT["Context management\n(compaction, truncation,\nbudget guard, overflow)"]
+        CE["Context engine\n(registry, legacy engine,\nSymbol.for isolation)"]
+        QU["Queue system\n(lanes, modes,\ndebounce, overflow)"]
+        TL["Tool pipeline\n(policy, wrapping,\nprofiles, catalog)"]
+    end
+
+    subgraph L2["Integration Tests"]
+        direction LR
+        GW["Gateway agent loop\n(mock LLM + real tools)"]
+        PL["Plugin loading\n(discovery, registry,\ntool resolution)"]
+        SM["Session management\n(routing, persistence,\ntranscript repair)"]
+    end
+
+    subgraph L3["E2E Tests (real infra)"]
+        direction LR
+        CLI["CLI e2e\n(multi-instance gateway,\nWebSocket, HTTP)"]
+        NET["Network e2e\n(two-container WS auth,\nhealth probes)"]
+    end
+
+    subgraph L4["Live Tests (real API keys)"]
+        direction LR
+        MOD["Model completion\n(GPT-5, Claude, Gemini,\nGrok, MiniMax)"]
+        AGT["Agent smoke probes\n(read nonce, exec+read,\nimage OCR)"]
+        PRV["Provider-specific\n(setup tokens, Z.AI,\naudio transcription)"]
+    end
+
+    subgraph L5["Platform Smoke (VMs)"]
+        direction LR
+        MAC["macOS (Parallels)\nfresh install + upgrade"]
+        WIN["Windows (Parallels)\nPowerShell + .cmd shims"]
+        LIN["Linux (Parallels)\napt bootstrap + agent"]
+    end
+
+    L1 --&gt; L2 --&gt; L3 --&gt; L4 --&gt; L5</code></pre>
+<h3 id="unit-tests-context-management-extensive">Unit Tests: Context Management (Extensive)<a class="headerlink" href="#unit-tests-context-management-extensive" title="Permanent link">&para;</a></h3>
+<p>The context pipeline has the deepest test coverage:</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>What's tested</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Overflow compaction</strong></td>
+<td>3-tier retry loop with mocked LLM, overflow detection routing, compaction-then-truncation fallback</td>
+</tr>
+<tr>
+<td><strong>Tool result truncation</strong></td>
+<td>Head+tail strategy, 400K hard cap, 2K min-keep, newline boundary cuts, important-tail detection</td>
+</tr>
+<tr>
+<td><strong>Context budget guard</strong></td>
+<td>Per-result 50% cap, total 75% budget, oldest-first eviction, placeholder replacement</td>
+</tr>
+<tr>
+<td><strong>Compaction quality</strong></td>
+<td>Identifier preservation (hex IDs, URLs, paths), token sanitization, required summary sections</td>
+</tr>
+<tr>
+<td><strong>Compaction safeguard</strong></td>
+<td>Quality auditing, retry on failed audit, workspace critical rules injection</td>
+</tr>
+<tr>
+<td><strong>Context engine</strong></td>
+<td>Registry Symbol.for isolation, cross-chunk visibility, legacy engine parity, bundle chunk tests</td>
+</tr>
+</tbody>
+</table>
+<p>Coverage threshold: <strong>70% lines/branches/functions/statements</strong> (V8, enforced in CI).</p>
+<h3 id="live-tests-real-api-calls">Live Tests: Real API Calls<a class="headerlink" href="#live-tests-real-api-calls" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span class="nv">LIVE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pnpm<span class="w"> </span>test:live<span class="w">              </span><span class="c1"># All live tests</span>
+<span class="nv">OPENCLAW_LIVE_MODELS</span><span class="o">=</span>modern<span class="w">        </span><span class="c1"># Direct model completion</span>
+<span class="nv">OPENCLAW_LIVE_GATEWAY_MODELS</span><span class="o">=</span>all<span class="w">   </span><span class="c1"># Full gateway + agent pipeline</span>
+</code></pre></div>
+<p><strong>Three-layer live testing:</strong></p>
+<p><strong>Layer 1 — Direct model completion (no gateway):</strong>
+Real API calls to verify provider connectivity. Tests GPT-5.x, Claude Opus/Sonnet/Haiku,
+Gemini 3, GLM 4.7, MiniMax M2.5, Grok 4. No tool calls — just "can we reach the provider?"</p>
+<p><strong>Layer 2 — Gateway + agent smoke (full pipeline):</strong>
+Full agent loop with real LLM, validated via probes:</p>
+<ul>
+<li><strong>Read probe</strong>: Agent reads a nonce file and echoes it back — validates tool calling works end-to-end</li>
+<li><strong>Exec+read probe</strong>: Agent writes a temp file, reads it, verifies content — validates multi-tool sequencing</li>
+<li><strong>Image probe</strong>: Agent processes a PNG with embedded code, returns OCR result — validates multimodal</li>
+</ul>
+<p><strong>Layer 3 — Provider-specific:</strong>
+Anthropic setup tokens, MiniMax streaming, Z.AI tool streaming, Android node capabilities,
+Deepgram audio transcription.</p>
+<h3 id="docker-tests">Docker Tests<a class="headerlink" href="#docker-tests" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code>pnpm<span class="w"> </span>test:docker:live-models<span class="w">       </span><span class="c1"># Model tests in container</span>
+pnpm<span class="w"> </span>test:docker:live-gateway<span class="w">      </span><span class="c1"># Full gateway + agent smoke</span>
+pnpm<span class="w"> </span>test:docker:onboard<span class="w">           </span><span class="c1"># Onboarding wizard TTY flow</span>
+pnpm<span class="w"> </span>test:docker:gateway-network<span class="w">   </span><span class="c1"># Two-container WS auth + health</span>
+pnpm<span class="w"> </span>test:docker:plugins<span class="w">           </span><span class="c1"># Extension loading + registry</span>
+</code></pre></div>
+<p>Validates that the full stack works in containerized environments — not just on
+the developer's Mac.</p>
+<h3 id="cross-platform-smoke-tests-parallels-vms">Cross-Platform Smoke Tests (Parallels VMs)<a class="headerlink" href="#cross-platform-smoke-tests-parallels-vms" title="Permanent link">&para;</a></h3>
+<p>Automated VM testing on macOS, Windows, and Linux:</p>
+<div class="language-bash highlight"><pre><span></span><code>pnpm<span class="w"> </span>test:parallels:macos<span class="w">          </span><span class="c1"># Restore fresh snapshot → install → smoke</span>
+pnpm<span class="w"> </span>test:parallels:windows<span class="w">        </span><span class="c1"># PowerShell .cmd shim execution</span>
+pnpm<span class="w"> </span>test:parallels:linux<span class="w">          </span><span class="c1"># apt bootstrap → direct gateway run</span>
+</code></pre></div>
+<p>Each test:
+1. Restores a fresh VM snapshot
+2. Installs OpenClaw from a host-served tarball
+3. Runs onboarding
+4. Starts the gateway
+5. Validates with <code>openclaw gateway status --deep --require-rpc</code></p>
+<h3 id="ci-pipeline-800-line-workflow">CI Pipeline (~800-line workflow)<a class="headerlink" href="#ci-pipeline-800-line-workflow" title="Permanent link">&para;</a></h3>
+<p><code>.github/workflows/ci.yml</code> runs on every push:</p>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>What it checks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit tests (2 shards)</td>
+<td><code>pnpm test</code> with vmForks pool</td>
+</tr>
+<tr>
+<td>Extension tests</td>
+<td><code>pnpm test:extensions</code></td>
+</tr>
+<tr>
+<td>Type/lint/format</td>
+<td><code>pnpm check</code>, <code>pnpm build:strict-smoke</code></td>
+</tr>
+<tr>
+<td>Protocol checks</td>
+<td><code>pnpm protocol:check</code></td>
+</tr>
+<tr>
+<td>Bun compatibility</td>
+<td><code>bunx vitest run</code> (push only)</td>
+</tr>
+<tr>
+<td>Node 22 compat</td>
+<td><code>pnpm build &amp;&amp; pnpm test</code></td>
+</tr>
+<tr>
+<td>Windows tests (6 shards)</td>
+<td>Single worker, 6GB heap</td>
+</tr>
+<tr>
+<td>Python skills</td>
+<td><code>ruff check skills</code> + <code>pytest skills</code></td>
+</tr>
+<tr>
+<td>Security audits</td>
+<td><code>detect-private-key</code>, <code>zizmor</code>, <code>pnpm-audit-prod</code></td>
+</tr>
+<tr>
+<td>Docs validation</td>
+<td><code>pnpm check:docs</code> (when docs changed)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="benchmarking-latency-only">Benchmarking (Latency Only)<a class="headerlink" href="#benchmarking-latency-only" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code>bun<span class="w"> </span>scripts/bench-model.ts<span class="w">         </span><span class="c1"># Model latency (median/min/max, 10 runs)</span>
+bun<span class="w"> </span>scripts/bench-cli-startup.ts<span class="w">   </span><span class="c1"># CLI startup (avg, p50, p95)</span>
+</code></pre></div>
+<p>No throughput or accuracy benchmarks — just latency measurement.</p>
+<h3 id="whats-not-tested-known-gaps">What's NOT Tested (Known Gaps)<a class="headerlink" href="#whats-not-tested-known-gaps" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Gap</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No agent decision evals</strong></td>
+<td>Can't measure "did the agent pick the right skill?" or "was the response helpful?"</td>
+</tr>
+<tr>
+<td><strong>No compaction faithfulness scoring</strong></td>
+<td>Can't verify summaries preserve critical information at scale</td>
+</tr>
+<tr>
+<td><strong>No skill compliance testing</strong></td>
+<td>Can't verify "did the agent follow SKILL.md instructions correctly?"</td>
+</tr>
+<tr>
+<td><strong>No continuous production monitoring</strong></td>
+<td>No dashboards or alerts for live agent performance</td>
+</tr>
+<tr>
+<td><strong>No A/B testing infrastructure</strong></td>
+<td>Can't compare context management strategies or prompt variations</td>
+</tr>
+<tr>
+<td><strong>No multi-turn workflow evals</strong></td>
+<td>Can't validate complex tool-call sequences against expected outcomes</td>
+</tr>
+</tbody>
+</table>
+<p>The testing philosophy: <strong>the plumbing is well-tested</strong> (context fits, compaction
+fires, tools execute, overflow recovers), but <strong>LLM decision quality is not
+systematically evaluated</strong>. The live smoke probes verify the pipeline works
+end-to-end, but they don't score the quality of agent responses.</p>
+<p>The docs (<code>docs/help/testing.md</code>) acknowledge these gaps and note future eval
+work as missing.</p>
 <hr />
 <h2 id="git-history-evolution">Git History Evolution<a class="headerlink" href="#git-history-evolution" title="Permanent link">&para;</a></h2>
 <h3 id="phase-1-cloud-deployment-foundation-jan-2430-2026">Phase 1: Cloud Deployment Foundation (Jan 24–30, 2026)<a class="headerlink" href="#phase-1-cloud-deployment-foundation-jan-2430-2026" title="Permanent link">&para;</a></h3>

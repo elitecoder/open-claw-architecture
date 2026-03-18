@@ -1093,6 +1093,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-7-layer-context-management-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 7-Layer Context Management Pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The 7-Layer Context Management Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-the-layers-interact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the Layers Interact
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-openclaw-needs-all-7-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why OpenClaw Needs All 7 Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evolution-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evolution Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#architecture-diagram" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1757,6 +1818,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-7-layer-context-management-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 7-Layer Context Management Pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The 7-Layer Context Management Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-the-layers-interact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the Layers Interact
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-openclaw-needs-all-7-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why OpenClaw Needs All 7 Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evolution-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evolution Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#architecture-diagram" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2257,6 +2379,165 @@ Suggest: <code>/reset</code> or <code>/new</code> or switch to a larger-context 
 </ul>
 <h3 id="the-evolution-story-in-four-sentences">The Evolution Story in Four Sentences<a class="headerlink" href="#the-evolution-story-in-four-sentences" title="Permanent link">&para;</a></h3>
 <p>The system started in early January 2026 with Peter Steinberger adding a simple <code>/compact</code> command. Within the first week, Max Sumrall built context pruning (a lighter alternative) and Shadow created safeguard summarization (a richer one). Over February, the community hardened it extensively — fixing deadlocks, overflow recovery, orphaned tool results, amnesia, task continuity, and a security DoS vector. In early March, Josh Lehman created the pluggable <code>ContextEngine</code> abstraction, transforming the monolithic compaction code into an extensible plugin-driven architecture.</p>
+<hr />
+<h2 id="the-7-layer-context-management-pipeline">The 7-Layer Context Management Pipeline<a class="headerlink" href="#the-7-layer-context-management-pipeline" title="Permanent link">&para;</a></h2>
+<p>The context engine is part of a broader <strong>7-layer pipeline</strong> that manages everything the model sees. Understanding the full pipeline shows how context flows from session start through to overflow recovery — and why each layer exists.</p>
+<h3 id="pipeline-diagram">Pipeline Diagram<a class="headerlink" href="#pipeline-diagram" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TB
+    subgraph L1["Layer 1: Bootstrap — session start"]
+        direction LR
+        BP["Bootstrap files\n(AGENTS.md, SOUL.md, ...)"]
+        SP["System prompt builder\n(tools, skills, runtime info)"]
+        BC["Bootstrap budget cap\n(bootstrapMaxChars,\nbootstrapTotalMaxChars)"]
+        BP --&gt; BC --&gt; SP
+    end
+
+    subgraph L2["Layer 2: Session history pipeline — before each prompt"]
+        direction LR
+        SH["sanitizeSessionHistory()\n(provider-specific cleanup)"]
+        VT["validateAnthropicTurns()\nvalidateGeminiTurns()\n(role ordering)"]
+        LH["limitHistoryTurns()\n(per-channel/DM turn cap)"]
+        RP["sanitizeToolUseResultPairing()\n(orphan repair)"]
+        SH --&gt; VT --&gt; LH --&gt; RP
+    end
+
+    subgraph L3["Layer 3: Context engine assembly"]
+        direction LR
+        CE["contextEngine.assemble()\n(pluggable: legacy or plugin)"]
+        SPA["systemPromptAddition\n(engine-injected context)"]
+        CE --&gt; SPA
+    end
+
+    subgraph L4["Layer 4: Real-time budget guard — every API call"]
+        direction LR
+        TG["transformContext()\ntool-result-context-guard"]
+        SC["Single result cap\n(50% of window)"]
+        TE["Total context budget\n(75% of window)"]
+        EV["Oldest-first eviction\n(replace with placeholder)"]
+        TG --&gt; SC --&gt; TE --&gt; EV
+    end
+
+    subgraph L5["Layer 5: Prompt caching — provider-specific"]
+        direction LR
+        AC["Anthropic direct\ncacheRetention: short (5m TTL)"]
+        OR["OpenRouter Anthropic\ncache_control on system msgs"]
+        OA["OpenAI Responses\nserver-side (store + context_management)"]
+    end
+
+    subgraph L6["Layer 6: Proactive maintenance — between turns"]
+        direction LR
+        AT["contextEngine.afterTurn()\n(post-turn lifecycle)"]
+        PR["Cache-TTL pruning\n(expire tool results &gt; 5m)"]
+        MF["Memory flush\n(pre-compaction durable writes)"]
+        SDK["Pi SDK auto-compaction\n(threshold: window - reserveTokens)"]
+        AT --&gt; PR
+        MF --&gt; SDK
+    end
+
+    subgraph L7["Layer 7: Overflow recovery — on API error"]
+        direction LR
+        DET["Detect overflow\n(isLikelyContextOverflowError)"]
+        TOK["Extract token count\nfrom error message"]
+        CMP["contextEngine.compact()\n(summarize + prune)"]
+        TRT["truncateOversizedToolResults()\n(head+tail strategy)"]
+        GU["Give up after 3 attempts\n(suggest /reset)"]
+        DET --&gt; TOK --&gt; CMP --&gt;|"still over"| TRT --&gt;|"still over"| GU
+    end
+
+    L1 --&gt; L2 --&gt; L3 --&gt; L4 --&gt; L5
+    L6 -.-&gt;|"runs between turns"| L2
+    L5 --&gt;|"API call"| L7
+    L7 --&gt;|"retry"| L2</code></pre>
+<h3 id="how-the-layers-interact">How the Layers Interact<a class="headerlink" href="#how-the-layers-interact" title="Permanent link">&para;</a></h3>
+<p>Think of it like layers of defense in a castle:</p>
+<ul>
+<li><strong>Layers 1–5 run sequentially</strong> for every prompt sent to the LLM. Bootstrap context is built, history is sanitized and trimmed, the context engine assembles messages, the real-time guard enforces budgets, and caching hints are applied before the API call goes out.</li>
+<li><strong>Layer 6 runs between turns</strong> as proactive maintenance. The Pi SDK auto-compaction fires when the session approaches <code>contextWindow - reserveTokens</code>. Cache-TTL pruning expires stale tool results. Memory flush writes durable state before compaction erases it.</li>
+<li><strong>Layer 7 is reactive</strong> — the safety net that only fires when the provider returns a context overflow error. It retries up to 3 times with progressively aggressive compaction before giving up.</li>
+</ul>
+<h3 id="why-openclaw-needs-all-7-layers">Why OpenClaw Needs All 7 Layers<a class="headerlink" href="#why-openclaw-needs-all-7-layers" title="Permanent link">&para;</a></h3>
+<p>Because OpenClaw calls LLM provider APIs directly (not through Claude Code or Codex CLI), it must handle everything itself. Different providers handle different parts:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Anthropic (direct)</th>
+<th>OpenRouter</th>
+<th>OpenAI Responses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt caching</td>
+<td>Client-side (<code>cacheRetention</code>)</td>
+<td>Client-side (system msgs only)</td>
+<td>Server-side (automatic)</td>
+</tr>
+<tr>
+<td>Compaction</td>
+<td>Client-side (all 7 layers)</td>
+<td>Client-side (all 7 layers)</td>
+<td>Server-side (<code>context_management</code>) + client layers</td>
+</tr>
+<tr>
+<td>Token counting</td>
+<td>Client-side estimate</td>
+<td>Client-side estimate</td>
+<td>Server-side</td>
+</tr>
+<tr>
+<td>Overflow recovery</td>
+<td>Client-side retry loop</td>
+<td>Client-side retry loop</td>
+<td>Rarely needed (server compacts first)</td>
+</tr>
+</tbody>
+</table>
+<p>For OpenAI, the server handles compaction at 70% of context window — OpenClaw just sends <code>context_management: [{ type: "compaction", compact_threshold }]</code>. For Anthropic and OpenRouter, OpenClaw must do all the work: token estimation, proactive pruning, reactive overflow recovery, and everything in between.</p>
+<h3 id="evolution-summary">Evolution Summary<a class="headerlink" href="#evolution-summary" title="Permanent link">&para;</a></h3>
+<p>The pipeline grew layer by layer as real-world usage revealed gaps:</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>When</th>
+<th>What changed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Foundation</strong></td>
+<td>Jan 2026</td>
+<td>Basic <code>/compact</code> command and session pruning</td>
+</tr>
+<tr>
+<td><strong>Pruning strategies</strong></td>
+<td>Jan 2026</td>
+<td>Cache-TTL pruning mode, auth-aware cache defaults</td>
+</tr>
+<tr>
+<td><strong>Overflow recovery</strong></td>
+<td>Feb 2026</td>
+<td>3-tier overflow recovery, head+tail truncation</td>
+</tr>
+<tr>
+<td><strong>Real-time guard</strong></td>
+<td>Feb 2026</td>
+<td><code>transformContext</code> hook enforcing budgets every API call</td>
+</tr>
+<tr>
+<td><strong>Pluggable engine</strong></td>
+<td>Mar 6, 2026</td>
+<td><code>ContextEngine</code> interface, plugin system integration</td>
+</tr>
+<tr>
+<td><strong>Engine maturation</strong></td>
+<td>Mar 2026</td>
+<td>Compaction model override, session key plumbing</td>
+</tr>
+</tbody>
+</table>
+<p>The pattern: <strong>reactive</strong> (catch overflow errors) → <strong>proactive</strong> (prune before overflow) → <strong>pluggable</strong> (let engines own the full lifecycle). Each layer was added to cover gaps the previous layers couldn't handle.</p>
 <hr />
 <h2 id="architecture-diagram">Architecture Diagram<a class="headerlink" href="#architecture-diagram" title="Permanent link">&para;</a></h2>
 <div class="language-text highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────┐

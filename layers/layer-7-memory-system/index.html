@@ -1197,6 +1197,95 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-memory-results-enter-the-llm-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Memory Results Enter the LLM Context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Memory Results Enter the LLM Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-memory-recall-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Memory Recall Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-memory-touches-context-5-integration-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Memory Touches Context (5 Integration Points)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-complete-memory-to-context-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Complete Memory-to-Context Lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#personalization-explicit-and-file-based" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Personalization: Explicit and File-Based
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Personalization: Explicit and File-Based">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-this-means-in-practice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What This Means in Practice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-not-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's NOT Here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#key-files-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2006,6 +2095,95 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-memory-results-enter-the-llm-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Memory Results Enter the LLM Context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Memory Results Enter the LLM Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-memory-recall-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Memory Recall Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-memory-touches-context-5-integration-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where Memory Touches Context (5 Integration Points)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-complete-memory-to-context-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Complete Memory-to-Context Lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#personalization-explicit-and-file-based" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Personalization: Explicit and File-Based
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Personalization: Explicit and File-Based">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-this-means-in-practice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What This Means in Practice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-not-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's NOT Here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2882,6 +3060,175 @@ Alternative Backends:
   ├── QMD (external CLI, local-first sidecar)
   └── LanceDB (plugin, auto-recall/capture)
 </code></pre></div>
+<hr />
+<h2 id="how-memory-results-enter-the-llm-context">How Memory Results Enter the LLM Context<a class="headerlink" href="#how-memory-results-enter-the-llm-context" title="Permanent link">&para;</a></h2>
+<p>The memory system doesn't passively sit in the background — it's woven into the
+agent loop at multiple points. Here's the complete flow:</p>
+<h3 id="the-memory-recall-flow">The Memory Recall Flow<a class="headerlink" href="#the-memory-recall-flow" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant User
+    participant Agent as Agent Loop
+    participant SP as System Prompt
+    participant LLM as LLM Provider
+    participant MS as memory_search tool
+    participant MG as memory_get tool
+    participant SQLite as SQLite (vectors + BM25)
+    participant Files as Memory Files&lt;br/&gt;(MEMORY.md, memory/*.md)
+
+    Note over SP: Session start
+    Files--&gt;&gt;SP: Bootstrap injects MEMORY.md,&lt;br/&gt;SOUL.md, USER.md, IDENTITY.md&lt;br/&gt;into system prompt
+    SP--&gt;&gt;SP: Adds "## Memory Recall" section:&lt;br/&gt;"Before answering about prior work,&lt;br/&gt;run memory_search first"
+
+    User-&gt;&gt;Agent: "What was the server IP&lt;br/&gt;we discussed last week?"
+    Agent-&gt;&gt;LLM: System prompt + conversation history
+    LLM-&gt;&gt;MS: tool_call: memory_search("server IP")
+
+    MS-&gt;&gt;SQLite: Hybrid search (BM25 + vector)
+    SQLite--&gt;&gt;MS: Raw results
+    MS-&gt;&gt;MS: Temporal decay (boost recent)
+    MS-&gt;&gt;MS: MMR re-ranking (diversity)
+    MS-&gt;&gt;MS: Decorate citations
+    MS--&gt;&gt;LLM: tool_result: [{snippet, path, score}]
+
+    Note over LLM: Sees snippets in context,&lt;br/&gt;may want more detail
+
+    LLM-&gt;&gt;MG: tool_call: memory_get("memory/2026-03-10.md", from=12, lines=5)
+    MG-&gt;&gt;Files: Read specific lines
+    Files--&gt;&gt;MG: Text content
+    MG--&gt;&gt;LLM: tool_result: {text, path}
+
+    LLM--&gt;&gt;Agent: "The server IP is 10.0.0.5,&lt;br/&gt;discussed on Mar 10.&lt;br/&gt;Source: memory/2026-03-10.md#L12-L16"
+    Agent--&gt;&gt;User: Reply with citation</code></pre>
+<h3 id="where-memory-touches-context-5-integration-points">Where Memory Touches Context (5 Integration Points)<a class="headerlink" href="#where-memory-touches-context-5-integration-points" title="Permanent link">&para;</a></h3>
+<p><strong>1. Bootstrap injection (session start)</strong></p>
+<p>At the start of every session, bootstrap files are loaded into the system prompt:</p>
+<ul>
+<li><code>MEMORY.md</code> — long-term curated facts (only in direct/private sessions, never groups)</li>
+<li><code>SOUL.md</code> — agent persona and boundaries</li>
+<li><code>USER.md</code> — user profile (name, timezone, projects)</li>
+<li><code>IDENTITY.md</code> — agent self-definition</li>
+<li><code>AGENTS.md</code> — available subagents</li>
+</ul>
+<p>These consume context tokens directly — they're part of the system prompt that
+the LLM sees on every turn. Large files are truncated via <code>bootstrapMaxChars</code>
+(default 20K chars per file, 150K total).</p>
+<p><strong>2. System prompt instruction (every turn)</strong></p>
+<p>When <code>memory_search</code> or <code>memory_get</code> tools are available, the system prompt
+includes a <code>## Memory Recall</code> section:</p>
+<blockquote>
+<p>Before answering anything about prior work, decisions, dates, people,
+preferences, or todos: run memory_search on MEMORY.md + memory/*.md;
+then use memory_get to pull only the needed lines.</p>
+</blockquote>
+<p>This instructs the LLM to <strong>proactively call memory tools</strong> before answering
+from its own (possibly outdated or compacted) context.</p>
+<p><strong>3. Tool call results (during a turn)</strong></p>
+<p>When the LLM calls <code>memory_search</code>, the results are returned as a standard
+<code>toolResult</code> message — JSON with snippets, file paths, line ranges, and scores.
+This enters the conversation history just like any other tool result, and is
+subject to all the context management layers (budget guard, pruning, compaction).</p>
+<p>Key details:
+- Results are capped at ~700 chars per snippet
+- QMD backend has an additional <code>maxInjectedChars</code> budget
+- Citations (<code>Source: path#L5-L7</code>) are appended when enabled
+- The LLM can follow up with <code>memory_get</code> for targeted reads</p>
+<p><strong>4. Pre-compaction memory flush (before compaction)</strong></p>
+<p>When the session nears auto-compaction, a <strong>silent agentic turn</strong> runs:</p>
+<ol>
+<li>System detects context is approaching <code>contextWindow - reserveTokens - 4000</code></li>
+<li>Fires a silent turn with prompt: "Pre-compaction memory flush. Store durable
+   memories to <code>memory/YYYY-MM-DD.md</code>"</li>
+<li>Agent writes important facts/decisions to disk</li>
+<li>Uses <code>NO_REPLY</code> so the user sees nothing</li>
+<li>Bootstrap files (SOUL.md, MEMORY.md, etc.) are marked read-only during flush</li>
+</ol>
+<p>This ensures memories survive compaction — they're written to files that will be
+indexed and retrievable via <code>memory_search</code> in future sessions.</p>
+<p><strong>5. Post-compaction re-indexing (after compaction)</strong></p>
+<p>After compaction summarizes old turns, the memory index may be stale (old
+transcript content was removed). The file watcher detects changes to
+<code>memory/*.md</code> files written during the flush and triggers re-indexing within
+1.5 seconds (debounce window).</p>
+<h3 id="the-complete-memory-to-context-lifecycle">The Complete Memory-to-Context Lifecycle<a class="headerlink" href="#the-complete-memory-to-context-lifecycle" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code>Session start:
+  MEMORY.md, SOUL.md, USER.md → injected into system prompt (Layer 1)
+
+Every turn:
+  &quot;## Memory Recall&quot; instruction → system prompt tells LLM to search first
+
+During a turn (LLM-initiated):
+  memory_search(query) → hybrid search → results as toolResult in context
+  memory_get(path, lines) → targeted read → results as toolResult in context
+
+Approaching compaction:
+  Memory flush → agent writes to memory/YYYY-MM-DD.md → files indexed
+
+After compaction:
+  Old turns summarized → memory files survive on disk → searchable next session
+
+Next session:
+  Bootstrap re-injects MEMORY.md → memory_search finds daily logs → cycle repeats
+</code></pre></div>
+<hr />
+<h2 id="personalization-explicit-and-file-based">Personalization: Explicit and File-Based<a class="headerlink" href="#personalization-explicit-and-file-based" title="Permanent link">&para;</a></h2>
+<p>OpenClaw does <strong>not</strong> learn or adapt preferences dynamically at runtime. All
+personalization flows through explicit bootstrap files:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What It Personalizes</th>
+<th>How It's Updated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SOUL.md</code></td>
+<td>Agent persona, boundaries, communication style</td>
+<td>User edits manually or agent writes on first run</td>
+</tr>
+<tr>
+<td><code>USER.md</code></td>
+<td>User name, pronouns, timezone, projects, preferences</td>
+<td>Agent updates over time as it learns about the user</td>
+</tr>
+<tr>
+<td><code>IDENTITY.md</code></td>
+<td>Agent name, creature type, emoji, avatar</td>
+<td>Agent fills in during first conversation</td>
+</tr>
+<tr>
+<td><code>MEMORY.md</code></td>
+<td>Long-term curated facts, decisions, preferences</td>
+<td>Agent writes; user can edit</td>
+</tr>
+<tr>
+<td><code>memory/*.md</code></td>
+<td>Daily logs and topic files</td>
+<td>Agent writes via memory flush and explicit saves</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-this-means-in-practice">What This Means in Practice<a class="headerlink" href="#what-this-means-in-practice" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Transparent</strong>: You can read and edit any of these files directly</li>
+<li><strong>Durable</strong>: Files survive compaction, session resets, and restarts</li>
+<li><strong>Retrievable</strong>: All files are indexed by the RAG system and searchable</li>
+<li><strong>Explicit</strong>: The agent must actively write — nothing is learned implicitly</li>
+<li><strong>No dynamic modeling</strong>: No user preference learning, collaborative filtering,
+  or behavioral adaptation beyond what's written to disk</li>
+</ul>
+<h3 id="whats-not-here">What's NOT Here<a class="headerlink" href="#whats-not-here" title="Permanent link">&para;</a></h3>
+<ul>
+<li>No session-to-session learning beyond explicit file writes</li>
+<li>No user preference modeling or adaptive behavior</li>
+<li>No collaborative filtering or recommendation</li>
+<li>No dynamic persona adjustment based on usage patterns</li>
+<li>No A/B testing or personalization experiments</li>
+</ul>
+<p>The design philosophy: <strong>durability over learning</strong>. Everything the agent "knows"
+about you must be written to a file where you can see it, edit it, and control
+it.</p>
 <hr />
 <h2 id="key-files-reference">Key Files Reference<a class="headerlink" href="#key-files-reference" title="Permanent link">&para;</a></h2>
 <table>
